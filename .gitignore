@@ -13,6 +13,7 @@ target
 *.xml.bak
 *.iml
 .idea
+.project
 
 #demo file
 AlexDemo.java
