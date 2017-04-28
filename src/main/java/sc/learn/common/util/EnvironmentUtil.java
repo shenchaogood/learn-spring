@@ -21,11 +21,18 @@ public class EnvironmentUtil {
 	
 	private static EnvironmentUtil single=new EnvironmentUtil();
 	
-	
+	/**
+	 * 本机环境
+	 * @return 本机环境
+	 */
 	public static EnvironmentType getLocalEnviromentType(){
 		return single.environmentType;
 	}
 	
+	/**
+	 * 是生产环境吗
+	 * @return true 是  false 否
+	 */
 	public static boolean isProductionEnvironment(){
 		return single.environmentType.isProduction();
 	}
