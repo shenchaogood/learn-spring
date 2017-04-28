@@ -7,6 +7,10 @@ import java.util.Enumeration;
 
 public abstract class NetToolUtil {
 
+	/**
+	 * 获取本地IPv4
+	 * @return IPv4
+	 */
 	public static String IP() {
 		try {
 			Enumeration<NetworkInterface> allNetInterfaces = NetworkInterface.getNetworkInterfaces();
