@@ -19,7 +19,6 @@ public class TestSftpUtil {
 	
 	@Test
 	public void testUpload() throws Exception{
-//		SFTPClient client=SFTPUtil.createSFTPClient(USER, "XXXXXX", "localhost", 22);
 		SFTPClient client=SFTPUtil.createSFTPClient(USER, "localhost", 22,"/home/"+USER+"/.ssh/id_rsa");
 		client.login();
 		client.upload("/home/"+USER+"/aaa/bbb/ccc","/home/"+USER+"/下载/step01_20170310.sql");

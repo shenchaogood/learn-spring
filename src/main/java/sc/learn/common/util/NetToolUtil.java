@@ -11,7 +11,7 @@ public abstract class NetToolUtil {
 	 * 获取本地IPv4
 	 * @return IPv4
 	 */
-	public static String IP() {
+	public static String getLocalIP() {
 		try {
 			Enumeration<NetworkInterface> allNetInterfaces = NetworkInterface.getNetworkInterfaces();
 			InetAddress ip = null;
