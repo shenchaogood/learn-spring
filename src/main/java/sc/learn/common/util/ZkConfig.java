@@ -32,7 +32,7 @@ public abstract class ZkConfig {
 	public final static int ZK_SESSION_TIMEOUT=Integer.parseInt(CONFIG_MAP.getProperty(SESSTION_TIMEOUT_KEY,System.getProperty(SESSTION_TIMEOUT_KEY, System.getenv(SESSTION_TIMEOUT_KEY))));
 	public final static int ZK_CONNECTION_TIMEOUT=Integer.parseInt(CONFIG_MAP.getProperty(CONNECTION_TIMEOUT_KEY,System.getProperty(CONNECTION_TIMEOUT_KEY, System.getenv(CONNECTION_TIMEOUT_KEY))));
 	public static final String MODULE_NAME = CONFIG_MAP.getProperty(MODULE_NAME_KEY,System.getProperty(MODULE_NAME_KEY, System.getenv(MODULE_NAME_KEY)));
-	public static final String SERVICE_PREFIX = CONFIG_MAP.getProperty(SERVICE_PREFIX_KEY,System.getProperty(SERVICE_PREFIX_KEY, System.getenv(SERVICE_PREFIX_KEY)));;
+	public static final String SERVICE_PREFIX = CONFIG_MAP.getProperty(SERVICE_PREFIX_KEY,System.getProperty(SERVICE_PREFIX_KEY, System.getenv(SERVICE_PREFIX_KEY)));
 	public static final String SERVICE_DEFAULT_IP = CONFIG_MAP.getProperty(SERVICE_DEFAULT_IP_KEY,System.getProperty(SERVICE_DEFAULT_IP_KEY, System.getenv(SERVICE_DEFAULT_IP_KEY)));
 	public static final String SERVICE_DEFAULT_PORT = CONFIG_MAP.getProperty(SERVICE_DEFAULT_PORT_KEY,System.getProperty(SERVICE_DEFAULT_PORT_KEY, System.getenv(SERVICE_DEFAULT_PORT_KEY)));
 	public static final boolean ZK_AUTH = BooleanUtils.toBoolean(CONFIG_MAP.getProperty(ZK_AUTH_KEY,System.getProperty(ZK_AUTH_KEY, System.getenv(ZK_AUTH_KEY))));

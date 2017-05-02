@@ -1,9 +1,12 @@
 package sc.learn.common.util;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.zookeeper.AsyncCallback.StatCallback;
 import org.apache.zookeeper.AsyncCallback.StringCallback;
 import org.apache.zookeeper.AsyncCallback.VoidCallback;
@@ -30,9 +33,38 @@ public class ZookeeperClient {
 	private final ZkCallback callback=new ZkCallback();
 	
 	private final class ZkCallback implements Watcher,StringCallback,VoidCallback,StatCallback{
+		
+		private Map<String,Watcher> monitoringPath=Collections.synchronizedMap(new HashMap<>());
+		
+		
+		public void addMonitor(String path,Watcher watcher){
+			monitoringPath.put(path, watcher);
+		}
+		
+		
 		@Override
 		public void process(WatchedEvent event) {
-			LOG.info(event.toString());
+			switch(event.getState()){
+			case Disconnected:
+			case Expired:
+				try {
+					if(client!=null){
+						client.close();
+					}
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+				try {
+					client=new ZooKeeper(ZkConfig.ZK_SERVER, ZkConfig.ZK_SESSION_TIMEOUT, callback);
+				} catch (IOException e) {
+					LOG.error(ExceptionUtils.getStackTrace(e));
+				}
+			case AuthFailed:
+				LOG.error(event.toString());
+				break;
+			default:
+				LOG.info(event.toString());
+			}
 		}
 
 
@@ -84,10 +116,20 @@ public class ZookeeperClient {
 
 	private ZooKeeper client;
 	
+	public List<String> getChildren(String path,Watcher watcher){
+		try {
+			return client.getChildren(path, watcher);
+		} catch (KeeperException | InterruptedException e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+	
 	public ZookeeperClient() throws IOException{
 		client=new ZooKeeper(ZkConfig.ZK_SERVER, ZkConfig.ZK_SESSION_TIMEOUT, callback);
 	}
-
+	
+	
 	
 	public void createPath(String path,byte[] data,String createMode){
 		Map<String,Object> ctx=new HashMap<>();
