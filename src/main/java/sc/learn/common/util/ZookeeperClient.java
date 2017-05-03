@@ -1,12 +1,12 @@
 package sc.learn.common.util;
 
 import java.io.IOException;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.apache.zookeeper.AsyncCallback.ChildrenCallback;
 import org.apache.zookeeper.AsyncCallback.StatCallback;
 import org.apache.zookeeper.AsyncCallback.StringCallback;
 import org.apache.zookeeper.AsyncCallback.VoidCallback;
@@ -32,15 +32,7 @@ public class ZookeeperClient {
 	
 	private final ZkCallback callback=new ZkCallback();
 	
-	private final class ZkCallback implements Watcher,StringCallback,VoidCallback,StatCallback{
-		
-		private Map<String,Watcher> monitoringPath=Collections.synchronizedMap(new HashMap<>());
-		
-		
-		public void addMonitor(String path,Watcher watcher){
-			monitoringPath.put(path, watcher);
-		}
-		
+	private final class ZkCallback implements Watcher,StringCallback,VoidCallback,StatCallback,ChildrenCallback{
 		
 		@Override
 		public void process(WatchedEvent event) {
@@ -112,17 +104,28 @@ public class ZookeeperClient {
 				break;
 			}
 		}
+
+
+		@Override
+		public void processResult(int rc, String path, Object ctx, List<String> children) {
+			switch(Code.get(rc)){
+			case CONNECTIONLOSS:
+				getChildren(path,null);
+				break;
+			case OK:
+				break;
+			default:
+				LOG.info(KeeperException.create(Code.get(rc)).getMessage());
+				break;
+			}
+			
+		}
 	}
 
 	private ZooKeeper client;
 	
-	public List<String> getChildren(String path,Watcher watcher){
-		try {
-			return client.getChildren(path, watcher);
-		} catch (KeeperException | InterruptedException e) {
-			e.printStackTrace();
-		}
-		return null;
+	public void getChildren(String path,ChildrenCallback cb){
+		client.getChildren(path, callback, cb, cb);
 	}
 	
 	public ZookeeperClient() throws IOException{
