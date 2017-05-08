@@ -110,7 +110,7 @@ public class ZookeeperClient {
 		public void processResult(int rc, String path, Object ctx, List<String> children) {
 			switch(Code.get(rc)){
 			case CONNECTIONLOSS:
-				getChildren(path,null);
+				LOG.error(KeeperException.create(Code.get(rc)).getMessage());
 				break;
 			case OK:
 				break;
@@ -124,8 +124,8 @@ public class ZookeeperClient {
 
 	private ZooKeeper client;
 	
-	public void getChildren(String path,ChildrenCallback cb){
-		client.getChildren(path, callback, cb, cb);
+	public void getChildren(String path,Watcher watcher,ChildrenCallback cb){
+		client.getChildren(path, watcher, cb, null);
 	}
 	
 	public ZookeeperClient() throws IOException{

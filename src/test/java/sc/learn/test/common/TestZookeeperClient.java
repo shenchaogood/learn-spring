@@ -1,5 +1,7 @@
 package sc.learn.test.common;
 
+import java.util.List;
+
 import org.junit.Test;
 
 import sc.learn.common.util.ZookeeperClient;
@@ -22,6 +24,20 @@ public class TestZookeeperClient {
 		client.deletePath("/shenchaoEPHEMERAL");
 		client.deletePath("/shenchaoPERSISTENT");
 		Thread.sleep(500);
+	}
+	
+	@Test
+	public void getChildren() throws Exception{
+		ZookeeperClient client=new ZookeeperClient();
+		while(true){
+			client.getChildren("/",event->{
+				
+			},(int rc, String path, Object ctx, List<String> children)->{
+				System.out.println("children is :"+children);
+			});
+			Thread.sleep(5000);
+		}
+		
 	}
 
 }

@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.thrift.TProcessor;
 import org.apache.thrift.async.TAsyncClientManager;
@@ -21,16 +22,21 @@ import org.apache.thrift.transport.TNonblockingTransport;
 import org.apache.zookeeper.AsyncCallback.ChildrenCallback;
 import org.apache.zookeeper.KeeperException;
 import org.apache.zookeeper.KeeperException.Code;
+import org.apache.zookeeper.Watcher;
+import org.apache.zookeeper.ZooKeeper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import sc.learn.common.util.ThriftUtil.Constants;
 
 public abstract class ThriftUtil {
 
 	protected static final Logger LOGGER = LoggerFactory.getLogger(ThriftUtil.class);
+	private static final Logger LOG=LoggerFactory.getLogger(ZookeeperClient.class);
 	private static final Map<EnvironmentType, ZookeeperClient> ENV_CLIENT_MAP = new HashMap<>();
 	private static final Map<Class<?>, Pair<?, ?>> CLIENT_MAP = new HashMap<>();
 
-	private static interface Constants {
+	public static interface Constants {
 		static final String SERVICE_PREFIX = ZkConfig.SERVICE_PREFIX;;
 		static final String IFACE_SUFFIX = "$Iface";
 		static final String ASYN_IFACE_SUFFIX = "$AsyncIface";
@@ -72,48 +78,58 @@ public abstract class ThriftUtil {
 			}
 			path.append(serviceName);
 
-			
-			ZkClientProxyFactory ifaceObj=new ZkClientProxyFactory();
-			ZkClientProxyFactory asynIfaceObj=new ZkClientProxyFactory();
+			Class<?> syncClientName=null;
+			Class<?> asynClientName = null;
+			try {
+				syncClientName = Class.forName(serviceName + Constants.CLIENT_SUFFIX);
+				asynClientName = Class.forName(serviceName + Constants.ASYN_CLIENT_SUFFIX);
+			} catch (ClassNotFoundException e) {
+				e.printStackTrace();
+			}
+			ThriftClient ifaceObj=new IfaceClientProxyFactory(syncClientName);
+			ThriftClient asynIfaceObj=new AsynIfaceClientProxyFactory(asynClientName);
 			
 			client = Pair.of(ifaceObj.createProxy(),asynIfaceObj.createProxy());
 			CLIENT_MAP.put(clazz, client);
 			ZookeeperClient currZkCli=zkClient;
-			zkClient.getChildren(path.toString(), (rc, paths, ctx, children) -> {
+			Map<String,Object> map=new HashMap<>();
+			ChildrenCallback cb=(rc, paths, ctx, children) -> {
 				switch (Code.get(rc)) {
 				case CONNECTIONLOSS:
-					currZkCli.getChildren(path.toString(), (ChildrenCallback) ctx);
+					currZkCli.getChildren(path.toString(),(Watcher)map.get("watcher"), (ChildrenCallback)map.get("cb"));
 					break;
 				case OK:
 					if (children == null || children.size() == 0) {
 						throw new RuntimeException(path + "节点下无任何可用节点");
 					}
-					try {
-						TNonblockingTransport transport = new TNonblockingSocket("", 0, timeout);
-						// transport.open();
-						TProtocol protocol = new TBinaryProtocol(transport);
-						String syncClientName = serviceName + Constants.CLIENT_SUFFIX;
-						Constructor<?> syncConstructor = Class.forName(syncClientName).getConstructor(TProtocol.class);
-
-						TAsyncClientManager clientManager = new TAsyncClientManager();
-						String asynClientName = serviceName + Constants.ASYN_CLIENT_SUFFIX;
-						Constructor<?> asynConstructor = Class.forName(asynClientName).getConstructor(TProtocol.class, TAsyncClientManager.class,
-								TNonblockingTransport.class);
-
-						ifaceObj.bind(syncConstructor.newInstance(protocol));
-						asynIfaceObj.bind(asynConstructor.newInstance(protocol, clientManager, transport));
-					} catch (Exception e) {
-						throw new RuntimeException(e);
-					}
+					children.forEach(node->{
+						ifaceObj.bindNewInstance(serviceName, node.split(":")[0], Integer.parseInt(node.split(":")[1]), timeout);
+						asynIfaceObj.bindNewInstance(serviceName, node.split(":")[0], Integer.parseInt(node.split(":")[1]), timeout);
+					});
 					break;
 				default:
 					LOGGER.info(KeeperException.create(Code.get(rc)).getMessage());
 					break;
 				}
-			});
+			};
+			
+			Watcher watcher=event->{
+				switch(event.getType()){
+				case NodeChildrenChanged:
+					currZkCli.getChildren(path.toString(),(Watcher)map.get("watcher"),cb);
+					break;
+				default:
+					LOG.info(event.toString());
+					break;
+				}
+			};
+			map.put("cb", cb);
+			map.put("watcher", watcher);
+			zkClient.getChildren(path.toString(),watcher,cb);
 		}
 		return client;
 	}
+	
 
 	public static void startThriftServer(Object thriftServiceObj) {
 
