@@ -16,6 +16,16 @@ abstract class AbstractThriftClient implements ThriftClient,InvocationHandler {
 		this.clazz=clazz;
 	}
 	
+	public void bind(String ip,int port,int timeout){
+		try {
+			cache.computeIfAbsent(ip+":"+port, p->bindNewInstance(ip,port,timeout));
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+	}
+	
+	protected abstract Object bindNewInstance(String ip,int port,int timeout);
+	
 	@Override
 	public Object createProxy() {
 		return Proxy.newProxyInstance(getClass().getClassLoader(),new Class[]{clazz} , this);

@@ -94,8 +94,8 @@ public abstract class ThriftUtil {
 						throw new RuntimeException(path + "节点下无任何可用节点");
 					}
 					children.forEach(node->{
-						ifaceObj.bindNewInstance(serviceName, node.split(":")[0], Integer.parseInt(node.split(":")[1]), timeout);
-						asynIfaceObj.bindNewInstance(serviceName, node.split(":")[0], Integer.parseInt(node.split(":")[1]), timeout);
+						ifaceObj.bind(node.split(":")[0], Integer.parseInt(node.split(":")[1]), timeout);
+						asynIfaceObj.bind(node.split(":")[0], Integer.parseInt(node.split(":")[1]), timeout);
 					});
 					break;
 				default:
