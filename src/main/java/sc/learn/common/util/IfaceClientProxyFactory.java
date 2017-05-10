@@ -13,14 +13,14 @@ class IfaceClientProxyFactory extends AbstractThriftClient {
 		super(clazz);
 	}
 
-	protected Object bindNewInstance(String ip,int port,int timeout){
+	protected ThriftClientHolder bindNewInstance(String ip,int port,int timeout){
 		try {
 			TNonblockingTransport transport = new TNonblockingSocket(ip, port, timeout);
 			// transport.open();
 			TProtocol protocol = new TBinaryProtocol(transport);
 			Constructor<?> syncConstructor = clazz.getConstructor(TProtocol.class);
 
-			return syncConstructor.newInstance(protocol);
+			return new ThriftClientHolder(transport,syncConstructor.newInstance(protocol));
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}

@@ -14,7 +14,7 @@ class AsynIfaceClientProxyFactory extends AbstractThriftClient {
 		super(clazz);
 	}
 
-	protected Object bindNewInstance(String ip,int port,int timeout){
+	protected ThriftClientHolder bindNewInstance(String ip,int port,int timeout){
 		try {
 			TNonblockingTransport transport = new TNonblockingSocket(ip, port, timeout);
 			// transport.open();
@@ -22,7 +22,7 @@ class AsynIfaceClientProxyFactory extends AbstractThriftClient {
 			TAsyncClientManager clientManager = new TAsyncClientManager();
 			Constructor<?> asynConstructor = clazz.getConstructor(TProtocol.class, TAsyncClientManager.class, TNonblockingTransport.class);
 
-			return asynConstructor.newInstance(protocol, clientManager, transport);
+			return new ThriftClientHolder(transport, asynConstructor.newInstance(protocol, clientManager, transport));
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}

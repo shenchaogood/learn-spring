@@ -93,10 +93,8 @@ public abstract class ThriftUtil {
 					if (children == null || children.size() == 0) {
 						throw new RuntimeException(path + "节点下无任何可用节点");
 					}
-					children.forEach(node->{
-						ifaceObj.bind(node.split(":")[0], Integer.parseInt(node.split(":")[1]), timeout);
-						asynIfaceObj.bind(node.split(":")[0], Integer.parseInt(node.split(":")[1]), timeout);
-					});
+					ifaceObj.bindAll(children);
+					asynIfaceObj.bindAll(children);
 					break;
 				default:
 					LOGGER.info(KeeperException.create(Code.get(rc)).getMessage());
