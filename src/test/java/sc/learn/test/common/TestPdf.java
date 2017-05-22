@@ -1,4 +1,4 @@
-package sc.learn.test.pdf;
+package sc.learn.test.common;
 
 import java.io.FileOutputStream;
 import java.util.List;
@@ -403,5 +403,4 @@ public class TestPdf {
 		document.add(table);
 		document.close();
 	}
-
 }
