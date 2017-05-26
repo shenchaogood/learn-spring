@@ -4,7 +4,6 @@ package sc.learn.config;
 import java.sql.SQLException;
 
 import javax.sql.DataSource;
-import javax.transaction.TransactionManager;
 
 import org.mybatis.spring.SqlSessionFactoryBean;
 import org.mybatis.spring.mapper.MapperScannerConfigurer;
@@ -26,7 +25,7 @@ import com.alibaba.druid.pool.DruidDataSource;
 
 @Configuration
 @EnableAspectJAutoProxy
-@PropertySources(value={@PropertySource("classpath:db.properties")})
+@PropertySources(value={@PropertySource("classpath:config/*.properties")})
 @ComponentScan(basePackages="sc.learn",excludeFilters={@Filter(type=FilterType.ANNOTATION,value=EnableWebMvc.class)})
 public class RootConfig {
 	
