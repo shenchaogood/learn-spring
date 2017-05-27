@@ -73,11 +73,13 @@
 		    <groupId>javax.servlet</groupId>
 		    <artifactId>javax.servlet-api</artifactId>
 		    <version>${servlet-version}</version>
+		    <scope>provided</scope>
 		</dependency>
 		<dependency>
 		    <groupId>javax.servlet.jsp</groupId>
 		    <artifactId>javax.servlet.jsp-api</artifactId>
 		    <version>${jsp-version}</version>
+		    <scope>provided</scope>
 		</dependency>
 		<dependency>
 		    <groupId>javax.servlet.jsp.jstl</groupId>
@@ -201,7 +203,7 @@
 		    <artifactId>pagehelper</artifactId>
 		    <version>${pagehelper-version}</version>
 		</dependency>
-		
+<!--  		
 		<dependency>
 			<groupId>org.hibernate</groupId>
 			<artifactId>hibernate-core</artifactId>
@@ -222,16 +224,26 @@
 			<artifactId>hibernate-validator</artifactId>
 			<version>${hibernate-validator-version}</version>
 		</dependency>
+-->		
 		
 		<dependency>
 		    <groupId>org.apache.zookeeper</groupId>
 		    <artifactId>zookeeper</artifactId>
 		    <version>${zookeeper-version}</version>
 		</dependency>
-		
 		<dependency>
 		    <groupId>org.apache.thrift</groupId>
 		    <artifactId>libthrift</artifactId>
+		    <exclusions>
+		    	<exclusion>
+		    		<groupId>org.apache.httpcomponents</groupId>
+		    		<artifactId>httpcomponents-client</artifactId>
+		    	</exclusion>
+		    	<exclusion>
+		    		<groupId>org.apache.httpcomponents</groupId>
+		    		<artifactId>httpcomponents-core</artifactId>
+		    	</exclusion>
+		    </exclusions>
 		    <version>${thrift-version}</version>
 		</dependency>
 		
@@ -297,15 +309,17 @@
 		    <version>0.1.54</version>
 		</dependency>
 		
+		<!-- 里面包含了spring 会冲突
 		<dependency>
 		    <groupId>org.apache.activemq</groupId>
 		    <artifactId>activemq-all</artifactId>
 		    <version>${activemq-version}</version>
+		</dependency> -->
+		<dependency>
+		    <groupId>org.apache.activemq</groupId>
+		    <artifactId>activemq-broker</artifactId>
+		    <version>${activemq-version}</version>
 		</dependency>
 
 	</dependencies>
-	
-	
-	
-	
 </project>

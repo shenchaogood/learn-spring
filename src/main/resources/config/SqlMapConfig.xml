@@ -5,7 +5,7 @@ PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
 <configuration>
 
 	<!-- 加载属性文件 -->
-	<properties resource="db.properties">
+	<properties resource="config/db.properties">
 		<!--properties中还可以配置一些属性名和属性值  -->
 		<!-- <property name="jdbc.driver" value=""/> -->
 	</properties>
