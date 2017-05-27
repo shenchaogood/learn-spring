@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.sunkaisens.omc.mapper.core.PrivilegeMapper" >
+
+	<resultMap type="privilege" id="menuResultMap">
+		<id column="id" property="id"/>
+		<result column="name" property="name"/>
+		<result column="description" property="description"/>
+		<result column="url" property="url"/>
+		<result column="icon" property="icon"/>
+		<result column="leaf" property="leaf"/>
+		<collection property="children" ofType="privilege">
+			<id column="c_id" property="id"/>
+			<result column="c_name" property="name"/>
+			<result column="c_description" property="description"/>
+			<result column="c_url" property="url"/>
+			<result column="c_icon" property="icon"/>
+			<result column="c_leaf" property="leaf"/>
+		</collection>
+	</resultMap>
+
+	<insert id="insert" parameterType="privilege">
+		<selectKey keyProperty="id" order="AFTER" resultType="java.lang.Integer">
+			SELECT LAST_INSERT_ID()
+		</selectKey>
+		insert into privilege(name,description,url,icon,leaf,parentId) 
+		values(#{name},#{description},#{url},#{icon},#{leaf},#{parent.id})
+	</insert>
+
+	<select id="selectById" parameterType="int" resultType="privilege">
+		select * from privilege where id=#{value}
+	</select>
+	
+	<select id="selectAll" resultType="privilege">
+		select * from privilege
+	</select>
+	
+	<select id="selectMenuPrivileges" resultMap="menuResultMap">
+		select 
+			parent.*,
+			child.id c_id,child.name c_name,child.description c_description,child.url c_url,child.icon c_icon,child.leaf c_leaf
+		from 
+			(select * from privilege where parentId is null) parent
+		left join
+			privilege child
+		on
+			(parent.id=child.parentId and !parent.leaf)
+		order by 
+			id asc
+	</select>
+	
+	<select id="selectByParentId" parameterType="int" resultType="privilege">
+		select * from privilege where parentId
+		<if test="value==null">is null</if>
+		<if test="value!=null">=#{value}</if>
+	</select>
+	
+	<select id="selectByIds" parameterType="int" resultType="privilege">
+		select * from privilege 
+		where id in
+		<foreach collection="array" item="item" open="(" separator="," close=")">
+			#{item}
+		</foreach>
+	</select>
+	
+	<select id="selectByUrl" parameterType="string" resultType="privilege">
+		select * from privilege where url=#{url}
+	</select>
+	
+	<select id="selectAllUrl" resultType="string">
+		select url from privilege
+	</select>
+	
+</mapper>
