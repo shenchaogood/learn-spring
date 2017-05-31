@@ -91,7 +91,7 @@ public abstract class ThriftUtil {
 					break;
 				case OK:
 					if (children == null || children.size() == 0) {
-						throw new RuntimeException(path + "节点下无任何可用节点");
+						LOGGER.warn(path + "节点下无任何可用节点");
 					}
 					ifaceObj.bindAll(children);
 					asynIfaceObj.bindAll(children);

@@ -4,10 +4,10 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
-import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.thrift.transport.TTransport;
@@ -23,7 +23,7 @@ abstract class AbstractThriftClient implements ThriftClient,InvocationHandler {
 		}
 	}
 	
-	protected Map<String,ThriftClientHolder> cache = new ConcurrentHashMap<>();
+	protected Map<String,ThriftClientHolder> cache = new HashMap<>();
 	
 	protected Class<?> clazz;
 	public AbstractThriftClient(Class<?> clazz){
@@ -32,25 +32,19 @@ abstract class AbstractThriftClient implements ThriftClient,InvocationHandler {
 	
 	@Override
 	public void bind(String ip,int port,int timeout){
-		try {
-			cache.computeIfAbsent(ip+":"+port, p->bindNewInstance(ip,port,timeout));
-		} catch (Exception e) {
-			throw new RuntimeException(e);
-		}
+		cache.computeIfAbsent(ip+":"+port, p->bindNewInstance(ip,port,timeout));
 	}
 	
 	@Override
 	public void bindAll(List<String> ipPortTimeouts){
-		try {
-			ipPortTimeouts.forEach(ipPortTimeout->{
-				String[] ipPortTimeoutStr=ipPortTimeout.split(":");
+		ipPortTimeouts.forEach(ipPortTimeout->{
+			String[] ipPortTimeoutStr=ipPortTimeout.split(":");
+			if(!cache.containsKey(ipPortTimeoutStr[0]+":"+ipPortTimeoutStr[1])){
 				cache.computeIfAbsent(ipPortTimeoutStr[0]+":"+ipPortTimeoutStr[1], p->bindNewInstance(ipPortTimeoutStr[0],
 						Integer.parseInt(ipPortTimeoutStr[1]),Integer.parseInt(ipPortTimeoutStr[2])));
-			});
-			CollectionUtils.subtract(cache.entrySet(),ipPortTimeouts).forEach(item->cache.remove(item).transport.close());
-		} catch (Exception e) {
-			throw new RuntimeException(e);
-		}
+			}
+		});
+		CollectionUtils.subtract(cache.entrySet(),ipPortTimeouts).forEach(item->cache.remove(item).transport.close());
 	}
 	
 	protected abstract ThriftClientHolder bindNewInstance(String ip,int port,int timeout);
