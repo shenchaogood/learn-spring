@@ -139,6 +139,6 @@
 	</select>
 	
 	<select id="selectCount" resultType="int">
-		select count(*) from t_user
+		select count(f_id) from t_user
 	</select>
 </mapper>

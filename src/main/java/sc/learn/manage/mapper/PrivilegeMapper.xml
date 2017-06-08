@@ -3,6 +3,16 @@
 	"http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="sc.learn.manage.mapper.PrivilegeMapper" >
 
+	<sql id="privilegeColumnSql">
+		f_id id,
+		f_description description,
+		f_url url,
+		f_icon icon,
+		f_leaf leaf,
+		f_create_time create_time,
+		f_update_time update_time
+	</sql>
+
 	<resultMap type="privilege" id="menuResultMap">
 		<id column="f_id" property="id"/>
 		<result column="f_name" property="name"/>
@@ -10,6 +20,8 @@
 		<result column="f_url" property="url"/>
 		<result column="f_icon" property="icon"/>
 		<result column="f_leaf" property="leaf"/>
+		<result column="f_create_time" property="createTime"/>
+		<result column="f_update_time" property="updateTime"/>
 		<collection property="children" ofType="privilege">
 			<id column="c_id" property="id"/>
 			<result column="c_name" property="name"/>
@@ -17,6 +29,8 @@
 			<result column="c_url" property="url"/>
 			<result column="c_icon" property="icon"/>
 			<result column="c_leaf" property="leaf"/>
+			<result column="c_create_time" property="createTime"/>
+			<result column="c_update_time" property="updateTime"/>
 		</collection>
 	</resultMap>
 
@@ -51,13 +65,22 @@
 	
 	<select id="selectMenuPrivileges" resultMap="menuResultMap">
 		select 
-			parent.*,
+			parent.f_id f_id,
+			parent.f_name f_name,
+			parent.f_description f_description,
+			parent.f_url f_url,
+			parent.f_icon f_icon,
+			parent.f_leaf f_leaf,
+			parent.f_create_time f_create_time,
+			parent.f_update_time f_update_time,
 			child.f_id c_id,
 			child.f_name c_name,
 			child.f_description c_description,
 			child.f_url c_url,
 			child.f_icon c_icon,
-			child.f_leaf c_leaf
+			child.f_leaf c_leaf,
+			child.f_create_time c_create_time,
+			child.f_update_time c_update_time
 		from 
 			(select * from t_privilege where f_parent_id = 0) parent
 		left join
@@ -69,21 +92,21 @@
 	</select>
 	
 	<select id="selectByParentId" parameterType="int" resultType="privilege">
-		select * from t_privilege where f_parent_id
+		select <include refid="privilegeColumnSql"/> from t_privilege where f_parent_id
 		<if test="value==null">is null</if>
 		<if test="value!=null">=#{value}</if>
 	</select>
 	
 	<select id="selectByIds" parameterType="int" resultType="privilege">
-		select * from t_privilege 
-		where f_id in
+		select <include refid="privilegeColumnSql"/> from t_privilege 
+		where id in
 		<foreach collection="array" item="item" open="(" separator="," close=")">
 			#{item}
 		</foreach>
 	</select>
 	
 	<select id="selectByUrl" parameterType="string" resultType="privilege">
-		select * from t_privilege where f_url=#{url}
+		select <include refid="privilegeColumnSql"/> from t_privilege where f_url=#{url}
 	</select>
 	
 	<select id="selectAllUrl" resultType="string">

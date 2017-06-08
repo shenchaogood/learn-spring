@@ -16,12 +16,13 @@ import org.junit.Test;
 public class TestActiveMq {
 
 	private static ActiveMQConnectionFactory connectionFactory;
-	private static String brokerUrl = "failover:(" + "tcp://localhost:61617," + "tcp://localhost:61618," + "tcp://localhost:61619," + "tcp://localhost:61620,"
-			+ "tcp://localhost:61621," + "tcp://localhost:61622," + ")?randomize=false";
+//	private static final String BROKERURL = "failover:(" + "tcp://localhost:61617," + "tcp://localhost:61618," + "tcp://localhost:61619," + "tcp://localhost:61620,"
+//			+ "tcp://localhost:61621," + "tcp://localhost:61622," + ")?randomize=false";
 
+	static String BROKERURL="failover:tcp://10.38.161.15:6161";
 	@BeforeClass
 	public static void init() {
-		connectionFactory = new ActiveMQConnectionFactory(ActiveMQConnection.DEFAULT_USER, ActiveMQConnection.DEFAULT_PASSWORD, brokerUrl);
+		connectionFactory = new ActiveMQConnectionFactory(ActiveMQConnection.DEFAULT_USER, ActiveMQConnection.DEFAULT_PASSWORD, BROKERURL);
 	}
 
 	@Test
@@ -60,7 +61,8 @@ public class TestActiveMq {
 			TextMessage textMessage = (TextMessage) messageConsumer.receive(100000);
 			if (textMessage != null) {
 				System.out.println("收到的消息:" + textMessage.getText());
-				session.recover();
+				textMessage.acknowledge();
+//				session.recover();
 			} else {
 				break;
 			}

@@ -2,6 +2,14 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
 	"http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="sc.learn.manage.mapper.RoleMapper" >
+
+	<sql id="roleColumnSql">
+		t_role.f_id id,
+		t_role.f_name name,
+		t_role.f_description description,
+		t_role.f_create_time createTime,
+		t_role.f_update_time updateTime
+	</sql>
 	
 	<sql id="query_role">
 		select 
@@ -18,7 +26,7 @@
 			t_privilege.f_icon icon,
 			t_privilege.f_leaf leaf,
 			t_privilege.f_create_time privilegeCreateTime,
-			t_privilege.f_update_time privilegeUpdateTime,
+			t_privilege.f_update_time privilegeUpdateTime
 		from 
 			t_role
 		left join(t_privilege,t_role_privilege)
@@ -95,11 +103,11 @@
 	</select>
 	
 	<select id="selectAll" resultType="role">
-		select * from t_role
+		select <include refid="roleColumnSql"/> from t_role
 	</select>
 	
 	<select id="selectByName" parameterType="string" resultType="role">
-		select * from t_role where f_name=#{value}
+		select <include refid="roleColumnSql"/> from t_role where f_name=#{value}
 	</select>
 	
 </mapper>
