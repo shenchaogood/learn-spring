@@ -25,20 +25,16 @@ public class UserController {
 	public ResponseResult login(UserVo userVo){
 		User user=userBiz.login(userVo);
 		if(user==null){
-			return ResponseResult.FAIL.setError(Contants.LOGIN_USER_NO_EXISTS);
+			return ResponseResult.createFail(Contants.LOGIN_USER_NO_EXISTS);
 		}else{
 			httpSession.setAttibute(Contants.CURRENT_LOGIN_USER, user);
-			return ResponseResult.SUCCESS;
+			return ResponseResult.createSuccess();
 		}
 	}
 	
 	@RequestMapping("add")
 	public ResponseResult add(User user){
-		if(userBiz.add(user)==0){
-			return 	ResponseResult.FAIL.setError(Contants.RECORD_EXISTS);
-		}else{
-			return 	ResponseResult.SUCCESS;
-		}
+		return userBiz.add(user);
 	}
 	
 	

@@ -1,18 +1,28 @@
 package sc.learn.common.pojo;
 
+import sc.learn.common.util.ArrayUtil;
+
 public class ResponseResult {
 	
-	public static final ResponseResult SUCCESS=new ResponseResult(true,"");
-	public static final ResponseResult FAIL=new ResponseResult(false,"");
-	
-	public ResponseResult(boolean success, String error) {
-		this.success = success;
-		this.error = error;
+	public static ResponseResult createSuccess(String...desc){
+		return new ResponseResult(true).setDesc(ArrayUtil.isEmpty(desc)?"":desc[0]);
 	}
-
+	
+	public static ResponseResult createFail(String...desc){
+		return new ResponseResult(false).setDesc(ArrayUtil.isEmpty(desc)?"":desc[0]);
+	}
+	
+	public static ResponseResult create(boolean success,String...desc){
+		return new ResponseResult(success).setDesc(ArrayUtil.isEmpty(desc)?"":desc[0]);
+	}
+	
+	private ResponseResult(boolean success) {
+		this.success = success;
+	}
+	
 	private boolean success;
 	
-	private String error;
+	private String desc;
 
 	public boolean isSuccess() {
 		return success;
@@ -23,12 +33,12 @@ public class ResponseResult {
 		return this;
 	}
 
-	public String getError() {
-		return error;
+	public String getDesc() {
+		return desc;
 	}
 
-	public ResponseResult setError(String error) {
-		this.error = error;
+	public ResponseResult setDesc(String desc) {
+		this.desc = desc;
 		return this;
 	}
 	

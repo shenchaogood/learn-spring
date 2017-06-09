@@ -13,4 +13,6 @@ public abstract class JsonUtil {
 	public static <T> T parseJSONString(String json,Class<T> type){
 		return JSON.parseObject(json, type);
 	}
+	
+	
 }
