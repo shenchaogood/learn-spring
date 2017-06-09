@@ -2,6 +2,8 @@ package sc.learn.config;
 
 
 import java.sql.SQLException;
+import java.util.HashSet;
+import java.util.Set;
 
 import javax.sql.DataSource;
 
@@ -24,10 +26,19 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 
 import com.alibaba.druid.pool.DruidDataSource;
 
+import redis.clients.jedis.HostAndPort;
+import redis.clients.jedis.JedisCluster;
+import redis.clients.jedis.JedisPoolConfig;
+import sc.learn.common.web.ClusterHttpSessionProvider;
+import sc.learn.common.web.HttpSessionProvider;
+
 @Lazy(false)
 @Configuration
 @EnableAspectJAutoProxy
-@PropertySources(value={@PropertySource("classpath:config/db.properties")})
+@PropertySources(value={
+		@PropertySource("classpath:config/db.properties"),
+		@PropertySource("classpath:config/redis.properties")
+		})
 //@PropertySource("classpath:config/db.properties")
 @ComponentScan(basePackages="sc.learn",excludeFilters={@Filter(type=FilterType.ANNOTATION,value=EnableWebMvc.class)})
 public class RootConfig implements EnvironmentAware {
@@ -73,4 +84,52 @@ public class RootConfig implements EnvironmentAware {
 		mapperScannerConfigurer.setBasePackage("sc.learn");
 		return mapperScannerConfigurer;
 	}
+	
+	@Bean
+	public JedisCluster jedisCluster(){
+		Set<HostAndPort> nodes=new HashSet<>();
+		for(String hp:env.getProperty("redis.server").split(",")){
+			nodes.add(new HostAndPort(hp.split(":")[0], Integer.parseInt(hp.split(":")[0])));
+		}
+		JedisPoolConfig config=new JedisPoolConfig();
+		config.setMaxIdle(20);
+		return new JedisCluster(nodes, config);
+	}
+	
+	
+	@Bean
+	public HttpSessionProvider httpSessionProvider(JedisCluster jedisCluster){
+		return new ClusterHttpSessionProvider(jedisCluster);
+	}
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 }

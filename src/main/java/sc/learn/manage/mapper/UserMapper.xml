@@ -81,7 +81,7 @@
 		<selectKey keyProperty="id" order="AFTER" resultType="java.lang.Integer">
 			select last_insert_id() as id
 		</selectKey>
-		insert into t_user(f_name,f_password,f_email) values(#{name},#{password},#{email})
+		insert ignore into t_user(f_name,f_password,f_email) values(#{name},#{password},#{email})
 	</insert>
 	
 	<insert id="insertUserRoles" parameterType="user" >
@@ -126,10 +126,10 @@
 		</where>
 	</select>
 	
-	<select id="selectByNamePassword" resultMap="UserResultMap">
+	<select id="selectByEmailPassword" resultMap="UserResultMap">
 		<include refid="query_user"></include>
 		<where>
-			t_user.f_name=#{name} and 
+			t_user.f_name=#{email} and 
 			t_user.f_password=#{password}
 		</where>
 	</select>

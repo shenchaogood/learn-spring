@@ -17,7 +17,7 @@ public interface UserMapper {
 	
 	User selectById(Integer id);
 	
-	User selectByNamePassword(@Param("name") String name,@Param("password") String password);
+	User selectByEmailPassword(@Param("email") String email,@Param("password") String password);
 	
 	void insertUserRoles(User user);
 	
