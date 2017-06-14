@@ -89,7 +89,7 @@ public class RootConfig implements EnvironmentAware {
 	public JedisCluster jedisCluster(){
 		Set<HostAndPort> nodes=new HashSet<>();
 		for(String hp:env.getProperty("redis.server").split(",")){
-			nodes.add(new HostAndPort(hp.split(":")[0], Integer.parseInt(hp.split(":")[0])));
+			nodes.add(new HostAndPort(hp.split(":")[0], Integer.parseInt(hp.split(":")[1])));
 		}
 		JedisPoolConfig config=new JedisPoolConfig();
 		config.setMaxIdle(20);

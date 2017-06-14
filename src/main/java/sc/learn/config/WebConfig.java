@@ -18,7 +18,7 @@ import sc.learn.web.TestIntercepter;
 
 @Configuration
 @EnableWebMvc
-@ComponentScan("sc.learn.web")
+@ComponentScan("sc.learn")
 public class WebConfig extends WebMvcConfigurerAdapter{
 
 	@Bean

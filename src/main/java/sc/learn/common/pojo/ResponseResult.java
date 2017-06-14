@@ -16,6 +16,9 @@ public class ResponseResult {
 		return new ResponseResult(success).setDesc(ArrayUtil.isEmpty(desc)?"":desc[0]);
 	}
 	
+	private ResponseResult() {
+	}
+	
 	private ResponseResult(boolean success) {
 		this.success = success;
 	}
@@ -41,7 +44,9 @@ public class ResponseResult {
 		this.desc = desc;
 		return this;
 	}
-	
-	
 
+	@Override
+	public String toString() {
+		return "ResponseResult [success=" + success + ", desc=" + desc + "]";
+	}
 }

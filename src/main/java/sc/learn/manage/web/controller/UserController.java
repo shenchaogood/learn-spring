@@ -21,7 +21,7 @@ public class UserController {
 	private UserBiz userBiz;
 	
 	
-	@RequestMapping("login")
+	@RequestMapping({"login","xyz"})
 	public ResponseResult login(UserVo userVo){
 		User user=userBiz.login(userVo);
 		if(user==null){
