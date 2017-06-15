@@ -135,6 +135,9 @@ public class ZookeeperClient {
 	
 	
 	public void createPath(String path,byte[] data,String createMode){
+		if(!path.startsWith("/")){
+			throw new IllegalArgumentException("路径必须/开头");
+		}
 		Map<String,Object> ctx=new HashMap<>();
 		ctx.put("data", data);
 		ctx.put("createMode", createMode);

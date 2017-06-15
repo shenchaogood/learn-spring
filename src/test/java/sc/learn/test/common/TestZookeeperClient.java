@@ -12,9 +12,9 @@ public class TestZookeeperClient {
 	public void createPath() throws Exception{
 		ZookeeperClient client=new ZookeeperClient();
 		client.createPath("/shenchaoEPHEMERAL", "woshi".getBytes(), ZookeeperClient.EPHEMERAL);
-		Thread.sleep(500);
-		client.createPath("/shenchaoPERSISTENT", "woshi".getBytes(), ZookeeperClient.PERSISTENT);
-		Thread.sleep(50000);
+		Thread.sleep(5000);
+//		client.createPath("/shenchaoPERSISTENT", "woshi".getBytes(), ZookeeperClient.PERSISTENT);
+//		Thread.sleep(50000);
 	}
 	
 	

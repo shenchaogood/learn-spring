@@ -126,11 +126,15 @@ public abstract class ThriftUtil {
 		ZookeeperClient zkClient = ENV_CLIENT_MAP.get(env);
 		if (zkClient == null) {
 			try {
-				zkClient = new ZookeeperClient();
+				synchronized (ThriftUtil.class) {
+					if (zkClient == null) {
+						zkClient = new ZookeeperClient();
+						ENV_CLIENT_MAP.put(env, zkClient);
+					}
+				}
 			} catch (IOException e) {
 				throw new RuntimeException(e);
 			}
-			ENV_CLIENT_MAP.put(env, zkClient);
 		}
 
 		for (Class<?> inter : thriftServiceObj.getClass().getInterfaces()) {
@@ -139,7 +143,7 @@ public abstract class ThriftUtil {
 				String serviceName = StringUtils.removeEnd(interfaceName, ThriftUtil.Constants.IFACE_SUFFIX);
 				String bindIp = ZkConfig.getServiceIp(serviceName);
 				int bindPort = ZkConfig.getServicePort(serviceName);
-				String path = Constants.SERVICE_PREFIX + serviceName + "/" + bindIp + ":" + bindPort;
+				String path = Constants.SERVICE_PREFIX +"/"+serviceName + "/" + bindIp + ":" + bindPort;
 				zkClient.createPath(path, "".getBytes(), ZookeeperClient.EPHEMERAL);
 				try {
 					Class<?> processorClass = Class.forName(serviceName + ThriftUtil.Constants.PROCESSOR_SUFFIX);
