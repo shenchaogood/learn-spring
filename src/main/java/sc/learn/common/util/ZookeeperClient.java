@@ -141,7 +141,17 @@ public class ZookeeperClient {
 		Map<String,Object> ctx=new HashMap<>();
 		ctx.put("data", data);
 		ctx.put("createMode", createMode);
-		client.create(path, data, Ids.OPEN_ACL_UNSAFE, CreateMode.valueOf(createMode), callback, ctx);
+		path=StringUtil.strip(path,"/");
+		String[] paths=path.split("/");
+		String newPath="";
+		for(int i=0;i<paths.length;i++){
+			newPath+="/"+paths[i];
+			if(i!=paths.length-1){
+				client.create(newPath, "".getBytes(), Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT, callback, ctx);
+			}else{
+				client.create(newPath, data, Ids.OPEN_ACL_UNSAFE, CreateMode.valueOf(createMode), callback, ctx);
+			}
+		}
 	}
 	
 	public void deletePath(String path){
@@ -150,5 +160,9 @@ public class ZookeeperClient {
 	
 	public void setDate(String path,byte[] data){
 		client.setData(path, data, -1, callback, data);
+	}
+	
+	public void close() throws InterruptedException{
+		client.close();
 	}
 }

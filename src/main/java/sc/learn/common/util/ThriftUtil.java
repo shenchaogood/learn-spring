@@ -5,14 +5,17 @@ import java.lang.reflect.Constructor;
 import java.net.InetSocketAddress;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.thrift.TProcessor;
+import org.apache.thrift.TProcessorFactory;
+import org.apache.thrift.protocol.TCompactProtocol;
+import org.apache.thrift.server.THsHaServer;
 import org.apache.thrift.server.TServer;
-import org.apache.thrift.server.TThreadedSelectorServer;
+import org.apache.thrift.transport.TFramedTransport;
 import org.apache.thrift.transport.TNonblockingServerSocket;
-import org.apache.thrift.transport.TNonblockingServerTransport;
 import org.apache.zookeeper.AsyncCallback.ChildrenCallback;
 import org.apache.zookeeper.KeeperException;
 import org.apache.zookeeper.KeeperException.Code;
@@ -24,8 +27,8 @@ public abstract class ThriftUtil {
 
 	protected static final Logger LOGGER = LoggerFactory.getLogger(ThriftUtil.class);
 	private static final Logger LOG=LoggerFactory.getLogger(ZookeeperClient.class);
-	private static final Map<EnvironmentType, ZookeeperClient> ENV_CLIENT_MAP = new HashMap<>();
-	private static final Map<Class<?>, Pair<?, ?>> CLIENT_MAP = new HashMap<>();
+	private static final Map<EnvironmentType, ZookeeperClient> ENV_CLIENT_MAP = new ConcurrentHashMap<>();
+	private static final Map<Class<?>, Pair<?, ?>> CLIENT_MAP = new ConcurrentHashMap<>();
 
 	public static interface Constants {
 		static final String SERVICE_PREFIX = ZkConfig.SERVICE_PREFIX;;
@@ -38,13 +41,13 @@ public abstract class ThriftUtil {
 	}
 
 	@SuppressWarnings("unchecked")
-	public static <Iface> Iface getIfaceClient(Class<Iface> iface, int timeout) {
-		return (Iface) CLIENT_MAP.get(iface).getLeft();
+	public static <Iface> Iface getIfaceClient(Class<Iface> iface, int timeout) throws IOException {
+		return (Iface) createClient(iface,timeout).getLeft();
 	}
 
 	@SuppressWarnings("unchecked")
-	public static <AsyncIface> AsyncIface getAsyncIfaceClient(Class<AsyncIface> iface, int timeout) {
-		return (AsyncIface) CLIENT_MAP.get(iface).getRight();
+	public static <AsyncIface> AsyncIface getAsyncIfaceClient(Class<AsyncIface> asyncIface, int timeout) throws IOException{
+		return (AsyncIface) createClient(asyncIface,timeout).getRight();
 	}
 
 	public static Pair<?, ?> createClient(Class<?> clazz, int timeout) throws IOException {
@@ -151,15 +154,30 @@ public abstract class ThriftUtil {
 					@SuppressWarnings("unchecked")
 					Constructor<TProcessor> ctor = (Constructor<TProcessor>) processorClass.getConstructor(ifaceClass);
 					TProcessor processor = ctor.newInstance(thriftServiceObj);
-					TNonblockingServerTransport serverTransport = new TNonblockingServerSocket(new InetSocketAddress(bindIp, bindPort));
-					TServer server = new TThreadedSelectorServer(new TThreadedSelectorServer.Args(serverTransport).processor(processor));
-					server.serve();
+					
+					TNonblockingServerSocket socket = new TNonblockingServerSocket(new InetSocketAddress(bindIp, bindPort));
+					THsHaServer.Args arg = new THsHaServer.Args(socket);
+//					// 高效率的、密集的二进制编码格式进行数据传输
+//					// 使用非阻塞方式，按块的大小进行传输，类似于 Java 中的 NIO
+					arg.protocolFactory(new TCompactProtocol.Factory());
+					arg.transportFactory(new TFramedTransport.Factory());
+					arg.processorFactory(new TProcessorFactory(processor));
+					TServer server = new THsHaServer(arg);
+					
+//					TNonblockingServerTransport serverTransport = new TNonblockingServerSocket(new InetSocketAddress(bindIp, bindPort));
+//					TServer server = new TThreadedSelectorServer(new TThreadedSelectorServer.Args(serverTransport).processor(processor));
 					final ZookeeperClient zkcli = zkClient;
 					Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-						zkcli.deletePath(path);
+						try {
+							zkcli.deletePath(path);
+							zkcli.close();
+						} catch (Exception e) {
+						}
 						server.stop();
-						serverTransport.close();
+//						serverTransport.close();
+						socket.close();
 					}));
+					new Thread(server::serve).start();
 				} catch (Exception e) {
 					throw new RuntimeException(e);
 				}
