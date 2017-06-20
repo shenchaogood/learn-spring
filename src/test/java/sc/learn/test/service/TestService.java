@@ -33,5 +33,6 @@ public class TestService {
 				System.out.println("onComplete");
 			}
 		});
+		Thread.sleep(1000);
 	}
 }
