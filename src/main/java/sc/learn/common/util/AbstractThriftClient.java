@@ -71,6 +71,7 @@ abstract class AbstractThriftClient implements ThriftClient, InvocationHandler {
 	@Override
 	public Object invoke(Object proxy, Method method, Object[] args) {
 		LOGGER.debug("执行方法:{}，参数:{}",method,Arrays.toString(args));
+		long startTime=System.currentTimeMillis();
 		int size = 0;
 		try {
 			while ((size = cache.values().size()) == 0) {
@@ -86,7 +87,7 @@ abstract class AbstractThriftClient implements ThriftClient, InvocationHandler {
 		Object target = cache.values().toArray(new ThriftClientHolder[cache.values().size()])[new Random().nextInt(size)].target;
 		try {
 			Object result=method.invoke(target, args);
-			LOGGER.debug("执行方法:{}，结果:{}",method,result);
+			LOGGER.debug("执行方法:{}，结果:{}，用时:{}",method,result,System.currentTimeMillis()-startTime);
 			return result;
 		} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
 			LOGGER.error("执行方法:{}，异常:{}",method,e);
