@@ -4,6 +4,7 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -69,6 +70,7 @@ abstract class AbstractThriftClient implements ThriftClient, InvocationHandler {
 
 	@Override
 	public Object invoke(Object proxy, Method method, Object[] args) {
+		LOGGER.debug("执行方法:{}，参数:{}",method,Arrays.toString(args));
 		int size = 0;
 		try {
 			while ((size = cache.values().size()) == 0) {
@@ -83,8 +85,11 @@ abstract class AbstractThriftClient implements ThriftClient, InvocationHandler {
 		
 		Object target = cache.values().toArray(new ThriftClientHolder[cache.values().size()])[new Random().nextInt(size)].target;
 		try {
-			return method.invoke(target, args);
+			Object result=method.invoke(target, args);
+			LOGGER.debug("执行方法:{}，结果:{}",method,result);
+			return result;
 		} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+			LOGGER.error("执行方法:{}，异常:{}",method,e);
 			throw new RuntimeException(e);
 		}
 	}
