@@ -9,6 +9,7 @@ import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 
 import sc.learn.common.pojo.DataTableParam;
+import sc.learn.common.pojo.DataTableParam.Column;
 import sc.learn.common.pojo.DataTableResult;
 import sc.learn.common.pojo.ResponseResult;
 import sc.learn.common.util.StringUtil;
@@ -16,6 +17,7 @@ import sc.learn.common.util.security.Coder;
 import sc.learn.manage.mapper.UserMapper;
 import sc.learn.manage.po.User;
 import sc.learn.manage.po.UserExample;
+import sc.learn.manage.po.UserExample.Criteria;
 import sc.learn.manage.util.Contants;
 import sc.learn.manage.vo.UserVo;
 
@@ -56,10 +58,21 @@ public class UserBiz {
 	}
 
 	public DataTableResult<User> list(DataTableParam param) {
-		PageHelper.offsetPage(param.getStart(), param.getLength());
 		UserExample example=new UserExample();
 		long recordsTotal=userMapper.countByExample(example);
-		//TODO example.createCriteria().
+		PageHelper.offsetPage(param.getStart(), param.getLength());
+		
+		if(param.getOrder()!=null){
+			example.setOrderByClause(param.getColumns()[param.getOrder().getColumn()].getName()+" "+param.getOrder().getDir());
+		}
+		
+		Criteria criteria=example.createCriteria();
+		for(Column column:param.getColumns()){
+//			criteria.andCreateTimeNotEqualTo(value)eqto
+		}
+		
+		Criteria criteria=example.createCriteria();
+		
 		List<User> data=userMapper.selectByExample(example);
 		PageInfo<User> pageInfo = new PageInfo<User>(data);
         long recordsFiltered = pageInfo.getTotal();

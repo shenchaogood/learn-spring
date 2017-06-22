@@ -41,8 +41,8 @@ public class DataTableParam {
 		private String name;
 		private boolean searchable;
 		private boolean orderable;
-		private Search search=new Search();
-		private Order order=new Order();
+		private Search search;
+		private Order order;
 		public String getData() {
 			return data;
 		}
