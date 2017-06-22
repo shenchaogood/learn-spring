@@ -44,4 +44,8 @@ public class UserBiz {
 			return ResponseResult.createFail(Contants.RECORD_EXISTS);
 		}
 	}
+
+	public void list() {
+		
+	}
 }

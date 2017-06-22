@@ -20,6 +20,7 @@ public class TestService {
 	public void testThriftClient() throws Exception {
 		TUserService.Iface service = ThriftUtil.getIfaceClient(TUserService.Iface.class, 5000);
 		service.save(new TUser().setEmail("6").setName("s").setPassword("g"));
+		service.save(new TUser().setEmail("6").setName("s").setPassword("g"));
 
 		TUserService.AsyncIface service2 = ThriftUtil.getAsyncIfaceClient(TUserService.AsyncIface.class, 5000);
 		System.out.println(service);
