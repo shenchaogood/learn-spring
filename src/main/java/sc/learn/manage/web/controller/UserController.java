@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import sc.learn.common.pojo.DataTableParam;
 import sc.learn.common.pojo.DataTableResult;
 import sc.learn.common.pojo.ResponseResult;
 import sc.learn.common.web.HttpSessionProvider;
@@ -34,9 +35,8 @@ public class UserController {
 	}
 	
 	@RequestMapping("list")
-	public DataTableResult<UserVo> list(){
-		userBiz.list();
-		return null;
+	public DataTableResult<User> list(DataTableParam param){
+		return userBiz.list(param);
 	}
 	
 	@RequestMapping("add")

@@ -1,8 +1,15 @@
 package sc.learn.manage.biz;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
+
+import sc.learn.common.pojo.DataTableParam;
+import sc.learn.common.pojo.DataTableResult;
 import sc.learn.common.pojo.ResponseResult;
 import sc.learn.common.util.StringUtil;
 import sc.learn.common.util.security.Coder;
@@ -45,7 +52,14 @@ public class UserBiz {
 		}
 	}
 
-	public void list() {
+	public DataTableResult<User> list(DataTableParam param) {
+		PageHelper.offsetPage(param.getStart(), param.getLength());
 		
+		long recordsTotal=userMapper.selectCount(null);
+		List<User> data=userMapper.select(param);
+		PageInfo<User> pageInfo = new PageInfo<User>(data);
+        long recordsFiltered = pageInfo.getTotal();
+        
+		return DataTableResult.createDataTableResult(param.getDraw(), recordsTotal, recordsFiltered, data);
 	}
 }

@@ -41,8 +41,8 @@ public class DataTableParam {
 		private String name;
 		private boolean searchable;
 		private boolean orderable;
-		private Search search;
-		private Order order;
+		private Search search=new Search();
+		private Order order=new Order();
 		public String getData() {
 			return data;
 		}
@@ -83,11 +83,11 @@ public class DataTableParam {
 	}
 	
 	/////
-	private long draw;
+	private int draw;
 	
-	private long start;
+	private int start;
 	
-	private long length;
+	private int length;
 	
 	private Column[] columns;
 	
@@ -95,27 +95,27 @@ public class DataTableParam {
 	
 	private Search search;
 
-	public long getDraw() {
+	public int getDraw() {
 		return draw;
 	}
 
-	public void setDraw(long draw) {
+	public void setDraw(int draw) {
 		this.draw = draw;
 	}
 
-	public long getStart() {
+	public int getStart() {
 		return start;
 	}
 
-	public void setStart(long start) {
+	public void setStart(int start) {
 		this.start = start;
 	}
 
-	public long getLength() {
+	public int getLength() {
 		return length;
 	}
 
-	public void setLength(long length) {
+	public void setLength(int length) {
 		this.length = length;
 	}
 

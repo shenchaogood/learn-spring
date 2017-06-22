@@ -4,24 +4,20 @@ import java.util.List;
 
 import org.apache.ibatis.annotations.Param;
 
+import sc.learn.common.mapper.BaseMapper;
 import sc.learn.manage.po.User;
 
-public interface UserMapper {
-	Integer insert(User user);
+public interface UserMapper extends BaseMapper<User>{
 	
 	void deleteById(Integer id);
 	
 	void deleteUserRoles(Integer userId);
 	
-	void update(User user);
-	
 	User selectById(Integer id);
 	
 	User selectByEmailPassword(@Param("email") String email,@Param("password") String password);
 	
-	void insertUserRoles(User user);
+	int insertUserRoles(User user);
 	
 	List<User> selectAll();
-
-	int selectCount();
 }

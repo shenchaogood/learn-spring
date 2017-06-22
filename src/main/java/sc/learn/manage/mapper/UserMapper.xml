@@ -138,7 +138,11 @@
 		<include refid="query_user"></include>
 	</select>
 	
-	<select id="selectCount" resultType="int">
+	<select id="selectCount" resultType="long">
 		select count(f_id) from t_user
+		<where>
+			
+		</where>
 	</select>
+	
 </mapper>
