@@ -15,6 +15,7 @@ import sc.learn.common.util.StringUtil;
 import sc.learn.common.util.security.Coder;
 import sc.learn.manage.mapper.UserMapper;
 import sc.learn.manage.po.User;
+import sc.learn.manage.po.UserExample;
 import sc.learn.manage.util.Contants;
 import sc.learn.manage.vo.UserVo;
 
@@ -25,7 +26,9 @@ public class UserBiz {
 	private UserMapper userMapper;
 	
 	public User login(UserVo user){
-		return userMapper.selectByEmailPassword(user.getEmail(), Coder.encryptMD5(user.getPassword()));
+		UserExample example=new UserExample();
+		example.createCriteria().andEmailEqualTo(user.getEmail()).andPasswordEqualTo(Coder.encryptMD5(user.getPassword()));
+		return userMapper.selectByExample(example).get(0);
 	}
 
 	public ResponseResult check(User user){
@@ -54,9 +57,10 @@ public class UserBiz {
 
 	public DataTableResult<User> list(DataTableParam param) {
 		PageHelper.offsetPage(param.getStart(), param.getLength());
-		
-		long recordsTotal=userMapper.selectCount(null);
-		List<User> data=userMapper.select(param);
+		UserExample example=new UserExample();
+		long recordsTotal=userMapper.countByExample(example);
+		//TODO example.createCriteria().
+		List<User> data=userMapper.selectByExample(example);
 		PageInfo<User> pageInfo = new PageInfo<User>(data);
         long recordsFiltered = pageInfo.getTotal();
         

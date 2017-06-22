@@ -1,174 +1,95 @@
 package sc.learn.manage.po;
 
-import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 
-public class Privilege implements Serializable{
-	private static final long serialVersionUID = 1L;
+public class Privilege {
+    private Integer fId;
 
-	//权限id
-	private Integer id;
-	
-	//权限名称
-	private String name;
-	
-	//权限url
-	private String url;
-	
-	//权限描述
-	private String description;
-	
-	//权限图标
-	private String icon;
-	
-	//当前节点是否是叶节点
-	private Boolean leaf;
-	
-	private Date createTime;
-	
-	private Date updateTime;
-	
-	private Privilege parent;
-	
-	//当前权限的子权限
-	private List<Privilege> children = new ArrayList<Privilege>();
-	//当前权限属于那个角色
-	private Set<Role> roles=new HashSet<Role>();
+    private String fName;
 
-	public Privilege(){}
-	
-	public Privilege(String name, String url, String description, String icon,
-			Boolean leaf, Privilege parent) {
-		super();
-		this.name = name;
-		this.url = url;
-		this.description = description;
-		this.icon = icon;
-		this.leaf = leaf;
-		this.parent = parent;
-	}
+    private String fDescription;
 
-	public Set<Role> getRoles() {
-		return roles;
-	}
+    private String fUrl;
 
-	public void setRoles(Set<Role> roles) {
-		this.roles = roles;
-	}
+    private String fIcon;
 
-	public Integer getId() {
-		return id;
-	}
+    private Boolean fLeaf;
 
-	public void setId(Integer id) {
-		this.id = id;
-	}
+    private Integer fParentId;
 
-	public String getName() {
-		return name;
-	}
+    private Date fCreateTime;
 
-	public void setName(String name) {
-		this.name = name;
-	}
+    private Date fUpdateTime;
 
-	public String getUrl() {
-		return url;
-	}
+    public Integer getfId() {
+        return fId;
+    }
 
-	public void setUrl(String url) {
-		this.url = url;
-	}
+    public void setfId(Integer fId) {
+        this.fId = fId;
+    }
 
-	public String getDescription() {
-		return description;
-	}
+    public String getfName() {
+        return fName;
+    }
 
-	public void setDescription(String description) {
-		this.description = description;
-	}
+    public void setfName(String fName) {
+        this.fName = fName == null ? null : fName.trim();
+    }
 
-	public String getIcon() {
-		return icon;
-	}
+    public String getfDescription() {
+        return fDescription;
+    }
 
-	public void setIcon(String icon) {
-		this.icon = icon;
-	}
+    public void setfDescription(String fDescription) {
+        this.fDescription = fDescription == null ? null : fDescription.trim();
+    }
 
-	public Boolean getLeaf() {
-		return leaf;
-	}
+    public String getfUrl() {
+        return fUrl;
+    }
 
-	public void setLeaf(Boolean leaf) {
-		this.leaf = leaf;
-	}
+    public void setfUrl(String fUrl) {
+        this.fUrl = fUrl == null ? null : fUrl.trim();
+    }
 
-	public Privilege getParent() {
-		return parent;
-	}
+    public String getfIcon() {
+        return fIcon;
+    }
 
-	public void setParent(Privilege parent) {
-		this.parent = parent;
-	}
+    public void setfIcon(String fIcon) {
+        this.fIcon = fIcon == null ? null : fIcon.trim();
+    }
 
-	public List<Privilege> getChildren() {
-		return children;
-	}
+    public Boolean getfLeaf() {
+        return fLeaf;
+    }
 
-	public void setChildren(List<Privilege> children) {
-		this.children = children;
-	}
+    public void setfLeaf(Boolean fLeaf) {
+        this.fLeaf = fLeaf;
+    }
 
-	public Date getCreateTime() {
-		return createTime;
-	}
+    public Integer getfParentId() {
+        return fParentId;
+    }
 
-	public void setCreateTime(Date createTime) {
-		this.createTime = createTime;
-	}
+    public void setfParentId(Integer fParentId) {
+        this.fParentId = fParentId;
+    }
 
-	public Date getUpdateTime() {
-		return updateTime;
-	}
+    public Date getfCreateTime() {
+        return fCreateTime;
+    }
 
-	public void setUpdateTime(Date updateTime) {
-		this.updateTime = updateTime;
-	}
+    public void setfCreateTime(Date fCreateTime) {
+        this.fCreateTime = fCreateTime;
+    }
 
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((id == null) ? 0 : id.hashCode());
-		return result;
-	}
+    public Date getfUpdateTime() {
+        return fUpdateTime;
+    }
 
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		Privilege other = (Privilege) obj;
-		if (id == null) {
-			if (other.id != null)
-				return false;
-		} else if (!id.equals(other.id))
-			return false;
-		return true;
-	}
-
-	@Override
-	public String toString() {
-		return "Privilege [id=" + id + ", name=" + name + ", url=" + url + ", description=" + description + ", icon=" + icon + ", leaf=" + leaf
-				+ ", createTime=" + createTime + ", updateTime=" + updateTime + ", parent=" + parent + ", children=" + children + ", roles=" + roles + "]";
-	}
-	
+    public void setfUpdateTime(Date fUpdateTime) {
+        this.fUpdateTime = fUpdateTime;
+    }
 }

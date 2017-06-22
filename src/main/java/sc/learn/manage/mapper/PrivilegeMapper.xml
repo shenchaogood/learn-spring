@@ -1,116 +1,1089 @@
-<?xml version="1.0" encoding="UTF-8" ?>
-<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
-	"http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
-<mapper namespace="sc.learn.manage.mapper.PrivilegeMapper" >
-
-	<sql id="privilegeColumnSql">
-		f_id id,
-		f_description description,
-		f_url url,
-		f_icon icon,
-		f_leaf leaf,
-		f_create_time create_time,
-		f_update_time update_time
-	</sql>
-
-	<resultMap type="privilege" id="menuResultMap">
-		<id column="f_id" property="id"/>
-		<result column="f_name" property="name"/>
-		<result column="f_description" property="description"/>
-		<result column="f_url" property="url"/>
-		<result column="f_icon" property="icon"/>
-		<result column="f_leaf" property="leaf"/>
-		<result column="f_create_time" property="createTime"/>
-		<result column="f_update_time" property="updateTime"/>
-		<collection property="children" ofType="privilege">
-			<id column="c_id" property="id"/>
-			<result column="c_name" property="name"/>
-			<result column="c_description" property="description"/>
-			<result column="c_url" property="url"/>
-			<result column="c_icon" property="icon"/>
-			<result column="c_leaf" property="leaf"/>
-			<result column="c_create_time" property="createTime"/>
-			<result column="c_update_time" property="updateTime"/>
-		</collection>
-	</resultMap>
-
-	<insert id="insert" parameterType="privilege">
-		<selectKey keyProperty="id" order="AFTER" resultType="java.lang.Integer">
-			select last_insert_id()
-		</selectKey>
-		insert into t_privilege(
-			f_name,
-			f_description,
-			f_url,
-			f_icon,
-			f_leaf,
-			f_parent_id) 
-		values(
-			#{name},
-			#{description},
-			#{url},
-			#{icon},
-			#{leaf},
-			#{parent.id}
-		)
-	</insert>
-
-	<select id="selectById" parameterType="int" resultType="privilege">
-		select * from t_privilege where f_id=#{value}
-	</select>
-	
-	<select id="selectAll" resultType="privilege">
-		select * from t_privilege
-	</select>
-	
-	<select id="selectMenuPrivileges" resultMap="menuResultMap">
-		select 
-			parent.f_id f_id,
-			parent.f_name f_name,
-			parent.f_description f_description,
-			parent.f_url f_url,
-			parent.f_icon f_icon,
-			parent.f_leaf f_leaf,
-			parent.f_create_time f_create_time,
-			parent.f_update_time f_update_time,
-			child.f_id c_id,
-			child.f_name c_name,
-			child.f_description c_description,
-			child.f_url c_url,
-			child.f_icon c_icon,
-			child.f_leaf c_leaf,
-			child.f_create_time c_create_time,
-			child.f_update_time c_update_time
-		from 
-			(select * from t_privilege where f_parent_id = 0) parent
-		left join
-			t_privilege child
-		on
-			(parent.f_id=child.f_parent_id and !parent.f_leaf)
-		order by 
-			f_id asc
-	</select>
-	
-	<select id="selectByParentId" parameterType="int" resultType="privilege">
-		select <include refid="privilegeColumnSql"/> from t_privilege where f_parent_id
-		<if test="value==null">is null</if>
-		<if test="value!=null">=#{value}</if>
-	</select>
-	
-	<select id="selectByIds" parameterType="int" resultType="privilege">
-		select <include refid="privilegeColumnSql"/> from t_privilege 
-		where id in
-		<foreach collection="array" item="item" open="(" separator="," close=")">
-			#{item}
-		</foreach>
-	</select>
-	
-	<select id="selectByUrl" parameterType="string" resultType="privilege">
-		select <include refid="privilegeColumnSql"/> from t_privilege where f_url=#{url}
-	</select>
-	
-	<select id="selectAllUrl" resultType="string">
-		select f_url from t_privilege
-	</select>
-	
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="sc.learn.manage.mapper.PrivilegeMapper">
+  <resultMap id="BaseResultMap" type="sc.learn.manage.po.Privilege">
+    <result column="f_id" jdbcType="INTEGER" property="fId" />
+    <result column="f_name" jdbcType="VARCHAR" property="fName" />
+    <result column="f_description" jdbcType="VARCHAR" property="fDescription" />
+    <result column="f_url" jdbcType="VARCHAR" property="fUrl" />
+    <result column="f_icon" jdbcType="VARCHAR" property="fIcon" />
+    <result column="f_leaf" jdbcType="BIT" property="fLeaf" />
+    <result column="f_parent_id" jdbcType="INTEGER" property="fParentId" />
+    <result column="f_create_time" jdbcType="TIMESTAMP" property="fCreateTime" />
+    <result column="f_update_time" jdbcType="TIMESTAMP" property="fUpdateTime" />
+  </resultMap>
+  <sql id="Example_Where_Clause">
+    <where>
+      <foreach collection="oredCriteria" item="criteria" separator="or">
+        <if test="criteria.valid">
+          <trim prefix="(" prefixOverrides="and" suffix=")">
+            <foreach collection="criteria.criteria" item="criterion">
+              <choose>
+                <when test="criterion.noValue">
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue">
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue">
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue">
+                  and ${criterion.condition}
+                  <foreach close=")" collection="criterion.value" item="listItem" open="(" separator=",">
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Update_By_Example_Where_Clause">
+    <where>
+      <foreach collection="example.oredCriteria" item="criteria" separator="or">
+        <if test="criteria.valid">
+          <trim prefix="(" prefixOverrides="and" suffix=")">
+            <foreach collection="criteria.criteria" item="criterion">
+              <choose>
+                <when test="criterion.noValue">
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue">
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue">
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue">
+                  and ${criterion.condition}
+                  <foreach close=")" collection="criterion.value" item="listItem" open="(" separator=",">
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Base_Column_List">
+    f_id, f_name, f_description, f_url, f_icon, f_leaf, f_parent_id, f_create_time, f_update_time
+  </sql>
+  <select id="selectByExample" parameterType="sc.learn.manage.po.PrivilegeExample" resultMap="BaseResultMap">
+    select
+    <if test="distinct">
+      distinct
+    </if>
+    <include refid="Base_Column_List" />
+    from t_privilege
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null">
+      order by ${orderByClause}
+    </if>
+  </select>
+  <delete id="deleteByExample" parameterType="sc.learn.manage.po.PrivilegeExample">
+    delete from t_privilege
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+  </delete>
+  <insert id="insert" parameterType="sc.learn.manage.po.Privilege">
+    insert into t_privilege (f_id, f_name, f_description, 
+      f_url, f_icon, f_leaf, f_parent_id, 
+      f_create_time, f_update_time)
+    values (#{fId,jdbcType=INTEGER}, #{fName,jdbcType=VARCHAR}, #{fDescription,jdbcType=VARCHAR}, 
+      #{fUrl,jdbcType=VARCHAR}, #{fIcon,jdbcType=VARCHAR}, #{fLeaf,jdbcType=BIT}, #{fParentId,jdbcType=INTEGER}, 
+      #{fCreateTime,jdbcType=TIMESTAMP}, #{fUpdateTime,jdbcType=TIMESTAMP})
+  </insert>
+  <insert id="insertSelective" parameterType="sc.learn.manage.po.Privilege">
+    insert into t_privilege
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="fId != null">
+        f_id,
+      </if>
+      <if test="fName != null">
+        f_name,
+      </if>
+      <if test="fDescription != null">
+        f_description,
+      </if>
+      <if test="fUrl != null">
+        f_url,
+      </if>
+      <if test="fIcon != null">
+        f_icon,
+      </if>
+      <if test="fLeaf != null">
+        f_leaf,
+      </if>
+      <if test="fParentId != null">
+        f_parent_id,
+      </if>
+      <if test="fCreateTime != null">
+        f_create_time,
+      </if>
+      <if test="fUpdateTime != null">
+        f_update_time,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="fId != null">
+        #{fId,jdbcType=INTEGER},
+      </if>
+      <if test="fName != null">
+        #{fName,jdbcType=VARCHAR},
+      </if>
+      <if test="fDescription != null">
+        #{fDescription,jdbcType=VARCHAR},
+      </if>
+      <if test="fUrl != null">
+        #{fUrl,jdbcType=VARCHAR},
+      </if>
+      <if test="fIcon != null">
+        #{fIcon,jdbcType=VARCHAR},
+      </if>
+      <if test="fLeaf != null">
+        #{fLeaf,jdbcType=BIT},
+      </if>
+      <if test="fParentId != null">
+        #{fParentId,jdbcType=INTEGER},
+      </if>
+      <if test="fCreateTime != null">
+        #{fCreateTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="fUpdateTime != null">
+        #{fUpdateTime,jdbcType=TIMESTAMP},
+      </if>
+    </trim>
+  </insert>
+  <select id="countByExample" parameterType="sc.learn.manage.po.PrivilegeExample" resultType="java.lang.Long">
+    select count(*) from t_privilege
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+  </select>
+  <update id="updateByExampleSelective" parameterType="map">
+    update t_privilege
+    <set>
+      <if test="record.fId != null">
+        f_id = #{record.fId,jdbcType=INTEGER},
+      </if>
+      <if test="record.fName != null">
+        f_name = #{record.fName,jdbcType=VARCHAR},
+      </if>
+      <if test="record.fDescription != null">
+        f_description = #{record.fDescription,jdbcType=VARCHAR},
+      </if>
+      <if test="record.fUrl != null">
+        f_url = #{record.fUrl,jdbcType=VARCHAR},
+      </if>
+      <if test="record.fIcon != null">
+        f_icon = #{record.fIcon,jdbcType=VARCHAR},
+      </if>
+      <if test="record.fLeaf != null">
+        f_leaf = #{record.fLeaf,jdbcType=BIT},
+      </if>
+      <if test="record.fParentId != null">
+        f_parent_id = #{record.fParentId,jdbcType=INTEGER},
+      </if>
+      <if test="record.fCreateTime != null">
+        f_create_time = #{record.fCreateTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="record.fUpdateTime != null">
+        f_update_time = #{record.fUpdateTime,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    <if test="_parameter != null">
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByExample" parameterType="map">
+    update t_privilege
+    set f_id = #{record.fId,jdbcType=INTEGER},
+      f_name = #{record.fName,jdbcType=VARCHAR},
+      f_description = #{record.fDescription,jdbcType=VARCHAR},
+      f_url = #{record.fUrl,jdbcType=VARCHAR},
+      f_icon = #{record.fIcon,jdbcType=VARCHAR},
+      f_leaf = #{record.fLeaf,jdbcType=BIT},
+      f_parent_id = #{record.fParentId,jdbcType=INTEGER},
+      f_create_time = #{record.fCreateTime,jdbcType=TIMESTAMP},
+      f_update_time = #{record.fUpdateTime,jdbcType=TIMESTAMP}
+    <if test="_parameter != null">
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <resultMap id="BaseResultMap" type="sc.learn.manage.po.Privilege">
+    <result column="f_id" jdbcType="INTEGER" property="fId" />
+    <result column="f_name" jdbcType="VARCHAR" property="fName" />
+    <result column="f_description" jdbcType="VARCHAR" property="fDescription" />
+    <result column="f_url" jdbcType="VARCHAR" property="fUrl" />
+    <result column="f_icon" jdbcType="VARCHAR" property="fIcon" />
+    <result column="f_leaf" jdbcType="BIT" property="fLeaf" />
+    <result column="f_parent_id" jdbcType="INTEGER" property="fParentId" />
+    <result column="f_create_time" jdbcType="TIMESTAMP" property="fCreateTime" />
+    <result column="f_update_time" jdbcType="TIMESTAMP" property="fUpdateTime" />
+  </resultMap>
+  <sql id="Example_Where_Clause">
+    <where>
+      <foreach collection="oredCriteria" item="criteria" separator="or">
+        <if test="criteria.valid">
+          <trim prefix="(" prefixOverrides="and" suffix=")">
+            <foreach collection="criteria.criteria" item="criterion">
+              <choose>
+                <when test="criterion.noValue">
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue">
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue">
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue">
+                  and ${criterion.condition}
+                  <foreach close=")" collection="criterion.value" item="listItem" open="(" separator=",">
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Update_By_Example_Where_Clause">
+    <where>
+      <foreach collection="example.oredCriteria" item="criteria" separator="or">
+        <if test="criteria.valid">
+          <trim prefix="(" prefixOverrides="and" suffix=")">
+            <foreach collection="criteria.criteria" item="criterion">
+              <choose>
+                <when test="criterion.noValue">
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue">
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue">
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue">
+                  and ${criterion.condition}
+                  <foreach close=")" collection="criterion.value" item="listItem" open="(" separator=",">
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Base_Column_List">
+    f_id, f_name, f_description, f_url, f_icon, f_leaf, f_parent_id, f_create_time, f_update_time
+  </sql>
+  <select id="selectByExample" parameterType="sc.learn.manage.po.PrivilegeExample" resultMap="BaseResultMap">
+    select
+    <if test="distinct">
+      distinct
+    </if>
+    <include refid="Base_Column_List" />
+    from t_privilege
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null">
+      order by ${orderByClause}
+    </if>
+  </select>
+  <delete id="deleteByExample" parameterType="sc.learn.manage.po.PrivilegeExample">
+    delete from t_privilege
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+  </delete>
+  <insert id="insert" parameterType="sc.learn.manage.po.Privilege">
+    insert into t_privilege (f_id, f_name, f_description, 
+      f_url, f_icon, f_leaf, f_parent_id, 
+      f_create_time, f_update_time)
+    values (#{fId,jdbcType=INTEGER}, #{fName,jdbcType=VARCHAR}, #{fDescription,jdbcType=VARCHAR}, 
+      #{fUrl,jdbcType=VARCHAR}, #{fIcon,jdbcType=VARCHAR}, #{fLeaf,jdbcType=BIT}, #{fParentId,jdbcType=INTEGER}, 
+      #{fCreateTime,jdbcType=TIMESTAMP}, #{fUpdateTime,jdbcType=TIMESTAMP})
+  </insert>
+  <insert id="insertSelective" parameterType="sc.learn.manage.po.Privilege">
+    insert into t_privilege
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="fId != null">
+        f_id,
+      </if>
+      <if test="fName != null">
+        f_name,
+      </if>
+      <if test="fDescription != null">
+        f_description,
+      </if>
+      <if test="fUrl != null">
+        f_url,
+      </if>
+      <if test="fIcon != null">
+        f_icon,
+      </if>
+      <if test="fLeaf != null">
+        f_leaf,
+      </if>
+      <if test="fParentId != null">
+        f_parent_id,
+      </if>
+      <if test="fCreateTime != null">
+        f_create_time,
+      </if>
+      <if test="fUpdateTime != null">
+        f_update_time,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="fId != null">
+        #{fId,jdbcType=INTEGER},
+      </if>
+      <if test="fName != null">
+        #{fName,jdbcType=VARCHAR},
+      </if>
+      <if test="fDescription != null">
+        #{fDescription,jdbcType=VARCHAR},
+      </if>
+      <if test="fUrl != null">
+        #{fUrl,jdbcType=VARCHAR},
+      </if>
+      <if test="fIcon != null">
+        #{fIcon,jdbcType=VARCHAR},
+      </if>
+      <if test="fLeaf != null">
+        #{fLeaf,jdbcType=BIT},
+      </if>
+      <if test="fParentId != null">
+        #{fParentId,jdbcType=INTEGER},
+      </if>
+      <if test="fCreateTime != null">
+        #{fCreateTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="fUpdateTime != null">
+        #{fUpdateTime,jdbcType=TIMESTAMP},
+      </if>
+    </trim>
+  </insert>
+  <select id="countByExample" parameterType="sc.learn.manage.po.PrivilegeExample" resultType="java.lang.Long">
+    select count(*) from t_privilege
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+  </select>
+  <update id="updateByExampleSelective" parameterType="map">
+    update t_privilege
+    <set>
+      <if test="record.fId != null">
+        f_id = #{record.fId,jdbcType=INTEGER},
+      </if>
+      <if test="record.fName != null">
+        f_name = #{record.fName,jdbcType=VARCHAR},
+      </if>
+      <if test="record.fDescription != null">
+        f_description = #{record.fDescription,jdbcType=VARCHAR},
+      </if>
+      <if test="record.fUrl != null">
+        f_url = #{record.fUrl,jdbcType=VARCHAR},
+      </if>
+      <if test="record.fIcon != null">
+        f_icon = #{record.fIcon,jdbcType=VARCHAR},
+      </if>
+      <if test="record.fLeaf != null">
+        f_leaf = #{record.fLeaf,jdbcType=BIT},
+      </if>
+      <if test="record.fParentId != null">
+        f_parent_id = #{record.fParentId,jdbcType=INTEGER},
+      </if>
+      <if test="record.fCreateTime != null">
+        f_create_time = #{record.fCreateTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="record.fUpdateTime != null">
+        f_update_time = #{record.fUpdateTime,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    <if test="_parameter != null">
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByExample" parameterType="map">
+    update t_privilege
+    set f_id = #{record.fId,jdbcType=INTEGER},
+      f_name = #{record.fName,jdbcType=VARCHAR},
+      f_description = #{record.fDescription,jdbcType=VARCHAR},
+      f_url = #{record.fUrl,jdbcType=VARCHAR},
+      f_icon = #{record.fIcon,jdbcType=VARCHAR},
+      f_leaf = #{record.fLeaf,jdbcType=BIT},
+      f_parent_id = #{record.fParentId,jdbcType=INTEGER},
+      f_create_time = #{record.fCreateTime,jdbcType=TIMESTAMP},
+      f_update_time = #{record.fUpdateTime,jdbcType=TIMESTAMP}
+    <if test="_parameter != null">
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <resultMap id="BaseResultMap" type="sc.learn.manage.po.Privilege">
+    <result column="f_id" jdbcType="INTEGER" property="fId" />
+    <result column="f_name" jdbcType="VARCHAR" property="fName" />
+    <result column="f_description" jdbcType="VARCHAR" property="fDescription" />
+    <result column="f_url" jdbcType="VARCHAR" property="fUrl" />
+    <result column="f_icon" jdbcType="VARCHAR" property="fIcon" />
+    <result column="f_leaf" jdbcType="BIT" property="fLeaf" />
+    <result column="f_parent_id" jdbcType="INTEGER" property="fParentId" />
+    <result column="f_create_time" jdbcType="TIMESTAMP" property="fCreateTime" />
+    <result column="f_update_time" jdbcType="TIMESTAMP" property="fUpdateTime" />
+  </resultMap>
+  <sql id="Example_Where_Clause">
+    <where>
+      <foreach collection="oredCriteria" item="criteria" separator="or">
+        <if test="criteria.valid">
+          <trim prefix="(" prefixOverrides="and" suffix=")">
+            <foreach collection="criteria.criteria" item="criterion">
+              <choose>
+                <when test="criterion.noValue">
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue">
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue">
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue">
+                  and ${criterion.condition}
+                  <foreach close=")" collection="criterion.value" item="listItem" open="(" separator=",">
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Update_By_Example_Where_Clause">
+    <where>
+      <foreach collection="example.oredCriteria" item="criteria" separator="or">
+        <if test="criteria.valid">
+          <trim prefix="(" prefixOverrides="and" suffix=")">
+            <foreach collection="criteria.criteria" item="criterion">
+              <choose>
+                <when test="criterion.noValue">
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue">
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue">
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue">
+                  and ${criterion.condition}
+                  <foreach close=")" collection="criterion.value" item="listItem" open="(" separator=",">
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Base_Column_List">
+    f_id, f_name, f_description, f_url, f_icon, f_leaf, f_parent_id, f_create_time, f_update_time
+  </sql>
+  <select id="selectByExample" parameterType="sc.learn.manage.po.PrivilegeExample" resultMap="BaseResultMap">
+    select
+    <if test="distinct">
+      distinct
+    </if>
+    <include refid="Base_Column_List" />
+    from t_privilege
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null">
+      order by ${orderByClause}
+    </if>
+  </select>
+  <delete id="deleteByExample" parameterType="sc.learn.manage.po.PrivilegeExample">
+    delete from t_privilege
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+  </delete>
+  <insert id="insert" parameterType="sc.learn.manage.po.Privilege">
+    insert into t_privilege (f_id, f_name, f_description, 
+      f_url, f_icon, f_leaf, f_parent_id, 
+      f_create_time, f_update_time)
+    values (#{fId,jdbcType=INTEGER}, #{fName,jdbcType=VARCHAR}, #{fDescription,jdbcType=VARCHAR}, 
+      #{fUrl,jdbcType=VARCHAR}, #{fIcon,jdbcType=VARCHAR}, #{fLeaf,jdbcType=BIT}, #{fParentId,jdbcType=INTEGER}, 
+      #{fCreateTime,jdbcType=TIMESTAMP}, #{fUpdateTime,jdbcType=TIMESTAMP})
+  </insert>
+  <insert id="insertSelective" parameterType="sc.learn.manage.po.Privilege">
+    insert into t_privilege
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="fId != null">
+        f_id,
+      </if>
+      <if test="fName != null">
+        f_name,
+      </if>
+      <if test="fDescription != null">
+        f_description,
+      </if>
+      <if test="fUrl != null">
+        f_url,
+      </if>
+      <if test="fIcon != null">
+        f_icon,
+      </if>
+      <if test="fLeaf != null">
+        f_leaf,
+      </if>
+      <if test="fParentId != null">
+        f_parent_id,
+      </if>
+      <if test="fCreateTime != null">
+        f_create_time,
+      </if>
+      <if test="fUpdateTime != null">
+        f_update_time,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="fId != null">
+        #{fId,jdbcType=INTEGER},
+      </if>
+      <if test="fName != null">
+        #{fName,jdbcType=VARCHAR},
+      </if>
+      <if test="fDescription != null">
+        #{fDescription,jdbcType=VARCHAR},
+      </if>
+      <if test="fUrl != null">
+        #{fUrl,jdbcType=VARCHAR},
+      </if>
+      <if test="fIcon != null">
+        #{fIcon,jdbcType=VARCHAR},
+      </if>
+      <if test="fLeaf != null">
+        #{fLeaf,jdbcType=BIT},
+      </if>
+      <if test="fParentId != null">
+        #{fParentId,jdbcType=INTEGER},
+      </if>
+      <if test="fCreateTime != null">
+        #{fCreateTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="fUpdateTime != null">
+        #{fUpdateTime,jdbcType=TIMESTAMP},
+      </if>
+    </trim>
+  </insert>
+  <select id="countByExample" parameterType="sc.learn.manage.po.PrivilegeExample" resultType="java.lang.Long">
+    select count(*) from t_privilege
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+  </select>
+  <update id="updateByExampleSelective" parameterType="map">
+    update t_privilege
+    <set>
+      <if test="record.fId != null">
+        f_id = #{record.fId,jdbcType=INTEGER},
+      </if>
+      <if test="record.fName != null">
+        f_name = #{record.fName,jdbcType=VARCHAR},
+      </if>
+      <if test="record.fDescription != null">
+        f_description = #{record.fDescription,jdbcType=VARCHAR},
+      </if>
+      <if test="record.fUrl != null">
+        f_url = #{record.fUrl,jdbcType=VARCHAR},
+      </if>
+      <if test="record.fIcon != null">
+        f_icon = #{record.fIcon,jdbcType=VARCHAR},
+      </if>
+      <if test="record.fLeaf != null">
+        f_leaf = #{record.fLeaf,jdbcType=BIT},
+      </if>
+      <if test="record.fParentId != null">
+        f_parent_id = #{record.fParentId,jdbcType=INTEGER},
+      </if>
+      <if test="record.fCreateTime != null">
+        f_create_time = #{record.fCreateTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="record.fUpdateTime != null">
+        f_update_time = #{record.fUpdateTime,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    <if test="_parameter != null">
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByExample" parameterType="map">
+    update t_privilege
+    set f_id = #{record.fId,jdbcType=INTEGER},
+      f_name = #{record.fName,jdbcType=VARCHAR},
+      f_description = #{record.fDescription,jdbcType=VARCHAR},
+      f_url = #{record.fUrl,jdbcType=VARCHAR},
+      f_icon = #{record.fIcon,jdbcType=VARCHAR},
+      f_leaf = #{record.fLeaf,jdbcType=BIT},
+      f_parent_id = #{record.fParentId,jdbcType=INTEGER},
+      f_create_time = #{record.fCreateTime,jdbcType=TIMESTAMP},
+      f_update_time = #{record.fUpdateTime,jdbcType=TIMESTAMP}
+    <if test="_parameter != null">
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <resultMap id="BaseResultMap" type="sc.learn.manage.po.Privilege">
+    <result column="f_id" jdbcType="INTEGER" property="fId" />
+    <result column="f_name" jdbcType="VARCHAR" property="fName" />
+    <result column="f_description" jdbcType="VARCHAR" property="fDescription" />
+    <result column="f_url" jdbcType="VARCHAR" property="fUrl" />
+    <result column="f_icon" jdbcType="VARCHAR" property="fIcon" />
+    <result column="f_leaf" jdbcType="BIT" property="fLeaf" />
+    <result column="f_parent_id" jdbcType="INTEGER" property="fParentId" />
+    <result column="f_create_time" jdbcType="TIMESTAMP" property="fCreateTime" />
+    <result column="f_update_time" jdbcType="TIMESTAMP" property="fUpdateTime" />
+  </resultMap>
+  <sql id="Example_Where_Clause">
+    <where>
+      <foreach collection="oredCriteria" item="criteria" separator="or">
+        <if test="criteria.valid">
+          <trim prefix="(" prefixOverrides="and" suffix=")">
+            <foreach collection="criteria.criteria" item="criterion">
+              <choose>
+                <when test="criterion.noValue">
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue">
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue">
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue">
+                  and ${criterion.condition}
+                  <foreach close=")" collection="criterion.value" item="listItem" open="(" separator=",">
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Update_By_Example_Where_Clause">
+    <where>
+      <foreach collection="example.oredCriteria" item="criteria" separator="or">
+        <if test="criteria.valid">
+          <trim prefix="(" prefixOverrides="and" suffix=")">
+            <foreach collection="criteria.criteria" item="criterion">
+              <choose>
+                <when test="criterion.noValue">
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue">
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue">
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue">
+                  and ${criterion.condition}
+                  <foreach close=")" collection="criterion.value" item="listItem" open="(" separator=",">
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Base_Column_List">
+    f_id, f_name, f_description, f_url, f_icon, f_leaf, f_parent_id, f_create_time, f_update_time
+  </sql>
+  <select id="selectByExample" parameterType="sc.learn.manage.po.PrivilegeExample" resultMap="BaseResultMap">
+    select
+    <if test="distinct">
+      distinct
+    </if>
+    <include refid="Base_Column_List" />
+    from t_privilege
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null">
+      order by ${orderByClause}
+    </if>
+  </select>
+  <delete id="deleteByExample" parameterType="sc.learn.manage.po.PrivilegeExample">
+    delete from t_privilege
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+  </delete>
+  <insert id="insert" parameterType="sc.learn.manage.po.Privilege">
+    insert into t_privilege (f_id, f_name, f_description, 
+      f_url, f_icon, f_leaf, f_parent_id, 
+      f_create_time, f_update_time)
+    values (#{fId,jdbcType=INTEGER}, #{fName,jdbcType=VARCHAR}, #{fDescription,jdbcType=VARCHAR}, 
+      #{fUrl,jdbcType=VARCHAR}, #{fIcon,jdbcType=VARCHAR}, #{fLeaf,jdbcType=BIT}, #{fParentId,jdbcType=INTEGER}, 
+      #{fCreateTime,jdbcType=TIMESTAMP}, #{fUpdateTime,jdbcType=TIMESTAMP})
+  </insert>
+  <insert id="insertSelective" parameterType="sc.learn.manage.po.Privilege">
+    insert into t_privilege
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="fId != null">
+        f_id,
+      </if>
+      <if test="fName != null">
+        f_name,
+      </if>
+      <if test="fDescription != null">
+        f_description,
+      </if>
+      <if test="fUrl != null">
+        f_url,
+      </if>
+      <if test="fIcon != null">
+        f_icon,
+      </if>
+      <if test="fLeaf != null">
+        f_leaf,
+      </if>
+      <if test="fParentId != null">
+        f_parent_id,
+      </if>
+      <if test="fCreateTime != null">
+        f_create_time,
+      </if>
+      <if test="fUpdateTime != null">
+        f_update_time,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="fId != null">
+        #{fId,jdbcType=INTEGER},
+      </if>
+      <if test="fName != null">
+        #{fName,jdbcType=VARCHAR},
+      </if>
+      <if test="fDescription != null">
+        #{fDescription,jdbcType=VARCHAR},
+      </if>
+      <if test="fUrl != null">
+        #{fUrl,jdbcType=VARCHAR},
+      </if>
+      <if test="fIcon != null">
+        #{fIcon,jdbcType=VARCHAR},
+      </if>
+      <if test="fLeaf != null">
+        #{fLeaf,jdbcType=BIT},
+      </if>
+      <if test="fParentId != null">
+        #{fParentId,jdbcType=INTEGER},
+      </if>
+      <if test="fCreateTime != null">
+        #{fCreateTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="fUpdateTime != null">
+        #{fUpdateTime,jdbcType=TIMESTAMP},
+      </if>
+    </trim>
+  </insert>
+  <select id="countByExample" parameterType="sc.learn.manage.po.PrivilegeExample" resultType="java.lang.Long">
+    select count(*) from t_privilege
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+  </select>
+  <update id="updateByExampleSelective" parameterType="map">
+    update t_privilege
+    <set>
+      <if test="record.fId != null">
+        f_id = #{record.fId,jdbcType=INTEGER},
+      </if>
+      <if test="record.fName != null">
+        f_name = #{record.fName,jdbcType=VARCHAR},
+      </if>
+      <if test="record.fDescription != null">
+        f_description = #{record.fDescription,jdbcType=VARCHAR},
+      </if>
+      <if test="record.fUrl != null">
+        f_url = #{record.fUrl,jdbcType=VARCHAR},
+      </if>
+      <if test="record.fIcon != null">
+        f_icon = #{record.fIcon,jdbcType=VARCHAR},
+      </if>
+      <if test="record.fLeaf != null">
+        f_leaf = #{record.fLeaf,jdbcType=BIT},
+      </if>
+      <if test="record.fParentId != null">
+        f_parent_id = #{record.fParentId,jdbcType=INTEGER},
+      </if>
+      <if test="record.fCreateTime != null">
+        f_create_time = #{record.fCreateTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="record.fUpdateTime != null">
+        f_update_time = #{record.fUpdateTime,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    <if test="_parameter != null">
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByExample" parameterType="map">
+    update t_privilege
+    set f_id = #{record.fId,jdbcType=INTEGER},
+      f_name = #{record.fName,jdbcType=VARCHAR},
+      f_description = #{record.fDescription,jdbcType=VARCHAR},
+      f_url = #{record.fUrl,jdbcType=VARCHAR},
+      f_icon = #{record.fIcon,jdbcType=VARCHAR},
+      f_leaf = #{record.fLeaf,jdbcType=BIT},
+      f_parent_id = #{record.fParentId,jdbcType=INTEGER},
+      f_create_time = #{record.fCreateTime,jdbcType=TIMESTAMP},
+      f_update_time = #{record.fUpdateTime,jdbcType=TIMESTAMP}
+    <if test="_parameter != null">
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <resultMap id="BaseResultMap" type="sc.learn.manage.po.Privilege">
+    <result column="f_id" jdbcType="INTEGER" property="fId" />
+    <result column="f_name" jdbcType="VARCHAR" property="fName" />
+    <result column="f_description" jdbcType="VARCHAR" property="fDescription" />
+    <result column="f_url" jdbcType="VARCHAR" property="fUrl" />
+    <result column="f_icon" jdbcType="VARCHAR" property="fIcon" />
+    <result column="f_leaf" jdbcType="BIT" property="fLeaf" />
+    <result column="f_parent_id" jdbcType="INTEGER" property="fParentId" />
+    <result column="f_create_time" jdbcType="TIMESTAMP" property="fCreateTime" />
+    <result column="f_update_time" jdbcType="TIMESTAMP" property="fUpdateTime" />
+  </resultMap>
+  <sql id="Example_Where_Clause">
+    <where>
+      <foreach collection="oredCriteria" item="criteria" separator="or">
+        <if test="criteria.valid">
+          <trim prefix="(" prefixOverrides="and" suffix=")">
+            <foreach collection="criteria.criteria" item="criterion">
+              <choose>
+                <when test="criterion.noValue">
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue">
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue">
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue">
+                  and ${criterion.condition}
+                  <foreach close=")" collection="criterion.value" item="listItem" open="(" separator=",">
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Update_By_Example_Where_Clause">
+    <where>
+      <foreach collection="example.oredCriteria" item="criteria" separator="or">
+        <if test="criteria.valid">
+          <trim prefix="(" prefixOverrides="and" suffix=")">
+            <foreach collection="criteria.criteria" item="criterion">
+              <choose>
+                <when test="criterion.noValue">
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue">
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue">
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue">
+                  and ${criterion.condition}
+                  <foreach close=")" collection="criterion.value" item="listItem" open="(" separator=",">
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Base_Column_List">
+    f_id, f_name, f_description, f_url, f_icon, f_leaf, f_parent_id, f_create_time, f_update_time
+  </sql>
+  <select id="selectByExample" parameterType="sc.learn.manage.po.PrivilegeExample" resultMap="BaseResultMap">
+    select
+    <if test="distinct">
+      distinct
+    </if>
+    <include refid="Base_Column_List" />
+    from t_privilege
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null">
+      order by ${orderByClause}
+    </if>
+  </select>
+  <delete id="deleteByExample" parameterType="sc.learn.manage.po.PrivilegeExample">
+    delete from t_privilege
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+  </delete>
+  <insert id="insert" parameterType="sc.learn.manage.po.Privilege">
+    insert into t_privilege (f_id, f_name, f_description, 
+      f_url, f_icon, f_leaf, f_parent_id, 
+      f_create_time, f_update_time)
+    values (#{fId,jdbcType=INTEGER}, #{fName,jdbcType=VARCHAR}, #{fDescription,jdbcType=VARCHAR}, 
+      #{fUrl,jdbcType=VARCHAR}, #{fIcon,jdbcType=VARCHAR}, #{fLeaf,jdbcType=BIT}, #{fParentId,jdbcType=INTEGER}, 
+      #{fCreateTime,jdbcType=TIMESTAMP}, #{fUpdateTime,jdbcType=TIMESTAMP})
+  </insert>
+  <insert id="insertSelective" parameterType="sc.learn.manage.po.Privilege">
+    insert into t_privilege
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="fId != null">
+        f_id,
+      </if>
+      <if test="fName != null">
+        f_name,
+      </if>
+      <if test="fDescription != null">
+        f_description,
+      </if>
+      <if test="fUrl != null">
+        f_url,
+      </if>
+      <if test="fIcon != null">
+        f_icon,
+      </if>
+      <if test="fLeaf != null">
+        f_leaf,
+      </if>
+      <if test="fParentId != null">
+        f_parent_id,
+      </if>
+      <if test="fCreateTime != null">
+        f_create_time,
+      </if>
+      <if test="fUpdateTime != null">
+        f_update_time,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="fId != null">
+        #{fId,jdbcType=INTEGER},
+      </if>
+      <if test="fName != null">
+        #{fName,jdbcType=VARCHAR},
+      </if>
+      <if test="fDescription != null">
+        #{fDescription,jdbcType=VARCHAR},
+      </if>
+      <if test="fUrl != null">
+        #{fUrl,jdbcType=VARCHAR},
+      </if>
+      <if test="fIcon != null">
+        #{fIcon,jdbcType=VARCHAR},
+      </if>
+      <if test="fLeaf != null">
+        #{fLeaf,jdbcType=BIT},
+      </if>
+      <if test="fParentId != null">
+        #{fParentId,jdbcType=INTEGER},
+      </if>
+      <if test="fCreateTime != null">
+        #{fCreateTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="fUpdateTime != null">
+        #{fUpdateTime,jdbcType=TIMESTAMP},
+      </if>
+    </trim>
+  </insert>
+  <select id="countByExample" parameterType="sc.learn.manage.po.PrivilegeExample" resultType="java.lang.Long">
+    select count(*) from t_privilege
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+  </select>
+  <update id="updateByExampleSelective" parameterType="map">
+    update t_privilege
+    <set>
+      <if test="record.fId != null">
+        f_id = #{record.fId,jdbcType=INTEGER},
+      </if>
+      <if test="record.fName != null">
+        f_name = #{record.fName,jdbcType=VARCHAR},
+      </if>
+      <if test="record.fDescription != null">
+        f_description = #{record.fDescription,jdbcType=VARCHAR},
+      </if>
+      <if test="record.fUrl != null">
+        f_url = #{record.fUrl,jdbcType=VARCHAR},
+      </if>
+      <if test="record.fIcon != null">
+        f_icon = #{record.fIcon,jdbcType=VARCHAR},
+      </if>
+      <if test="record.fLeaf != null">
+        f_leaf = #{record.fLeaf,jdbcType=BIT},
+      </if>
+      <if test="record.fParentId != null">
+        f_parent_id = #{record.fParentId,jdbcType=INTEGER},
+      </if>
+      <if test="record.fCreateTime != null">
+        f_create_time = #{record.fCreateTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="record.fUpdateTime != null">
+        f_update_time = #{record.fUpdateTime,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    <if test="_parameter != null">
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByExample" parameterType="map">
+    update t_privilege
+    set f_id = #{record.fId,jdbcType=INTEGER},
+      f_name = #{record.fName,jdbcType=VARCHAR},
+      f_description = #{record.fDescription,jdbcType=VARCHAR},
+      f_url = #{record.fUrl,jdbcType=VARCHAR},
+      f_icon = #{record.fIcon,jdbcType=VARCHAR},
+      f_leaf = #{record.fLeaf,jdbcType=BIT},
+      f_parent_id = #{record.fParentId,jdbcType=INTEGER},
+      f_create_time = #{record.fCreateTime,jdbcType=TIMESTAMP},
+      f_update_time = #{record.fUpdateTime,jdbcType=TIMESTAMP}
+    <if test="_parameter != null">
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
 </mapper>

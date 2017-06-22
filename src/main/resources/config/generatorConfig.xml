@@ -2,7 +2,7 @@
 <!DOCTYPE generatorConfiguration  
         PUBLIC "-//mybatis.org//DTD MyBatis Generator Configuration 1.0//EN"  
         "http://mybatis.org/dtd/mybatis-generator-config_1_0.dtd">
-
+<!-- mvn mybatis-generator:generate -->
 <generatorConfiguration>
 	<context id="testTables" targetRuntime="MyBatis3">
 		<commentGenerator>
@@ -10,8 +10,8 @@
 			<property name="suppressAllComments" value="true" />
 		</commentGenerator>
 		<!--mysql数据库连接的信息：驱动类、连接地址、用户名、密码 -->
-		<jdbcConnection driverClass="com.mysql.jdbc.Driver" connectionURL="jdbc:mysql://localhost:3306/test" 
-			userId="root" password="sc123+-*/">
+		<jdbcConnection driverClass="com.mysql.jdbc.Driver" connectionURL="jdbc:mysql://localhost:3306/test" userId="root"
+			password="sc123+-*/">
 		</jdbcConnection>
 
 		<!--oracle配置 -->
@@ -42,10 +42,21 @@
 		</javaClientGenerator>
 
 		<!-- 指定数据库表，要生成哪些表，就写哪些表，要和数据库中对应，不能写错！ -->
-		<table tableName="t_user"></table>
-		<table tableName="t_role"></table>
-		<table tableName="t_privilege"></table>
-		<table tableName="t_role_privilege"></table>
-		<table tableName="t_user_role"></table>
+		<table tableName="t_user" mapperName="UserMapper" domainObjectName="User">
+			<columnRenamingRule searchString="^f_" replaceString="" />
+		</table>
+		<table tableName="t_role" mapperName="RoleMapper" domainObjectName="Role">
+			<columnRenamingRule searchString="^f_" replaceString="" />
+		</table>
+		<table tableName="t_privilege" mapperName="PrivilegeMapper" domainObjectName="Privilege">
+			<columnRenamingRule searchString="^f_" replaceString="" />
+		</table>
+		<table tableName="t_role_privilege" mapperName="RolePrivilegeMapper" domainObjectName="RolePrivilege">
+			<columnRenamingRule searchString="^f_" replaceString="" />
+		</table>
+		<table tableName="t_user_role" mapperName="UserRoleMapper" domainObjectName="UserRole">
+			<columnRenamingRule searchString="^f_" replaceString="" />
+		</table>
+
 	</context>
 </generatorConfiguration>

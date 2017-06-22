@@ -1,10 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="sc.learn.manage.mapper.RoleMapper">
-  <resultMap id="BaseResultMap" type="sc.learn.manage.po.Role">
-    <result column="f_id" jdbcType="INTEGER" property="fId" />
-    <result column="f_name" jdbcType="VARCHAR" property="fName" />
-    <result column="f_description" jdbcType="VARCHAR" property="fDescription" />
+<mapper namespace="sc.learn.manage.mapper.RolePrivilegeMapper">
+  <resultMap id="BaseResultMap" type="sc.learn.manage.po.RolePrivilege">
+    <result column="f_role_id" jdbcType="INTEGER" property="fRoleId" />
+    <result column="f_privilege_id" jdbcType="INTEGER" property="fPrivilegeId" />
     <result column="f_create_time" jdbcType="TIMESTAMP" property="fCreateTime" />
     <result column="f_update_time" jdbcType="TIMESTAMP" property="fUpdateTime" />
   </resultMap>
@@ -67,15 +66,15 @@
     </where>
   </sql>
   <sql id="Base_Column_List">
-    f_id, f_name, f_description, f_create_time, f_update_time
+    f_role_id, f_privilege_id, f_create_time, f_update_time
   </sql>
-  <select id="selectByExample" parameterType="sc.learn.manage.po.RoleExample" resultMap="BaseResultMap">
+  <select id="selectByExample" parameterType="sc.learn.manage.po.RolePrivilegeExample" resultMap="BaseResultMap">
     select
     <if test="distinct">
       distinct
     </if>
     <include refid="Base_Column_List" />
-    from t_role
+    from t_role_privilege
     <if test="_parameter != null">
       <include refid="Example_Where_Clause" />
     </if>
@@ -83,29 +82,26 @@
       order by ${orderByClause}
     </if>
   </select>
-  <delete id="deleteByExample" parameterType="sc.learn.manage.po.RoleExample">
-    delete from t_role
+  <delete id="deleteByExample" parameterType="sc.learn.manage.po.RolePrivilegeExample">
+    delete from t_role_privilege
     <if test="_parameter != null">
       <include refid="Example_Where_Clause" />
     </if>
   </delete>
-  <insert id="insert" parameterType="sc.learn.manage.po.Role">
-    insert into t_role (f_id, f_name, f_description, 
-      f_create_time, f_update_time)
-    values (#{fId,jdbcType=INTEGER}, #{fName,jdbcType=VARCHAR}, #{fDescription,jdbcType=VARCHAR}, 
-      #{fCreateTime,jdbcType=TIMESTAMP}, #{fUpdateTime,jdbcType=TIMESTAMP})
+  <insert id="insert" parameterType="sc.learn.manage.po.RolePrivilege">
+    insert into t_role_privilege (f_role_id, f_privilege_id, f_create_time, 
+      f_update_time)
+    values (#{fRoleId,jdbcType=INTEGER}, #{fPrivilegeId,jdbcType=INTEGER}, #{fCreateTime,jdbcType=TIMESTAMP}, 
+      #{fUpdateTime,jdbcType=TIMESTAMP})
   </insert>
-  <insert id="insertSelective" parameterType="sc.learn.manage.po.Role">
-    insert into t_role
+  <insert id="insertSelective" parameterType="sc.learn.manage.po.RolePrivilege">
+    insert into t_role_privilege
     <trim prefix="(" suffix=")" suffixOverrides=",">
-      <if test="fId != null">
-        f_id,
+      <if test="fRoleId != null">
+        f_role_id,
       </if>
-      <if test="fName != null">
-        f_name,
-      </if>
-      <if test="fDescription != null">
-        f_description,
+      <if test="fPrivilegeId != null">
+        f_privilege_id,
       </if>
       <if test="fCreateTime != null">
         f_create_time,
@@ -115,14 +111,11 @@
       </if>
     </trim>
     <trim prefix="values (" suffix=")" suffixOverrides=",">
-      <if test="fId != null">
-        #{fId,jdbcType=INTEGER},
+      <if test="fRoleId != null">
+        #{fRoleId,jdbcType=INTEGER},
       </if>
-      <if test="fName != null">
-        #{fName,jdbcType=VARCHAR},
-      </if>
-      <if test="fDescription != null">
-        #{fDescription,jdbcType=VARCHAR},
+      <if test="fPrivilegeId != null">
+        #{fPrivilegeId,jdbcType=INTEGER},
       </if>
       <if test="fCreateTime != null">
         #{fCreateTime,jdbcType=TIMESTAMP},
@@ -132,23 +125,20 @@
       </if>
     </trim>
   </insert>
-  <select id="countByExample" parameterType="sc.learn.manage.po.RoleExample" resultType="java.lang.Long">
-    select count(*) from t_role
+  <select id="countByExample" parameterType="sc.learn.manage.po.RolePrivilegeExample" resultType="java.lang.Long">
+    select count(*) from t_role_privilege
     <if test="_parameter != null">
       <include refid="Example_Where_Clause" />
     </if>
   </select>
   <update id="updateByExampleSelective" parameterType="map">
-    update t_role
+    update t_role_privilege
     <set>
-      <if test="record.fId != null">
-        f_id = #{record.fId,jdbcType=INTEGER},
+      <if test="record.fRoleId != null">
+        f_role_id = #{record.fRoleId,jdbcType=INTEGER},
       </if>
-      <if test="record.fName != null">
-        f_name = #{record.fName,jdbcType=VARCHAR},
-      </if>
-      <if test="record.fDescription != null">
-        f_description = #{record.fDescription,jdbcType=VARCHAR},
+      <if test="record.fPrivilegeId != null">
+        f_privilege_id = #{record.fPrivilegeId,jdbcType=INTEGER},
       </if>
       <if test="record.fCreateTime != null">
         f_create_time = #{record.fCreateTime,jdbcType=TIMESTAMP},
@@ -162,20 +152,18 @@
     </if>
   </update>
   <update id="updateByExample" parameterType="map">
-    update t_role
-    set f_id = #{record.fId,jdbcType=INTEGER},
-      f_name = #{record.fName,jdbcType=VARCHAR},
-      f_description = #{record.fDescription,jdbcType=VARCHAR},
+    update t_role_privilege
+    set f_role_id = #{record.fRoleId,jdbcType=INTEGER},
+      f_privilege_id = #{record.fPrivilegeId,jdbcType=INTEGER},
       f_create_time = #{record.fCreateTime,jdbcType=TIMESTAMP},
       f_update_time = #{record.fUpdateTime,jdbcType=TIMESTAMP}
     <if test="_parameter != null">
       <include refid="Update_By_Example_Where_Clause" />
     </if>
   </update>
-  <resultMap id="BaseResultMap" type="sc.learn.manage.po.Role">
-    <result column="f_id" jdbcType="INTEGER" property="fId" />
-    <result column="f_name" jdbcType="VARCHAR" property="fName" />
-    <result column="f_description" jdbcType="VARCHAR" property="fDescription" />
+  <resultMap id="BaseResultMap" type="sc.learn.manage.po.RolePrivilege">
+    <result column="f_role_id" jdbcType="INTEGER" property="fRoleId" />
+    <result column="f_privilege_id" jdbcType="INTEGER" property="fPrivilegeId" />
     <result column="f_create_time" jdbcType="TIMESTAMP" property="fCreateTime" />
     <result column="f_update_time" jdbcType="TIMESTAMP" property="fUpdateTime" />
   </resultMap>
@@ -238,15 +226,15 @@
     </where>
   </sql>
   <sql id="Base_Column_List">
-    f_id, f_name, f_description, f_create_time, f_update_time
+    f_role_id, f_privilege_id, f_create_time, f_update_time
   </sql>
-  <select id="selectByExample" parameterType="sc.learn.manage.po.RoleExample" resultMap="BaseResultMap">
+  <select id="selectByExample" parameterType="sc.learn.manage.po.RolePrivilegeExample" resultMap="BaseResultMap">
     select
     <if test="distinct">
       distinct
     </if>
     <include refid="Base_Column_List" />
-    from t_role
+    from t_role_privilege
     <if test="_parameter != null">
       <include refid="Example_Where_Clause" />
     </if>
@@ -254,29 +242,26 @@
       order by ${orderByClause}
     </if>
   </select>
-  <delete id="deleteByExample" parameterType="sc.learn.manage.po.RoleExample">
-    delete from t_role
+  <delete id="deleteByExample" parameterType="sc.learn.manage.po.RolePrivilegeExample">
+    delete from t_role_privilege
     <if test="_parameter != null">
       <include refid="Example_Where_Clause" />
     </if>
   </delete>
-  <insert id="insert" parameterType="sc.learn.manage.po.Role">
-    insert into t_role (f_id, f_name, f_description, 
-      f_create_time, f_update_time)
-    values (#{fId,jdbcType=INTEGER}, #{fName,jdbcType=VARCHAR}, #{fDescription,jdbcType=VARCHAR}, 
-      #{fCreateTime,jdbcType=TIMESTAMP}, #{fUpdateTime,jdbcType=TIMESTAMP})
+  <insert id="insert" parameterType="sc.learn.manage.po.RolePrivilege">
+    insert into t_role_privilege (f_role_id, f_privilege_id, f_create_time, 
+      f_update_time)
+    values (#{fRoleId,jdbcType=INTEGER}, #{fPrivilegeId,jdbcType=INTEGER}, #{fCreateTime,jdbcType=TIMESTAMP}, 
+      #{fUpdateTime,jdbcType=TIMESTAMP})
   </insert>
-  <insert id="insertSelective" parameterType="sc.learn.manage.po.Role">
-    insert into t_role
+  <insert id="insertSelective" parameterType="sc.learn.manage.po.RolePrivilege">
+    insert into t_role_privilege
     <trim prefix="(" suffix=")" suffixOverrides=",">
-      <if test="fId != null">
-        f_id,
+      <if test="fRoleId != null">
+        f_role_id,
       </if>
-      <if test="fName != null">
-        f_name,
-      </if>
-      <if test="fDescription != null">
-        f_description,
+      <if test="fPrivilegeId != null">
+        f_privilege_id,
       </if>
       <if test="fCreateTime != null">
         f_create_time,
@@ -286,14 +271,11 @@
       </if>
     </trim>
     <trim prefix="values (" suffix=")" suffixOverrides=",">
-      <if test="fId != null">
-        #{fId,jdbcType=INTEGER},
+      <if test="fRoleId != null">
+        #{fRoleId,jdbcType=INTEGER},
       </if>
-      <if test="fName != null">
-        #{fName,jdbcType=VARCHAR},
-      </if>
-      <if test="fDescription != null">
-        #{fDescription,jdbcType=VARCHAR},
+      <if test="fPrivilegeId != null">
+        #{fPrivilegeId,jdbcType=INTEGER},
       </if>
       <if test="fCreateTime != null">
         #{fCreateTime,jdbcType=TIMESTAMP},
@@ -303,23 +285,20 @@
       </if>
     </trim>
   </insert>
-  <select id="countByExample" parameterType="sc.learn.manage.po.RoleExample" resultType="java.lang.Long">
-    select count(*) from t_role
+  <select id="countByExample" parameterType="sc.learn.manage.po.RolePrivilegeExample" resultType="java.lang.Long">
+    select count(*) from t_role_privilege
     <if test="_parameter != null">
       <include refid="Example_Where_Clause" />
     </if>
   </select>
   <update id="updateByExampleSelective" parameterType="map">
-    update t_role
+    update t_role_privilege
     <set>
-      <if test="record.fId != null">
-        f_id = #{record.fId,jdbcType=INTEGER},
+      <if test="record.fRoleId != null">
+        f_role_id = #{record.fRoleId,jdbcType=INTEGER},
       </if>
-      <if test="record.fName != null">
-        f_name = #{record.fName,jdbcType=VARCHAR},
-      </if>
-      <if test="record.fDescription != null">
-        f_description = #{record.fDescription,jdbcType=VARCHAR},
+      <if test="record.fPrivilegeId != null">
+        f_privilege_id = #{record.fPrivilegeId,jdbcType=INTEGER},
       </if>
       <if test="record.fCreateTime != null">
         f_create_time = #{record.fCreateTime,jdbcType=TIMESTAMP},
@@ -333,20 +312,18 @@
     </if>
   </update>
   <update id="updateByExample" parameterType="map">
-    update t_role
-    set f_id = #{record.fId,jdbcType=INTEGER},
-      f_name = #{record.fName,jdbcType=VARCHAR},
-      f_description = #{record.fDescription,jdbcType=VARCHAR},
+    update t_role_privilege
+    set f_role_id = #{record.fRoleId,jdbcType=INTEGER},
+      f_privilege_id = #{record.fPrivilegeId,jdbcType=INTEGER},
       f_create_time = #{record.fCreateTime,jdbcType=TIMESTAMP},
       f_update_time = #{record.fUpdateTime,jdbcType=TIMESTAMP}
     <if test="_parameter != null">
       <include refid="Update_By_Example_Where_Clause" />
     </if>
   </update>
-  <resultMap id="BaseResultMap" type="sc.learn.manage.po.Role">
-    <result column="f_id" jdbcType="INTEGER" property="fId" />
-    <result column="f_name" jdbcType="VARCHAR" property="fName" />
-    <result column="f_description" jdbcType="VARCHAR" property="fDescription" />
+  <resultMap id="BaseResultMap" type="sc.learn.manage.po.RolePrivilege">
+    <result column="f_role_id" jdbcType="INTEGER" property="fRoleId" />
+    <result column="f_privilege_id" jdbcType="INTEGER" property="fPrivilegeId" />
     <result column="f_create_time" jdbcType="TIMESTAMP" property="fCreateTime" />
     <result column="f_update_time" jdbcType="TIMESTAMP" property="fUpdateTime" />
   </resultMap>
@@ -409,15 +386,15 @@
     </where>
   </sql>
   <sql id="Base_Column_List">
-    f_id, f_name, f_description, f_create_time, f_update_time
+    f_role_id, f_privilege_id, f_create_time, f_update_time
   </sql>
-  <select id="selectByExample" parameterType="sc.learn.manage.po.RoleExample" resultMap="BaseResultMap">
+  <select id="selectByExample" parameterType="sc.learn.manage.po.RolePrivilegeExample" resultMap="BaseResultMap">
     select
     <if test="distinct">
       distinct
     </if>
     <include refid="Base_Column_List" />
-    from t_role
+    from t_role_privilege
     <if test="_parameter != null">
       <include refid="Example_Where_Clause" />
     </if>
@@ -425,29 +402,26 @@
       order by ${orderByClause}
     </if>
   </select>
-  <delete id="deleteByExample" parameterType="sc.learn.manage.po.RoleExample">
-    delete from t_role
+  <delete id="deleteByExample" parameterType="sc.learn.manage.po.RolePrivilegeExample">
+    delete from t_role_privilege
     <if test="_parameter != null">
       <include refid="Example_Where_Clause" />
     </if>
   </delete>
-  <insert id="insert" parameterType="sc.learn.manage.po.Role">
-    insert into t_role (f_id, f_name, f_description, 
-      f_create_time, f_update_time)
-    values (#{fId,jdbcType=INTEGER}, #{fName,jdbcType=VARCHAR}, #{fDescription,jdbcType=VARCHAR}, 
-      #{fCreateTime,jdbcType=TIMESTAMP}, #{fUpdateTime,jdbcType=TIMESTAMP})
+  <insert id="insert" parameterType="sc.learn.manage.po.RolePrivilege">
+    insert into t_role_privilege (f_role_id, f_privilege_id, f_create_time, 
+      f_update_time)
+    values (#{fRoleId,jdbcType=INTEGER}, #{fPrivilegeId,jdbcType=INTEGER}, #{fCreateTime,jdbcType=TIMESTAMP}, 
+      #{fUpdateTime,jdbcType=TIMESTAMP})
   </insert>
-  <insert id="insertSelective" parameterType="sc.learn.manage.po.Role">
-    insert into t_role
+  <insert id="insertSelective" parameterType="sc.learn.manage.po.RolePrivilege">
+    insert into t_role_privilege
     <trim prefix="(" suffix=")" suffixOverrides=",">
-      <if test="fId != null">
-        f_id,
+      <if test="fRoleId != null">
+        f_role_id,
       </if>
-      <if test="fName != null">
-        f_name,
-      </if>
-      <if test="fDescription != null">
-        f_description,
+      <if test="fPrivilegeId != null">
+        f_privilege_id,
       </if>
       <if test="fCreateTime != null">
         f_create_time,
@@ -457,14 +431,11 @@
       </if>
     </trim>
     <trim prefix="values (" suffix=")" suffixOverrides=",">
-      <if test="fId != null">
-        #{fId,jdbcType=INTEGER},
+      <if test="fRoleId != null">
+        #{fRoleId,jdbcType=INTEGER},
       </if>
-      <if test="fName != null">
-        #{fName,jdbcType=VARCHAR},
-      </if>
-      <if test="fDescription != null">
-        #{fDescription,jdbcType=VARCHAR},
+      <if test="fPrivilegeId != null">
+        #{fPrivilegeId,jdbcType=INTEGER},
       </if>
       <if test="fCreateTime != null">
         #{fCreateTime,jdbcType=TIMESTAMP},
@@ -474,23 +445,20 @@
       </if>
     </trim>
   </insert>
-  <select id="countByExample" parameterType="sc.learn.manage.po.RoleExample" resultType="java.lang.Long">
-    select count(*) from t_role
+  <select id="countByExample" parameterType="sc.learn.manage.po.RolePrivilegeExample" resultType="java.lang.Long">
+    select count(*) from t_role_privilege
     <if test="_parameter != null">
       <include refid="Example_Where_Clause" />
     </if>
   </select>
   <update id="updateByExampleSelective" parameterType="map">
-    update t_role
+    update t_role_privilege
     <set>
-      <if test="record.fId != null">
-        f_id = #{record.fId,jdbcType=INTEGER},
+      <if test="record.fRoleId != null">
+        f_role_id = #{record.fRoleId,jdbcType=INTEGER},
       </if>
-      <if test="record.fName != null">
-        f_name = #{record.fName,jdbcType=VARCHAR},
-      </if>
-      <if test="record.fDescription != null">
-        f_description = #{record.fDescription,jdbcType=VARCHAR},
+      <if test="record.fPrivilegeId != null">
+        f_privilege_id = #{record.fPrivilegeId,jdbcType=INTEGER},
       </if>
       <if test="record.fCreateTime != null">
         f_create_time = #{record.fCreateTime,jdbcType=TIMESTAMP},
@@ -504,20 +472,18 @@
     </if>
   </update>
   <update id="updateByExample" parameterType="map">
-    update t_role
-    set f_id = #{record.fId,jdbcType=INTEGER},
-      f_name = #{record.fName,jdbcType=VARCHAR},
-      f_description = #{record.fDescription,jdbcType=VARCHAR},
+    update t_role_privilege
+    set f_role_id = #{record.fRoleId,jdbcType=INTEGER},
+      f_privilege_id = #{record.fPrivilegeId,jdbcType=INTEGER},
       f_create_time = #{record.fCreateTime,jdbcType=TIMESTAMP},
       f_update_time = #{record.fUpdateTime,jdbcType=TIMESTAMP}
     <if test="_parameter != null">
       <include refid="Update_By_Example_Where_Clause" />
     </if>
   </update>
-  <resultMap id="BaseResultMap" type="sc.learn.manage.po.Role">
-    <result column="f_id" jdbcType="INTEGER" property="fId" />
-    <result column="f_name" jdbcType="VARCHAR" property="fName" />
-    <result column="f_description" jdbcType="VARCHAR" property="fDescription" />
+  <resultMap id="BaseResultMap" type="sc.learn.manage.po.RolePrivilege">
+    <result column="f_role_id" jdbcType="INTEGER" property="fRoleId" />
+    <result column="f_privilege_id" jdbcType="INTEGER" property="fPrivilegeId" />
     <result column="f_create_time" jdbcType="TIMESTAMP" property="fCreateTime" />
     <result column="f_update_time" jdbcType="TIMESTAMP" property="fUpdateTime" />
   </resultMap>
@@ -580,15 +546,15 @@
     </where>
   </sql>
   <sql id="Base_Column_List">
-    f_id, f_name, f_description, f_create_time, f_update_time
+    f_role_id, f_privilege_id, f_create_time, f_update_time
   </sql>
-  <select id="selectByExample" parameterType="sc.learn.manage.po.RoleExample" resultMap="BaseResultMap">
+  <select id="selectByExample" parameterType="sc.learn.manage.po.RolePrivilegeExample" resultMap="BaseResultMap">
     select
     <if test="distinct">
       distinct
     </if>
     <include refid="Base_Column_List" />
-    from t_role
+    from t_role_privilege
     <if test="_parameter != null">
       <include refid="Example_Where_Clause" />
     </if>
@@ -596,29 +562,26 @@
       order by ${orderByClause}
     </if>
   </select>
-  <delete id="deleteByExample" parameterType="sc.learn.manage.po.RoleExample">
-    delete from t_role
+  <delete id="deleteByExample" parameterType="sc.learn.manage.po.RolePrivilegeExample">
+    delete from t_role_privilege
     <if test="_parameter != null">
       <include refid="Example_Where_Clause" />
     </if>
   </delete>
-  <insert id="insert" parameterType="sc.learn.manage.po.Role">
-    insert into t_role (f_id, f_name, f_description, 
-      f_create_time, f_update_time)
-    values (#{fId,jdbcType=INTEGER}, #{fName,jdbcType=VARCHAR}, #{fDescription,jdbcType=VARCHAR}, 
-      #{fCreateTime,jdbcType=TIMESTAMP}, #{fUpdateTime,jdbcType=TIMESTAMP})
+  <insert id="insert" parameterType="sc.learn.manage.po.RolePrivilege">
+    insert into t_role_privilege (f_role_id, f_privilege_id, f_create_time, 
+      f_update_time)
+    values (#{fRoleId,jdbcType=INTEGER}, #{fPrivilegeId,jdbcType=INTEGER}, #{fCreateTime,jdbcType=TIMESTAMP}, 
+      #{fUpdateTime,jdbcType=TIMESTAMP})
   </insert>
-  <insert id="insertSelective" parameterType="sc.learn.manage.po.Role">
-    insert into t_role
+  <insert id="insertSelective" parameterType="sc.learn.manage.po.RolePrivilege">
+    insert into t_role_privilege
     <trim prefix="(" suffix=")" suffixOverrides=",">
-      <if test="fId != null">
-        f_id,
+      <if test="fRoleId != null">
+        f_role_id,
       </if>
-      <if test="fName != null">
-        f_name,
-      </if>
-      <if test="fDescription != null">
-        f_description,
+      <if test="fPrivilegeId != null">
+        f_privilege_id,
       </if>
       <if test="fCreateTime != null">
         f_create_time,
@@ -628,14 +591,11 @@
       </if>
     </trim>
     <trim prefix="values (" suffix=")" suffixOverrides=",">
-      <if test="fId != null">
-        #{fId,jdbcType=INTEGER},
+      <if test="fRoleId != null">
+        #{fRoleId,jdbcType=INTEGER},
       </if>
-      <if test="fName != null">
-        #{fName,jdbcType=VARCHAR},
-      </if>
-      <if test="fDescription != null">
-        #{fDescription,jdbcType=VARCHAR},
+      <if test="fPrivilegeId != null">
+        #{fPrivilegeId,jdbcType=INTEGER},
       </if>
       <if test="fCreateTime != null">
         #{fCreateTime,jdbcType=TIMESTAMP},
@@ -645,23 +605,20 @@
       </if>
     </trim>
   </insert>
-  <select id="countByExample" parameterType="sc.learn.manage.po.RoleExample" resultType="java.lang.Long">
-    select count(*) from t_role
+  <select id="countByExample" parameterType="sc.learn.manage.po.RolePrivilegeExample" resultType="java.lang.Long">
+    select count(*) from t_role_privilege
     <if test="_parameter != null">
       <include refid="Example_Where_Clause" />
     </if>
   </select>
   <update id="updateByExampleSelective" parameterType="map">
-    update t_role
+    update t_role_privilege
     <set>
-      <if test="record.fId != null">
-        f_id = #{record.fId,jdbcType=INTEGER},
+      <if test="record.fRoleId != null">
+        f_role_id = #{record.fRoleId,jdbcType=INTEGER},
       </if>
-      <if test="record.fName != null">
-        f_name = #{record.fName,jdbcType=VARCHAR},
-      </if>
-      <if test="record.fDescription != null">
-        f_description = #{record.fDescription,jdbcType=VARCHAR},
+      <if test="record.fPrivilegeId != null">
+        f_privilege_id = #{record.fPrivilegeId,jdbcType=INTEGER},
       </if>
       <if test="record.fCreateTime != null">
         f_create_time = #{record.fCreateTime,jdbcType=TIMESTAMP},
@@ -675,20 +632,18 @@
     </if>
   </update>
   <update id="updateByExample" parameterType="map">
-    update t_role
-    set f_id = #{record.fId,jdbcType=INTEGER},
-      f_name = #{record.fName,jdbcType=VARCHAR},
-      f_description = #{record.fDescription,jdbcType=VARCHAR},
+    update t_role_privilege
+    set f_role_id = #{record.fRoleId,jdbcType=INTEGER},
+      f_privilege_id = #{record.fPrivilegeId,jdbcType=INTEGER},
       f_create_time = #{record.fCreateTime,jdbcType=TIMESTAMP},
       f_update_time = #{record.fUpdateTime,jdbcType=TIMESTAMP}
     <if test="_parameter != null">
       <include refid="Update_By_Example_Where_Clause" />
     </if>
   </update>
-  <resultMap id="BaseResultMap" type="sc.learn.manage.po.Role">
-    <result column="f_id" jdbcType="INTEGER" property="fId" />
-    <result column="f_name" jdbcType="VARCHAR" property="fName" />
-    <result column="f_description" jdbcType="VARCHAR" property="fDescription" />
+  <resultMap id="BaseResultMap" type="sc.learn.manage.po.RolePrivilege">
+    <result column="f_role_id" jdbcType="INTEGER" property="fRoleId" />
+    <result column="f_privilege_id" jdbcType="INTEGER" property="fPrivilegeId" />
     <result column="f_create_time" jdbcType="TIMESTAMP" property="fCreateTime" />
     <result column="f_update_time" jdbcType="TIMESTAMP" property="fUpdateTime" />
   </resultMap>
@@ -751,15 +706,15 @@
     </where>
   </sql>
   <sql id="Base_Column_List">
-    f_id, f_name, f_description, f_create_time, f_update_time
+    f_role_id, f_privilege_id, f_create_time, f_update_time
   </sql>
-  <select id="selectByExample" parameterType="sc.learn.manage.po.RoleExample" resultMap="BaseResultMap">
+  <select id="selectByExample" parameterType="sc.learn.manage.po.RolePrivilegeExample" resultMap="BaseResultMap">
     select
     <if test="distinct">
       distinct
     </if>
     <include refid="Base_Column_List" />
-    from t_role
+    from t_role_privilege
     <if test="_parameter != null">
       <include refid="Example_Where_Clause" />
     </if>
@@ -767,29 +722,26 @@
       order by ${orderByClause}
     </if>
   </select>
-  <delete id="deleteByExample" parameterType="sc.learn.manage.po.RoleExample">
-    delete from t_role
+  <delete id="deleteByExample" parameterType="sc.learn.manage.po.RolePrivilegeExample">
+    delete from t_role_privilege
     <if test="_parameter != null">
       <include refid="Example_Where_Clause" />
     </if>
   </delete>
-  <insert id="insert" parameterType="sc.learn.manage.po.Role">
-    insert into t_role (f_id, f_name, f_description, 
-      f_create_time, f_update_time)
-    values (#{fId,jdbcType=INTEGER}, #{fName,jdbcType=VARCHAR}, #{fDescription,jdbcType=VARCHAR}, 
-      #{fCreateTime,jdbcType=TIMESTAMP}, #{fUpdateTime,jdbcType=TIMESTAMP})
+  <insert id="insert" parameterType="sc.learn.manage.po.RolePrivilege">
+    insert into t_role_privilege (f_role_id, f_privilege_id, f_create_time, 
+      f_update_time)
+    values (#{fRoleId,jdbcType=INTEGER}, #{fPrivilegeId,jdbcType=INTEGER}, #{fCreateTime,jdbcType=TIMESTAMP}, 
+      #{fUpdateTime,jdbcType=TIMESTAMP})
   </insert>
-  <insert id="insertSelective" parameterType="sc.learn.manage.po.Role">
-    insert into t_role
+  <insert id="insertSelective" parameterType="sc.learn.manage.po.RolePrivilege">
+    insert into t_role_privilege
     <trim prefix="(" suffix=")" suffixOverrides=",">
-      <if test="fId != null">
-        f_id,
+      <if test="fRoleId != null">
+        f_role_id,
       </if>
-      <if test="fName != null">
-        f_name,
-      </if>
-      <if test="fDescription != null">
-        f_description,
+      <if test="fPrivilegeId != null">
+        f_privilege_id,
       </if>
       <if test="fCreateTime != null">
         f_create_time,
@@ -799,14 +751,11 @@
       </if>
     </trim>
     <trim prefix="values (" suffix=")" suffixOverrides=",">
-      <if test="fId != null">
-        #{fId,jdbcType=INTEGER},
+      <if test="fRoleId != null">
+        #{fRoleId,jdbcType=INTEGER},
       </if>
-      <if test="fName != null">
-        #{fName,jdbcType=VARCHAR},
-      </if>
-      <if test="fDescription != null">
-        #{fDescription,jdbcType=VARCHAR},
+      <if test="fPrivilegeId != null">
+        #{fPrivilegeId,jdbcType=INTEGER},
       </if>
       <if test="fCreateTime != null">
         #{fCreateTime,jdbcType=TIMESTAMP},
@@ -816,23 +765,20 @@
       </if>
     </trim>
   </insert>
-  <select id="countByExample" parameterType="sc.learn.manage.po.RoleExample" resultType="java.lang.Long">
-    select count(*) from t_role
+  <select id="countByExample" parameterType="sc.learn.manage.po.RolePrivilegeExample" resultType="java.lang.Long">
+    select count(*) from t_role_privilege
     <if test="_parameter != null">
       <include refid="Example_Where_Clause" />
     </if>
   </select>
   <update id="updateByExampleSelective" parameterType="map">
-    update t_role
+    update t_role_privilege
     <set>
-      <if test="record.fId != null">
-        f_id = #{record.fId,jdbcType=INTEGER},
+      <if test="record.fRoleId != null">
+        f_role_id = #{record.fRoleId,jdbcType=INTEGER},
       </if>
-      <if test="record.fName != null">
-        f_name = #{record.fName,jdbcType=VARCHAR},
-      </if>
-      <if test="record.fDescription != null">
-        f_description = #{record.fDescription,jdbcType=VARCHAR},
+      <if test="record.fPrivilegeId != null">
+        f_privilege_id = #{record.fPrivilegeId,jdbcType=INTEGER},
       </if>
       <if test="record.fCreateTime != null">
         f_create_time = #{record.fCreateTime,jdbcType=TIMESTAMP},
@@ -846,10 +792,9 @@
     </if>
   </update>
   <update id="updateByExample" parameterType="map">
-    update t_role
-    set f_id = #{record.fId,jdbcType=INTEGER},
-      f_name = #{record.fName,jdbcType=VARCHAR},
-      f_description = #{record.fDescription,jdbcType=VARCHAR},
+    update t_role_privilege
+    set f_role_id = #{record.fRoleId,jdbcType=INTEGER},
+      f_privilege_id = #{record.fPrivilegeId,jdbcType=INTEGER},
       f_create_time = #{record.fCreateTime,jdbcType=TIMESTAMP},
       f_update_time = #{record.fUpdateTime,jdbcType=TIMESTAMP}
     <if test="_parameter != null">

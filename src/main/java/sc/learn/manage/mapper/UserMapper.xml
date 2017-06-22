@@ -1,148 +1,924 @@
-<?xml version="1.0" encoding="UTF-8" ?>
-<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
-	"http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
-<mapper namespace="sc.learn.manage.mapper.UserMapper" >
-	
-	<sql id="query_user">
-		select
-			t_user.f_id id,
-			t_user.f_name name,
-			t_user.f_password password,
-			t_user.f_email email,
-			t_user.f_create_time createTime,
-			t_user.f_update_time updateTime,
-			t_role.f_id roleId,
-			t_role.f_name roleName,
-			t_role.f_description roleDescription,
-			t_role.f_create_time roleCreateTime,
-			t_role.f_update_time roleUpdateTime,
-			t_privilege.f_id privilegeId,
-			t_privilege.f_name privilegeName,
-			t_privilege.f_description privilegeDescription,
-			t_privilege.f_url url,
-			t_privilege.f_icon icon,
-			t_privilege.f_leaf leaf,
-			t_privilege.f_create_time privilegeCreateTime,
-			t_privilege.f_update_time privilegeUpdateTime
-		from
-			t_user
-		left join
-			(
-			t_role,
-			t_user_role
-			)
-		on
-			(
-			t_user.f_id=t_user_role.f_user_id and 
-			t_user_role.f_role_id=t_role.f_id
-			)
-		left join
-			(
-			t_privilege,
-			t_role_privilege
-			)
-		on 
-			(
-			t_role.f_id=t_role_privilege.f_role_id and
-			t_role_privilege.f_privilege_id=t_privilege.f_id
-			)
-	</sql>
-
-	<resultMap type="user" id="UserResultMap">
-		<id column="id" property="id"/>
-		<result column="name" property="name"/>
-		<result column="password" property="password"/>
-		<result column="email" property="email"/>
-		<result column="createTime" property="createTime"/>
-		<result column="updateTime" property="updateTime"/>
-		
-		<collection property="roles" ofType="role">
-		 	<id column="roleId" property="id"/>
-		 	<result column="roleName" property="name"/>
-		 	<result column="roleDescription" property="description"/>
-		 	<result column="roleCreateTime" property="createTime"/>
-			<result column="roleUpdateTime" property="updateTime"/>
-		 	
-		 	<collection property="privileges" ofType="privilege">
-		 		<id column="privilegeId" property="id"/>
-			 	<result column="privilegeName" property="name"/>
-			 	<result column="privilegeDescription" property="description"/>
-			 	<result column="url" property="url"/>
-			 	<result column="icon" property="icon"/>
-			 	<result column="leaf" property="leaf"/>
-			 	<result column="privilegeCreateTime" property="createTime"/>
-				<result column="privilegeUpdateTime" property="updateTime"/>
-		 	</collection>
-		</collection>
-	</resultMap>
-
-
-	<insert id="insert" parameterType="user">
-		<selectKey keyProperty="id" order="AFTER" resultType="java.lang.Integer">
-			select last_insert_id() as id
-		</selectKey>
-		insert ignore into t_user(f_name,f_password,f_email) values(#{name},#{password},#{email})
-	</insert>
-	
-	<insert id="insertUserRoles" parameterType="user" >
-		insert into t_user_role (f_user_id,f_role_id) values 
-		<foreach collection="roles" item="role" open="" close="" separator=",">
-			(#{id},#{role.id})
-		</foreach>
-	</insert>
-	
-	<delete id="deleteById" parameterType="int">
-		delete from f_user where f_id = #{value}
-	</delete>
-	
-	<delete id="deleteUserRoles" parameterType="int">
-		delete from f_user_role where f_user_id = #{id}
-	</delete>
-	
-	<update id="update" parameterType="user">
-		update 
-			t_user 
-		<set>
-			<if test="name!=null">
-				f_name=#{name},
-			</if>
-			<if test="password!=null">
-				f_password=#{password},
-			</if>
-			<if test="email!=null">
-				f_email=#{email},
-			</if>
-			f_update_time=now()
-		</set>
-		<where>
-			f_id=#{id}
-		</where>
-	</update>
-	
-	<select id="selectById" parameterType="int" resultMap="UserResultMap">
-		<include refid="query_user"></include>
-		<where>
-			t_user.f_id=#{value}
-		</where>
-	</select>
-	
-	<select id="selectByEmailPassword" resultMap="UserResultMap">
-		<include refid="query_user"></include>
-		<where>
-			t_user.f_name=#{email} and 
-			t_user.f_password=#{password}
-		</where>
-	</select>
-	
-	<select id="selectAll" resultMap="UserResultMap">
-		<include refid="query_user"></include>
-	</select>
-	
-	<select id="selectCount" resultType="long">
-		select count(f_id) from t_user
-		<where>
-			
-		</where>
-	</select>
-	
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="sc.learn.manage.mapper.UserMapper">
+  <resultMap id="BaseResultMap" type="sc.learn.manage.po.User">
+    <result column="f_id" jdbcType="INTEGER" property="id" />
+    <result column="f_name" jdbcType="VARCHAR" property="name" />
+    <result column="f_password" jdbcType="VARCHAR" property="password" />
+    <result column="f_email" jdbcType="VARCHAR" property="email" />
+    <result column="f_create_time" jdbcType="TIMESTAMP" property="createTime" />
+    <result column="f_update_time" jdbcType="TIMESTAMP" property="updateTime" />
+  </resultMap>
+  <sql id="Example_Where_Clause">
+    <where>
+      <foreach collection="oredCriteria" item="criteria" separator="or">
+        <if test="criteria.valid">
+          <trim prefix="(" prefixOverrides="and" suffix=")">
+            <foreach collection="criteria.criteria" item="criterion">
+              <choose>
+                <when test="criterion.noValue">
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue">
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue">
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue">
+                  and ${criterion.condition}
+                  <foreach close=")" collection="criterion.value" item="listItem" open="(" separator=",">
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Update_By_Example_Where_Clause">
+    <where>
+      <foreach collection="example.oredCriteria" item="criteria" separator="or">
+        <if test="criteria.valid">
+          <trim prefix="(" prefixOverrides="and" suffix=")">
+            <foreach collection="criteria.criteria" item="criterion">
+              <choose>
+                <when test="criterion.noValue">
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue">
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue">
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue">
+                  and ${criterion.condition}
+                  <foreach close=")" collection="criterion.value" item="listItem" open="(" separator=",">
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Base_Column_List">
+    f_id, f_name, f_password, f_email, f_create_time, f_update_time
+  </sql>
+  <select id="selectByExample" parameterType="sc.learn.manage.po.UserExample" resultMap="BaseResultMap">
+    select
+    <if test="distinct">
+      distinct
+    </if>
+    <include refid="Base_Column_List" />
+    from t_user
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null">
+      order by ${orderByClause}
+    </if>
+  </select>
+  <delete id="deleteByExample" parameterType="sc.learn.manage.po.UserExample">
+    delete from t_user
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+  </delete>
+  <insert id="insert" parameterType="sc.learn.manage.po.User">
+    insert into t_user (f_id, f_name, f_password, 
+      f_email, f_create_time, f_update_time
+      )
+    values (#{id,jdbcType=INTEGER}, #{name,jdbcType=VARCHAR}, #{password,jdbcType=VARCHAR}, 
+      #{email,jdbcType=VARCHAR}, #{createTime,jdbcType=TIMESTAMP}, #{updateTime,jdbcType=TIMESTAMP}
+      )
+  </insert>
+  <insert id="insertSelective" parameterType="sc.learn.manage.po.User">
+    insert into t_user
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        f_id,
+      </if>
+      <if test="name != null">
+        f_name,
+      </if>
+      <if test="password != null">
+        f_password,
+      </if>
+      <if test="email != null">
+        f_email,
+      </if>
+      <if test="createTime != null">
+        f_create_time,
+      </if>
+      <if test="updateTime != null">
+        f_update_time,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        #{id,jdbcType=INTEGER},
+      </if>
+      <if test="name != null">
+        #{name,jdbcType=VARCHAR},
+      </if>
+      <if test="password != null">
+        #{password,jdbcType=VARCHAR},
+      </if>
+      <if test="email != null">
+        #{email,jdbcType=VARCHAR},
+      </if>
+      <if test="createTime != null">
+        #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updateTime != null">
+        #{updateTime,jdbcType=TIMESTAMP},
+      </if>
+    </trim>
+  </insert>
+  <select id="countByExample" parameterType="sc.learn.manage.po.UserExample" resultType="java.lang.Long">
+    select count(*) from t_user
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+  </select>
+  <update id="updateByExampleSelective" parameterType="map">
+    update t_user
+    <set>
+      <if test="record.id != null">
+        f_id = #{record.id,jdbcType=INTEGER},
+      </if>
+      <if test="record.name != null">
+        f_name = #{record.name,jdbcType=VARCHAR},
+      </if>
+      <if test="record.password != null">
+        f_password = #{record.password,jdbcType=VARCHAR},
+      </if>
+      <if test="record.email != null">
+        f_email = #{record.email,jdbcType=VARCHAR},
+      </if>
+      <if test="record.createTime != null">
+        f_create_time = #{record.createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="record.updateTime != null">
+        f_update_time = #{record.updateTime,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    <if test="_parameter != null">
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByExample" parameterType="map">
+    update t_user
+    set f_id = #{record.id,jdbcType=INTEGER},
+      f_name = #{record.name,jdbcType=VARCHAR},
+      f_password = #{record.password,jdbcType=VARCHAR},
+      f_email = #{record.email,jdbcType=VARCHAR},
+      f_create_time = #{record.createTime,jdbcType=TIMESTAMP},
+      f_update_time = #{record.updateTime,jdbcType=TIMESTAMP}
+    <if test="_parameter != null">
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <resultMap id="BaseResultMap" type="sc.learn.manage.po.User">
+    <result column="f_id" jdbcType="INTEGER" property="fId" />
+    <result column="f_name" jdbcType="VARCHAR" property="fName" />
+    <result column="f_password" jdbcType="VARCHAR" property="fPassword" />
+    <result column="f_email" jdbcType="VARCHAR" property="fEmail" />
+    <result column="f_create_time" jdbcType="TIMESTAMP" property="fCreateTime" />
+    <result column="f_update_time" jdbcType="TIMESTAMP" property="fUpdateTime" />
+  </resultMap>
+  <sql id="Example_Where_Clause">
+    <where>
+      <foreach collection="oredCriteria" item="criteria" separator="or">
+        <if test="criteria.valid">
+          <trim prefix="(" prefixOverrides="and" suffix=")">
+            <foreach collection="criteria.criteria" item="criterion">
+              <choose>
+                <when test="criterion.noValue">
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue">
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue">
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue">
+                  and ${criterion.condition}
+                  <foreach close=")" collection="criterion.value" item="listItem" open="(" separator=",">
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Update_By_Example_Where_Clause">
+    <where>
+      <foreach collection="example.oredCriteria" item="criteria" separator="or">
+        <if test="criteria.valid">
+          <trim prefix="(" prefixOverrides="and" suffix=")">
+            <foreach collection="criteria.criteria" item="criterion">
+              <choose>
+                <when test="criterion.noValue">
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue">
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue">
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue">
+                  and ${criterion.condition}
+                  <foreach close=")" collection="criterion.value" item="listItem" open="(" separator=",">
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Base_Column_List">
+    f_id, f_name, f_password, f_email, f_create_time, f_update_time
+  </sql>
+  <select id="selectByExample" parameterType="sc.learn.manage.po.UserExample" resultMap="BaseResultMap">
+    select
+    <if test="distinct">
+      distinct
+    </if>
+    <include refid="Base_Column_List" />
+    from t_user
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null">
+      order by ${orderByClause}
+    </if>
+  </select>
+  <delete id="deleteByExample" parameterType="sc.learn.manage.po.UserExample">
+    delete from t_user
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+  </delete>
+  <insert id="insert" parameterType="sc.learn.manage.po.User">
+    insert into t_user (f_id, f_name, f_password, 
+      f_email, f_create_time, f_update_time
+      )
+    values (#{fId,jdbcType=INTEGER}, #{fName,jdbcType=VARCHAR}, #{fPassword,jdbcType=VARCHAR}, 
+      #{fEmail,jdbcType=VARCHAR}, #{fCreateTime,jdbcType=TIMESTAMP}, #{fUpdateTime,jdbcType=TIMESTAMP}
+      )
+  </insert>
+  <insert id="insertSelective" parameterType="sc.learn.manage.po.User">
+    insert into t_user
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="fId != null">
+        f_id,
+      </if>
+      <if test="fName != null">
+        f_name,
+      </if>
+      <if test="fPassword != null">
+        f_password,
+      </if>
+      <if test="fEmail != null">
+        f_email,
+      </if>
+      <if test="fCreateTime != null">
+        f_create_time,
+      </if>
+      <if test="fUpdateTime != null">
+        f_update_time,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="fId != null">
+        #{fId,jdbcType=INTEGER},
+      </if>
+      <if test="fName != null">
+        #{fName,jdbcType=VARCHAR},
+      </if>
+      <if test="fPassword != null">
+        #{fPassword,jdbcType=VARCHAR},
+      </if>
+      <if test="fEmail != null">
+        #{fEmail,jdbcType=VARCHAR},
+      </if>
+      <if test="fCreateTime != null">
+        #{fCreateTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="fUpdateTime != null">
+        #{fUpdateTime,jdbcType=TIMESTAMP},
+      </if>
+    </trim>
+  </insert>
+  <select id="countByExample" parameterType="sc.learn.manage.po.UserExample" resultType="java.lang.Long">
+    select count(*) from t_user
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+  </select>
+  <update id="updateByExampleSelective" parameterType="map">
+    update t_user
+    <set>
+      <if test="record.fId != null">
+        f_id = #{record.fId,jdbcType=INTEGER},
+      </if>
+      <if test="record.fName != null">
+        f_name = #{record.fName,jdbcType=VARCHAR},
+      </if>
+      <if test="record.fPassword != null">
+        f_password = #{record.fPassword,jdbcType=VARCHAR},
+      </if>
+      <if test="record.fEmail != null">
+        f_email = #{record.fEmail,jdbcType=VARCHAR},
+      </if>
+      <if test="record.fCreateTime != null">
+        f_create_time = #{record.fCreateTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="record.fUpdateTime != null">
+        f_update_time = #{record.fUpdateTime,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    <if test="_parameter != null">
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByExample" parameterType="map">
+    update t_user
+    set f_id = #{record.fId,jdbcType=INTEGER},
+      f_name = #{record.fName,jdbcType=VARCHAR},
+      f_password = #{record.fPassword,jdbcType=VARCHAR},
+      f_email = #{record.fEmail,jdbcType=VARCHAR},
+      f_create_time = #{record.fCreateTime,jdbcType=TIMESTAMP},
+      f_update_time = #{record.fUpdateTime,jdbcType=TIMESTAMP}
+    <if test="_parameter != null">
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <resultMap id="BaseResultMap" type="sc.learn.manage.po.User">
+    <result column="f_id" jdbcType="INTEGER" property="fId" />
+    <result column="f_name" jdbcType="VARCHAR" property="fName" />
+    <result column="f_password" jdbcType="VARCHAR" property="fPassword" />
+    <result column="f_email" jdbcType="VARCHAR" property="fEmail" />
+    <result column="f_create_time" jdbcType="TIMESTAMP" property="fCreateTime" />
+    <result column="f_update_time" jdbcType="TIMESTAMP" property="fUpdateTime" />
+  </resultMap>
+  <sql id="Example_Where_Clause">
+    <where>
+      <foreach collection="oredCriteria" item="criteria" separator="or">
+        <if test="criteria.valid">
+          <trim prefix="(" prefixOverrides="and" suffix=")">
+            <foreach collection="criteria.criteria" item="criterion">
+              <choose>
+                <when test="criterion.noValue">
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue">
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue">
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue">
+                  and ${criterion.condition}
+                  <foreach close=")" collection="criterion.value" item="listItem" open="(" separator=",">
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Update_By_Example_Where_Clause">
+    <where>
+      <foreach collection="example.oredCriteria" item="criteria" separator="or">
+        <if test="criteria.valid">
+          <trim prefix="(" prefixOverrides="and" suffix=")">
+            <foreach collection="criteria.criteria" item="criterion">
+              <choose>
+                <when test="criterion.noValue">
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue">
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue">
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue">
+                  and ${criterion.condition}
+                  <foreach close=")" collection="criterion.value" item="listItem" open="(" separator=",">
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Base_Column_List">
+    f_id, f_name, f_password, f_email, f_create_time, f_update_time
+  </sql>
+  <select id="selectByExample" parameterType="sc.learn.manage.po.UserExample" resultMap="BaseResultMap">
+    select
+    <if test="distinct">
+      distinct
+    </if>
+    <include refid="Base_Column_List" />
+    from t_user
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null">
+      order by ${orderByClause}
+    </if>
+  </select>
+  <delete id="deleteByExample" parameterType="sc.learn.manage.po.UserExample">
+    delete from t_user
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+  </delete>
+  <insert id="insert" parameterType="sc.learn.manage.po.User">
+    insert into t_user (f_id, f_name, f_password, 
+      f_email, f_create_time, f_update_time
+      )
+    values (#{fId,jdbcType=INTEGER}, #{fName,jdbcType=VARCHAR}, #{fPassword,jdbcType=VARCHAR}, 
+      #{fEmail,jdbcType=VARCHAR}, #{fCreateTime,jdbcType=TIMESTAMP}, #{fUpdateTime,jdbcType=TIMESTAMP}
+      )
+  </insert>
+  <insert id="insertSelective" parameterType="sc.learn.manage.po.User">
+    insert into t_user
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="fId != null">
+        f_id,
+      </if>
+      <if test="fName != null">
+        f_name,
+      </if>
+      <if test="fPassword != null">
+        f_password,
+      </if>
+      <if test="fEmail != null">
+        f_email,
+      </if>
+      <if test="fCreateTime != null">
+        f_create_time,
+      </if>
+      <if test="fUpdateTime != null">
+        f_update_time,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="fId != null">
+        #{fId,jdbcType=INTEGER},
+      </if>
+      <if test="fName != null">
+        #{fName,jdbcType=VARCHAR},
+      </if>
+      <if test="fPassword != null">
+        #{fPassword,jdbcType=VARCHAR},
+      </if>
+      <if test="fEmail != null">
+        #{fEmail,jdbcType=VARCHAR},
+      </if>
+      <if test="fCreateTime != null">
+        #{fCreateTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="fUpdateTime != null">
+        #{fUpdateTime,jdbcType=TIMESTAMP},
+      </if>
+    </trim>
+  </insert>
+  <select id="countByExample" parameterType="sc.learn.manage.po.UserExample" resultType="java.lang.Long">
+    select count(*) from t_user
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+  </select>
+  <update id="updateByExampleSelective" parameterType="map">
+    update t_user
+    <set>
+      <if test="record.fId != null">
+        f_id = #{record.fId,jdbcType=INTEGER},
+      </if>
+      <if test="record.fName != null">
+        f_name = #{record.fName,jdbcType=VARCHAR},
+      </if>
+      <if test="record.fPassword != null">
+        f_password = #{record.fPassword,jdbcType=VARCHAR},
+      </if>
+      <if test="record.fEmail != null">
+        f_email = #{record.fEmail,jdbcType=VARCHAR},
+      </if>
+      <if test="record.fCreateTime != null">
+        f_create_time = #{record.fCreateTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="record.fUpdateTime != null">
+        f_update_time = #{record.fUpdateTime,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    <if test="_parameter != null">
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByExample" parameterType="map">
+    update t_user
+    set f_id = #{record.fId,jdbcType=INTEGER},
+      f_name = #{record.fName,jdbcType=VARCHAR},
+      f_password = #{record.fPassword,jdbcType=VARCHAR},
+      f_email = #{record.fEmail,jdbcType=VARCHAR},
+      f_create_time = #{record.fCreateTime,jdbcType=TIMESTAMP},
+      f_update_time = #{record.fUpdateTime,jdbcType=TIMESTAMP}
+    <if test="_parameter != null">
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <resultMap id="BaseResultMap" type="sc.learn.manage.po.User">
+    <result column="f_id" jdbcType="INTEGER" property="fId" />
+    <result column="f_name" jdbcType="VARCHAR" property="fName" />
+    <result column="f_password" jdbcType="VARCHAR" property="fPassword" />
+    <result column="f_email" jdbcType="VARCHAR" property="fEmail" />
+    <result column="f_create_time" jdbcType="TIMESTAMP" property="fCreateTime" />
+    <result column="f_update_time" jdbcType="TIMESTAMP" property="fUpdateTime" />
+  </resultMap>
+  <sql id="Example_Where_Clause">
+    <where>
+      <foreach collection="oredCriteria" item="criteria" separator="or">
+        <if test="criteria.valid">
+          <trim prefix="(" prefixOverrides="and" suffix=")">
+            <foreach collection="criteria.criteria" item="criterion">
+              <choose>
+                <when test="criterion.noValue">
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue">
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue">
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue">
+                  and ${criterion.condition}
+                  <foreach close=")" collection="criterion.value" item="listItem" open="(" separator=",">
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Update_By_Example_Where_Clause">
+    <where>
+      <foreach collection="example.oredCriteria" item="criteria" separator="or">
+        <if test="criteria.valid">
+          <trim prefix="(" prefixOverrides="and" suffix=")">
+            <foreach collection="criteria.criteria" item="criterion">
+              <choose>
+                <when test="criterion.noValue">
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue">
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue">
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue">
+                  and ${criterion.condition}
+                  <foreach close=")" collection="criterion.value" item="listItem" open="(" separator=",">
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Base_Column_List">
+    f_id, f_name, f_password, f_email, f_create_time, f_update_time
+  </sql>
+  <select id="selectByExample" parameterType="sc.learn.manage.po.UserExample" resultMap="BaseResultMap">
+    select
+    <if test="distinct">
+      distinct
+    </if>
+    <include refid="Base_Column_List" />
+    from t_user
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null">
+      order by ${orderByClause}
+    </if>
+  </select>
+  <delete id="deleteByExample" parameterType="sc.learn.manage.po.UserExample">
+    delete from t_user
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+  </delete>
+  <insert id="insert" parameterType="sc.learn.manage.po.User">
+    insert into t_user (f_id, f_name, f_password, 
+      f_email, f_create_time, f_update_time
+      )
+    values (#{fId,jdbcType=INTEGER}, #{fName,jdbcType=VARCHAR}, #{fPassword,jdbcType=VARCHAR}, 
+      #{fEmail,jdbcType=VARCHAR}, #{fCreateTime,jdbcType=TIMESTAMP}, #{fUpdateTime,jdbcType=TIMESTAMP}
+      )
+  </insert>
+  <insert id="insertSelective" parameterType="sc.learn.manage.po.User">
+    insert into t_user
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="fId != null">
+        f_id,
+      </if>
+      <if test="fName != null">
+        f_name,
+      </if>
+      <if test="fPassword != null">
+        f_password,
+      </if>
+      <if test="fEmail != null">
+        f_email,
+      </if>
+      <if test="fCreateTime != null">
+        f_create_time,
+      </if>
+      <if test="fUpdateTime != null">
+        f_update_time,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="fId != null">
+        #{fId,jdbcType=INTEGER},
+      </if>
+      <if test="fName != null">
+        #{fName,jdbcType=VARCHAR},
+      </if>
+      <if test="fPassword != null">
+        #{fPassword,jdbcType=VARCHAR},
+      </if>
+      <if test="fEmail != null">
+        #{fEmail,jdbcType=VARCHAR},
+      </if>
+      <if test="fCreateTime != null">
+        #{fCreateTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="fUpdateTime != null">
+        #{fUpdateTime,jdbcType=TIMESTAMP},
+      </if>
+    </trim>
+  </insert>
+  <select id="countByExample" parameterType="sc.learn.manage.po.UserExample" resultType="java.lang.Long">
+    select count(*) from t_user
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+  </select>
+  <update id="updateByExampleSelective" parameterType="map">
+    update t_user
+    <set>
+      <if test="record.fId != null">
+        f_id = #{record.fId,jdbcType=INTEGER},
+      </if>
+      <if test="record.fName != null">
+        f_name = #{record.fName,jdbcType=VARCHAR},
+      </if>
+      <if test="record.fPassword != null">
+        f_password = #{record.fPassword,jdbcType=VARCHAR},
+      </if>
+      <if test="record.fEmail != null">
+        f_email = #{record.fEmail,jdbcType=VARCHAR},
+      </if>
+      <if test="record.fCreateTime != null">
+        f_create_time = #{record.fCreateTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="record.fUpdateTime != null">
+        f_update_time = #{record.fUpdateTime,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    <if test="_parameter != null">
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByExample" parameterType="map">
+    update t_user
+    set f_id = #{record.fId,jdbcType=INTEGER},
+      f_name = #{record.fName,jdbcType=VARCHAR},
+      f_password = #{record.fPassword,jdbcType=VARCHAR},
+      f_email = #{record.fEmail,jdbcType=VARCHAR},
+      f_create_time = #{record.fCreateTime,jdbcType=TIMESTAMP},
+      f_update_time = #{record.fUpdateTime,jdbcType=TIMESTAMP}
+    <if test="_parameter != null">
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <resultMap id="BaseResultMap" type="sc.learn.manage.po.User">
+    <result column="f_id" jdbcType="INTEGER" property="fId" />
+    <result column="f_name" jdbcType="VARCHAR" property="fName" />
+    <result column="f_password" jdbcType="VARCHAR" property="fPassword" />
+    <result column="f_email" jdbcType="VARCHAR" property="fEmail" />
+    <result column="f_create_time" jdbcType="TIMESTAMP" property="fCreateTime" />
+    <result column="f_update_time" jdbcType="TIMESTAMP" property="fUpdateTime" />
+  </resultMap>
+  <sql id="Example_Where_Clause">
+    <where>
+      <foreach collection="oredCriteria" item="criteria" separator="or">
+        <if test="criteria.valid">
+          <trim prefix="(" prefixOverrides="and" suffix=")">
+            <foreach collection="criteria.criteria" item="criterion">
+              <choose>
+                <when test="criterion.noValue">
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue">
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue">
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue">
+                  and ${criterion.condition}
+                  <foreach close=")" collection="criterion.value" item="listItem" open="(" separator=",">
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Update_By_Example_Where_Clause">
+    <where>
+      <foreach collection="example.oredCriteria" item="criteria" separator="or">
+        <if test="criteria.valid">
+          <trim prefix="(" prefixOverrides="and" suffix=")">
+            <foreach collection="criteria.criteria" item="criterion">
+              <choose>
+                <when test="criterion.noValue">
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue">
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue">
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue">
+                  and ${criterion.condition}
+                  <foreach close=")" collection="criterion.value" item="listItem" open="(" separator=",">
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Base_Column_List">
+    f_id, f_name, f_password, f_email, f_create_time, f_update_time
+  </sql>
+  <select id="selectByExample" parameterType="sc.learn.manage.po.UserExample" resultMap="BaseResultMap">
+    select
+    <if test="distinct">
+      distinct
+    </if>
+    <include refid="Base_Column_List" />
+    from t_user
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null">
+      order by ${orderByClause}
+    </if>
+  </select>
+  <delete id="deleteByExample" parameterType="sc.learn.manage.po.UserExample">
+    delete from t_user
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+  </delete>
+  <insert id="insert" parameterType="sc.learn.manage.po.User">
+    insert into t_user (f_id, f_name, f_password, 
+      f_email, f_create_time, f_update_time
+      )
+    values (#{fId,jdbcType=INTEGER}, #{fName,jdbcType=VARCHAR}, #{fPassword,jdbcType=VARCHAR}, 
+      #{fEmail,jdbcType=VARCHAR}, #{fCreateTime,jdbcType=TIMESTAMP}, #{fUpdateTime,jdbcType=TIMESTAMP}
+      )
+  </insert>
+  <insert id="insertSelective" parameterType="sc.learn.manage.po.User">
+    insert into t_user
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="fId != null">
+        f_id,
+      </if>
+      <if test="fName != null">
+        f_name,
+      </if>
+      <if test="fPassword != null">
+        f_password,
+      </if>
+      <if test="fEmail != null">
+        f_email,
+      </if>
+      <if test="fCreateTime != null">
+        f_create_time,
+      </if>
+      <if test="fUpdateTime != null">
+        f_update_time,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="fId != null">
+        #{fId,jdbcType=INTEGER},
+      </if>
+      <if test="fName != null">
+        #{fName,jdbcType=VARCHAR},
+      </if>
+      <if test="fPassword != null">
+        #{fPassword,jdbcType=VARCHAR},
+      </if>
+      <if test="fEmail != null">
+        #{fEmail,jdbcType=VARCHAR},
+      </if>
+      <if test="fCreateTime != null">
+        #{fCreateTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="fUpdateTime != null">
+        #{fUpdateTime,jdbcType=TIMESTAMP},
+      </if>
+    </trim>
+  </insert>
+  <select id="countByExample" parameterType="sc.learn.manage.po.UserExample" resultType="java.lang.Long">
+    select count(*) from t_user
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+  </select>
+  <update id="updateByExampleSelective" parameterType="map">
+    update t_user
+    <set>
+      <if test="record.fId != null">
+        f_id = #{record.fId,jdbcType=INTEGER},
+      </if>
+      <if test="record.fName != null">
+        f_name = #{record.fName,jdbcType=VARCHAR},
+      </if>
+      <if test="record.fPassword != null">
+        f_password = #{record.fPassword,jdbcType=VARCHAR},
+      </if>
+      <if test="record.fEmail != null">
+        f_email = #{record.fEmail,jdbcType=VARCHAR},
+      </if>
+      <if test="record.fCreateTime != null">
+        f_create_time = #{record.fCreateTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="record.fUpdateTime != null">
+        f_update_time = #{record.fUpdateTime,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    <if test="_parameter != null">
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByExample" parameterType="map">
+    update t_user
+    set f_id = #{record.fId,jdbcType=INTEGER},
+      f_name = #{record.fName,jdbcType=VARCHAR},
+      f_password = #{record.fPassword,jdbcType=VARCHAR},
+      f_email = #{record.fEmail,jdbcType=VARCHAR},
+      f_create_time = #{record.fCreateTime,jdbcType=TIMESTAMP},
+      f_update_time = #{record.fUpdateTime,jdbcType=TIMESTAMP}
+    <if test="_parameter != null">
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
 </mapper>

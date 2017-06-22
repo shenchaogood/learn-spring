@@ -1,101 +1,55 @@
 package sc.learn.manage.po;
 
-import java.io.Serializable;
 import java.util.Date;
-import java.util.HashSet;
-import java.util.Set;
 
-public class Role implements Serializable{
-	private static final long serialVersionUID = 1L;
+public class Role {
+    private Integer fId;
 
-	//角色id
-	private Integer id;
-	
-	//角色名称
-	private String name;
-	
-	//角色描述
-	private String description;
-	
-	private Date createTime;
-	
-	private Date updateTime;
-	
-	//拥有该角色的用户
-	private Set<User> users=new HashSet<User>();
-//	
-	//该角色拥有的权限
-	private Set<Privilege> privileges=new HashSet<Privilege>();
+    private String fName;
 
-	public Integer getId() {
-		return id;
-	}
+    private String fDescription;
 
-	public void setId(Integer id) {
-		this.id = id;
-	}
+    private Date fCreateTime;
 
-	public String getName() {
-		return name;
-	}
+    private Date fUpdateTime;
 
-	public void setName(String name) {
-		this.name = name;
-	}
+    public Integer getfId() {
+        return fId;
+    }
 
-	public String getDescription() {
-		return description;
-	}
+    public void setfId(Integer fId) {
+        this.fId = fId;
+    }
 
-	public void setDescription(String description) {
-		this.description = description;
-	}
+    public String getfName() {
+        return fName;
+    }
 
-	public Set<User> getUsers() {
-		return users;
-	}
+    public void setfName(String fName) {
+        this.fName = fName == null ? null : fName.trim();
+    }
 
-	public void setUsers(Set<User> users) {
-		this.users = users;
-	}
+    public String getfDescription() {
+        return fDescription;
+    }
 
-	public Set<Privilege> getPrivileges() {
-		return privileges;
-	}
+    public void setfDescription(String fDescription) {
+        this.fDescription = fDescription == null ? null : fDescription.trim();
+    }
 
-	public void setPrivileges(Set<Privilege> privileges) {
-		this.privileges = privileges;
-	}
+    public Date getfCreateTime() {
+        return fCreateTime;
+    }
 
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((name == null) ? 0 : name.hashCode());
-		return result;
-	}
+    public void setfCreateTime(Date fCreateTime) {
+        this.fCreateTime = fCreateTime;
+    }
 
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		Role other = (Role) obj;
-		if (name == null) {
-			if (other.name != null)
-				return false;
-		} else if (!name.equals(other.name))
-			return false;
-		return true;
-	}
+    public Date getfUpdateTime() {
+        return fUpdateTime;
+    }
 
-	@Override
-	public String toString() {
-		return "Role [id=" + id + ", name=" + name + ", description=" + description + ", createTime=" + createTime + ", updateTime=" + updateTime + ", users="
-				+ users + ", privileges=" + privileges + "]";
-	}
-
+    public void setfUpdateTime(Date fUpdateTime) {
+        this.fUpdateTime = fUpdateTime;
+    }
 }

@@ -1,23 +1,22 @@
 package sc.learn.manage.mapper;
 
 import java.util.List;
-
+import org.apache.ibatis.annotations.Param;
 import sc.learn.manage.po.Privilege;
+import sc.learn.manage.po.PrivilegeExample;
 
 public interface PrivilegeMapper {
-	Integer insert(Privilege privilege);
-	
-	Privilege selectById(Integer id);
-	
-	List<Privilege> selectAll();
+    long countByExample(PrivilegeExample example);
 
-	List<Privilege> selectMenuPrivileges();
-	
-	List<Privilege> selectByParentId(Integer parentId);
+    int deleteByExample(PrivilegeExample example);
 
-	List<Privilege> selectByIds(Integer[] ids);
-	
-	Privilege selectByUrl(String url);
+    int insert(Privilege record);
 
-	List<String> selectAllUrl();
+    int insertSelective(Privilege record);
+
+    List<Privilege> selectByExample(PrivilegeExample example);
+
+    int updateByExampleSelective(@Param("record") Privilege record, @Param("example") PrivilegeExample example);
+
+    int updateByExample(@Param("record") Privilege record, @Param("example") PrivilegeExample example);
 }

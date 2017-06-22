@@ -1,26 +1,22 @@
 package sc.learn.manage.mapper;
 
 import java.util.List;
-
+import org.apache.ibatis.annotations.Param;
 import sc.learn.manage.po.Role;
-
+import sc.learn.manage.po.RoleExample;
 
 public interface RoleMapper {
-	Integer insert(Role role);
-	
-	void deleteById(Integer id);
-	
-	void deleteRolePrivileges(Integer roleId);
-	
-	void deleteRoleUsers(Integer roleId);
-	
-	void update(Role role);
-	
-	Role selectById(Integer id);
-	
-	void insertRolePrivileges(Role role);
-	
-	List<Role> selectAll();
+    long countByExample(RoleExample example);
 
-	Role selectByName(String name);
+    int deleteByExample(RoleExample example);
+
+    int insert(Role record);
+
+    int insertSelective(Role record);
+
+    List<Role> selectByExample(RoleExample example);
+
+    int updateByExampleSelective(@Param("record") Role record, @Param("example") RoleExample example);
+
+    int updateByExample(@Param("record") Role record, @Param("example") RoleExample example);
 }
