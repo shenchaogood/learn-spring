@@ -1,5 +1,7 @@
 package sc.learn.common.pojo;
 
+import java.util.List;
+
 public class DataTableParam {
 	
 	public static class Search{
@@ -42,7 +44,6 @@ public class DataTableParam {
 		private boolean searchable;
 		private boolean orderable;
 		private Search search;
-		private Order order;
 		public String getData() {
 			return data;
 		}
@@ -73,13 +74,6 @@ public class DataTableParam {
 		public void setSearch(Search search) {
 			this.search = search;
 		}
-		public Order getOrder() {
-			return order;
-		}
-		public void setOrder(Order order) {
-			this.order = order;
-		}
-		
 	}
 	
 	/////
@@ -88,10 +82,10 @@ public class DataTableParam {
 	private int start;
 	
 	private int length;
+
+	private List<Column> columns;
 	
-	private Column[] columns;
-	
-	private Order order;
+	private List<Order> order;
 	
 	private Search search;
 
@@ -119,19 +113,19 @@ public class DataTableParam {
 		this.length = length;
 	}
 
-	public Column[] getColumns() {
+	public List<Column> getColumns() {
 		return columns;
 	}
 
-	public void setColumns(Column[] columns) {
+	public void setColumns(List<Column> columns) {
 		this.columns = columns;
 	}
 
-	public Order getOrder() {
+	public List<Order> getOrder() {
 		return order;
 	}
 
-	public void setOrder(Order order) {
+	public void setOrder(List<Order> order) {
 		this.order = order;
 	}
 

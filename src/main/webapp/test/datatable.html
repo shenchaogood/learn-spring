@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+<script src="/learn-spring/vendor/jquery/jquery.min.js"></script>
+<script src="/learn-spring/vendor/jquery/datatables/jquery.dataTables.min.js"></script>
+</head>
+<body>
+	<table id="example">
+		<thead>
+	        <tr>
+	            <th>Subscriber ID</th>
+	            <th>Install Location</th>
+	            <th>Subscriber Name</th>
+	            <th>some data</th>
+	            <th>some data</th>
+	            <th>some data</th>
+	        </tr>
+	    </thead>
+	    <tfoot>
+	        <tr>
+	            <th>Subscriber ID</th>
+	            <th>Install Location</th>
+	            <th>Subscriber Name</th>
+	            <th>some data</th>
+	            <th>some data</th>
+	            <th>some data</th>
+	        </tr>
+	    </tfoot>
+	</table>
+
+	<script type="text/javascript">
+	$('#example').DataTable( {
+	    serverSide: true,
+	    "ordering": false, // 禁止排序
+ 	    "columns": [
+            { "data": "id" },
+            { "data": "name" },
+            { "data": "email" },
+            { "data": "password" },
+            { "data": "createTime" },
+            { "data": "updateTime" }
+        ],
+	    ajax: {
+	        url: '/learn-spring/manage/user/list',
+	        type: 'POST',
+            contentType:"application/json",
+	        data: function(data) {
+	        	return JSON.stringify(data);
+	        }
+	    }
+	} );
+	</script>
+</body>
+</html>

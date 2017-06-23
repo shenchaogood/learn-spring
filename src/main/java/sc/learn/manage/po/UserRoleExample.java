@@ -105,243 +105,243 @@ public class UserRoleExample {
             criteria.add(new Criterion(condition, value1, value2));
         }
 
-        public Criteria andFUserIdIsNull() {
+        public Criteria andUserIdIsNull() {
             addCriterion("f_user_id is null");
             return (Criteria) this;
         }
 
-        public Criteria andFUserIdIsNotNull() {
+        public Criteria andUserIdIsNotNull() {
             addCriterion("f_user_id is not null");
             return (Criteria) this;
         }
 
-        public Criteria andFUserIdEqualTo(Integer value) {
-            addCriterion("f_user_id =", value, "fUserId");
+        public Criteria andUserIdEqualTo(Integer value) {
+            addCriterion("f_user_id =", value, "userId");
             return (Criteria) this;
         }
 
-        public Criteria andFUserIdNotEqualTo(Integer value) {
-            addCriterion("f_user_id <>", value, "fUserId");
+        public Criteria andUserIdNotEqualTo(Integer value) {
+            addCriterion("f_user_id <>", value, "userId");
             return (Criteria) this;
         }
 
-        public Criteria andFUserIdGreaterThan(Integer value) {
-            addCriterion("f_user_id >", value, "fUserId");
+        public Criteria andUserIdGreaterThan(Integer value) {
+            addCriterion("f_user_id >", value, "userId");
             return (Criteria) this;
         }
 
-        public Criteria andFUserIdGreaterThanOrEqualTo(Integer value) {
-            addCriterion("f_user_id >=", value, "fUserId");
+        public Criteria andUserIdGreaterThanOrEqualTo(Integer value) {
+            addCriterion("f_user_id >=", value, "userId");
             return (Criteria) this;
         }
 
-        public Criteria andFUserIdLessThan(Integer value) {
-            addCriterion("f_user_id <", value, "fUserId");
+        public Criteria andUserIdLessThan(Integer value) {
+            addCriterion("f_user_id <", value, "userId");
             return (Criteria) this;
         }
 
-        public Criteria andFUserIdLessThanOrEqualTo(Integer value) {
-            addCriterion("f_user_id <=", value, "fUserId");
+        public Criteria andUserIdLessThanOrEqualTo(Integer value) {
+            addCriterion("f_user_id <=", value, "userId");
             return (Criteria) this;
         }
 
-        public Criteria andFUserIdIn(List<Integer> values) {
-            addCriterion("f_user_id in", values, "fUserId");
+        public Criteria andUserIdIn(List<Integer> values) {
+            addCriterion("f_user_id in", values, "userId");
             return (Criteria) this;
         }
 
-        public Criteria andFUserIdNotIn(List<Integer> values) {
-            addCriterion("f_user_id not in", values, "fUserId");
+        public Criteria andUserIdNotIn(List<Integer> values) {
+            addCriterion("f_user_id not in", values, "userId");
             return (Criteria) this;
         }
 
-        public Criteria andFUserIdBetween(Integer value1, Integer value2) {
-            addCriterion("f_user_id between", value1, value2, "fUserId");
+        public Criteria andUserIdBetween(Integer value1, Integer value2) {
+            addCriterion("f_user_id between", value1, value2, "userId");
             return (Criteria) this;
         }
 
-        public Criteria andFUserIdNotBetween(Integer value1, Integer value2) {
-            addCriterion("f_user_id not between", value1, value2, "fUserId");
+        public Criteria andUserIdNotBetween(Integer value1, Integer value2) {
+            addCriterion("f_user_id not between", value1, value2, "userId");
             return (Criteria) this;
         }
 
-        public Criteria andFRoleIdIsNull() {
+        public Criteria andRoleIdIsNull() {
             addCriterion("f_role_id is null");
             return (Criteria) this;
         }
 
-        public Criteria andFRoleIdIsNotNull() {
+        public Criteria andRoleIdIsNotNull() {
             addCriterion("f_role_id is not null");
             return (Criteria) this;
         }
 
-        public Criteria andFRoleIdEqualTo(Integer value) {
-            addCriterion("f_role_id =", value, "fRoleId");
+        public Criteria andRoleIdEqualTo(Integer value) {
+            addCriterion("f_role_id =", value, "roleId");
             return (Criteria) this;
         }
 
-        public Criteria andFRoleIdNotEqualTo(Integer value) {
-            addCriterion("f_role_id <>", value, "fRoleId");
+        public Criteria andRoleIdNotEqualTo(Integer value) {
+            addCriterion("f_role_id <>", value, "roleId");
             return (Criteria) this;
         }
 
-        public Criteria andFRoleIdGreaterThan(Integer value) {
-            addCriterion("f_role_id >", value, "fRoleId");
+        public Criteria andRoleIdGreaterThan(Integer value) {
+            addCriterion("f_role_id >", value, "roleId");
             return (Criteria) this;
         }
 
-        public Criteria andFRoleIdGreaterThanOrEqualTo(Integer value) {
-            addCriterion("f_role_id >=", value, "fRoleId");
+        public Criteria andRoleIdGreaterThanOrEqualTo(Integer value) {
+            addCriterion("f_role_id >=", value, "roleId");
             return (Criteria) this;
         }
 
-        public Criteria andFRoleIdLessThan(Integer value) {
-            addCriterion("f_role_id <", value, "fRoleId");
+        public Criteria andRoleIdLessThan(Integer value) {
+            addCriterion("f_role_id <", value, "roleId");
             return (Criteria) this;
         }
 
-        public Criteria andFRoleIdLessThanOrEqualTo(Integer value) {
-            addCriterion("f_role_id <=", value, "fRoleId");
+        public Criteria andRoleIdLessThanOrEqualTo(Integer value) {
+            addCriterion("f_role_id <=", value, "roleId");
             return (Criteria) this;
         }
 
-        public Criteria andFRoleIdIn(List<Integer> values) {
-            addCriterion("f_role_id in", values, "fRoleId");
+        public Criteria andRoleIdIn(List<Integer> values) {
+            addCriterion("f_role_id in", values, "roleId");
             return (Criteria) this;
         }
 
-        public Criteria andFRoleIdNotIn(List<Integer> values) {
-            addCriterion("f_role_id not in", values, "fRoleId");
+        public Criteria andRoleIdNotIn(List<Integer> values) {
+            addCriterion("f_role_id not in", values, "roleId");
             return (Criteria) this;
         }
 
-        public Criteria andFRoleIdBetween(Integer value1, Integer value2) {
-            addCriterion("f_role_id between", value1, value2, "fRoleId");
+        public Criteria andRoleIdBetween(Integer value1, Integer value2) {
+            addCriterion("f_role_id between", value1, value2, "roleId");
             return (Criteria) this;
         }
 
-        public Criteria andFRoleIdNotBetween(Integer value1, Integer value2) {
-            addCriterion("f_role_id not between", value1, value2, "fRoleId");
+        public Criteria andRoleIdNotBetween(Integer value1, Integer value2) {
+            addCriterion("f_role_id not between", value1, value2, "roleId");
             return (Criteria) this;
         }
 
-        public Criteria andFCreateTimeIsNull() {
+        public Criteria andCreateTimeIsNull() {
             addCriterion("f_create_time is null");
             return (Criteria) this;
         }
 
-        public Criteria andFCreateTimeIsNotNull() {
+        public Criteria andCreateTimeIsNotNull() {
             addCriterion("f_create_time is not null");
             return (Criteria) this;
         }
 
-        public Criteria andFCreateTimeEqualTo(Date value) {
-            addCriterion("f_create_time =", value, "fCreateTime");
+        public Criteria andCreateTimeEqualTo(Date value) {
+            addCriterion("f_create_time =", value, "createTime");
             return (Criteria) this;
         }
 
-        public Criteria andFCreateTimeNotEqualTo(Date value) {
-            addCriterion("f_create_time <>", value, "fCreateTime");
+        public Criteria andCreateTimeNotEqualTo(Date value) {
+            addCriterion("f_create_time <>", value, "createTime");
             return (Criteria) this;
         }
 
-        public Criteria andFCreateTimeGreaterThan(Date value) {
-            addCriterion("f_create_time >", value, "fCreateTime");
+        public Criteria andCreateTimeGreaterThan(Date value) {
+            addCriterion("f_create_time >", value, "createTime");
             return (Criteria) this;
         }
 
-        public Criteria andFCreateTimeGreaterThanOrEqualTo(Date value) {
-            addCriterion("f_create_time >=", value, "fCreateTime");
+        public Criteria andCreateTimeGreaterThanOrEqualTo(Date value) {
+            addCriterion("f_create_time >=", value, "createTime");
             return (Criteria) this;
         }
 
-        public Criteria andFCreateTimeLessThan(Date value) {
-            addCriterion("f_create_time <", value, "fCreateTime");
+        public Criteria andCreateTimeLessThan(Date value) {
+            addCriterion("f_create_time <", value, "createTime");
             return (Criteria) this;
         }
 
-        public Criteria andFCreateTimeLessThanOrEqualTo(Date value) {
-            addCriterion("f_create_time <=", value, "fCreateTime");
+        public Criteria andCreateTimeLessThanOrEqualTo(Date value) {
+            addCriterion("f_create_time <=", value, "createTime");
             return (Criteria) this;
         }
 
-        public Criteria andFCreateTimeIn(List<Date> values) {
-            addCriterion("f_create_time in", values, "fCreateTime");
+        public Criteria andCreateTimeIn(List<Date> values) {
+            addCriterion("f_create_time in", values, "createTime");
             return (Criteria) this;
         }
 
-        public Criteria andFCreateTimeNotIn(List<Date> values) {
-            addCriterion("f_create_time not in", values, "fCreateTime");
+        public Criteria andCreateTimeNotIn(List<Date> values) {
+            addCriterion("f_create_time not in", values, "createTime");
             return (Criteria) this;
         }
 
-        public Criteria andFCreateTimeBetween(Date value1, Date value2) {
-            addCriterion("f_create_time between", value1, value2, "fCreateTime");
+        public Criteria andCreateTimeBetween(Date value1, Date value2) {
+            addCriterion("f_create_time between", value1, value2, "createTime");
             return (Criteria) this;
         }
 
-        public Criteria andFCreateTimeNotBetween(Date value1, Date value2) {
-            addCriterion("f_create_time not between", value1, value2, "fCreateTime");
+        public Criteria andCreateTimeNotBetween(Date value1, Date value2) {
+            addCriterion("f_create_time not between", value1, value2, "createTime");
             return (Criteria) this;
         }
 
-        public Criteria andFUpdateTimeIsNull() {
+        public Criteria andUpdateTimeIsNull() {
             addCriterion("f_update_time is null");
             return (Criteria) this;
         }
 
-        public Criteria andFUpdateTimeIsNotNull() {
+        public Criteria andUpdateTimeIsNotNull() {
             addCriterion("f_update_time is not null");
             return (Criteria) this;
         }
 
-        public Criteria andFUpdateTimeEqualTo(Date value) {
-            addCriterion("f_update_time =", value, "fUpdateTime");
+        public Criteria andUpdateTimeEqualTo(Date value) {
+            addCriterion("f_update_time =", value, "updateTime");
             return (Criteria) this;
         }
 
-        public Criteria andFUpdateTimeNotEqualTo(Date value) {
-            addCriterion("f_update_time <>", value, "fUpdateTime");
+        public Criteria andUpdateTimeNotEqualTo(Date value) {
+            addCriterion("f_update_time <>", value, "updateTime");
             return (Criteria) this;
         }
 
-        public Criteria andFUpdateTimeGreaterThan(Date value) {
-            addCriterion("f_update_time >", value, "fUpdateTime");
+        public Criteria andUpdateTimeGreaterThan(Date value) {
+            addCriterion("f_update_time >", value, "updateTime");
             return (Criteria) this;
         }
 
-        public Criteria andFUpdateTimeGreaterThanOrEqualTo(Date value) {
-            addCriterion("f_update_time >=", value, "fUpdateTime");
+        public Criteria andUpdateTimeGreaterThanOrEqualTo(Date value) {
+            addCriterion("f_update_time >=", value, "updateTime");
             return (Criteria) this;
         }
 
-        public Criteria andFUpdateTimeLessThan(Date value) {
-            addCriterion("f_update_time <", value, "fUpdateTime");
+        public Criteria andUpdateTimeLessThan(Date value) {
+            addCriterion("f_update_time <", value, "updateTime");
             return (Criteria) this;
         }
 
-        public Criteria andFUpdateTimeLessThanOrEqualTo(Date value) {
-            addCriterion("f_update_time <=", value, "fUpdateTime");
+        public Criteria andUpdateTimeLessThanOrEqualTo(Date value) {
+            addCriterion("f_update_time <=", value, "updateTime");
             return (Criteria) this;
         }
 
-        public Criteria andFUpdateTimeIn(List<Date> values) {
-            addCriterion("f_update_time in", values, "fUpdateTime");
+        public Criteria andUpdateTimeIn(List<Date> values) {
+            addCriterion("f_update_time in", values, "updateTime");
             return (Criteria) this;
         }
 
-        public Criteria andFUpdateTimeNotIn(List<Date> values) {
-            addCriterion("f_update_time not in", values, "fUpdateTime");
+        public Criteria andUpdateTimeNotIn(List<Date> values) {
+            addCriterion("f_update_time not in", values, "updateTime");
             return (Criteria) this;
         }
 
-        public Criteria andFUpdateTimeBetween(Date value1, Date value2) {
-            addCriterion("f_update_time between", value1, value2, "fUpdateTime");
+        public Criteria andUpdateTimeBetween(Date value1, Date value2) {
+            addCriterion("f_update_time between", value1, value2, "updateTime");
             return (Criteria) this;
         }
 
-        public Criteria andFUpdateTimeNotBetween(Date value1, Date value2) {
-            addCriterion("f_update_time not between", value1, value2, "fUpdateTime");
+        public Criteria andUpdateTimeNotBetween(Date value1, Date value2) {
+            addCriterion("f_update_time not between", value1, value2, "updateTime");
             return (Criteria) this;
         }
     }

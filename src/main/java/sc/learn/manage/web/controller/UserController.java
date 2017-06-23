@@ -1,6 +1,9 @@
 package sc.learn.manage.web.controller;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -16,6 +19,8 @@ import sc.learn.manage.vo.UserVo;
 @RestController
 @RequestMapping("/manage/user")
 public class UserController {
+	
+	private static Logger LOGGER=LoggerFactory.getLogger(UserController.class);
 	
 	@Autowired
 	private HttpSessionProvider httpSession;
@@ -35,7 +40,7 @@ public class UserController {
 	}
 	
 	@RequestMapping("list")
-	public DataTableResult<User> list(DataTableParam param){
+	public DataTableResult<User> list(@RequestBody DataTableParam param){
 		return userBiz.list(param);
 	}
 	

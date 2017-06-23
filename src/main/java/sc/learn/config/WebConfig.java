@@ -1,20 +1,25 @@
 package sc.learn.config;
 
 import java.io.IOException;
+import java.util.Arrays;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.MediaType;
 import org.springframework.web.multipart.MultipartResolver;
 import org.springframework.web.multipart.support.StandardServletMultipartResolver;
 import org.springframework.web.servlet.ViewResolver;
 import org.springframework.web.servlet.config.annotation.DefaultServletHandlerConfigurer;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
+import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 import org.springframework.web.servlet.view.InternalResourceViewResolver;
 
-import sc.learn.web.TestIntercepter;
+import com.alibaba.fastjson.support.spring.FastJsonHttpMessageConverter;
+
+import sc.learn.manage.web.intercepter.MethodPrintIntercepter;
 
 @Configuration
 @EnableWebMvc
@@ -47,8 +52,17 @@ public class WebConfig extends WebMvcConfigurerAdapter{
 	@Bean
 	public RequestMappingHandlerMapping requestMappingHandlerMapping(){
 		RequestMappingHandlerMapping handlerMapping=new RequestMappingHandlerMapping();
-		handlerMapping.setInterceptors(new TestIntercepter());
+		handlerMapping.setInterceptors(new MethodPrintIntercepter());
 		return handlerMapping;
 	}
 	
+	@Bean
+	public RequestMappingHandlerAdapter requestMappingHandlerAdapter(){
+		RequestMappingHandlerAdapter handlerAdapter=new RequestMappingHandlerAdapter();
+		FastJsonHttpMessageConverter converter = new FastJsonHttpMessageConverter();
+		//<!-- 这里顺序不能写反，一定要先写text/html，否则IE下会出现下载提示 -->  
+		converter.setSupportedMediaTypes(Arrays.asList(MediaType.TEXT_HTML,MediaType.APPLICATION_JSON));
+		handlerAdapter.getMessageConverters().add(0,converter);
+		return handlerAdapter;
+	}
 }

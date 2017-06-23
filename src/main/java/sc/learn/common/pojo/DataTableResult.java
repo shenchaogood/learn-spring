@@ -4,15 +4,16 @@ import java.util.List;
 
 public class DataTableResult<T> {
 
-	public static <T> DataTableResult<T> createDataTableResult(long draw, long recordsTotal, long recordsFiltered, List<T> data){
-		return new DataTableResult<T>(draw,recordsTotal,recordsFiltered,data);
+	public static <T> DataTableResult<T> createDataTableResult(long draw, long recordsTotal, long recordsFiltered, List<T> data,String error){
+		return new DataTableResult<T>(draw,recordsTotal,recordsFiltered,data,error);
 	}
 	
-	private DataTableResult(long draw, long recordsTotal, long recordsFiltered, List<T> data) {
+	private DataTableResult(long draw, long recordsTotal, long recordsFiltered, List<T> data,String error) {
 		this.draw = draw;
 		this.recordsTotal = recordsTotal;
 		this.recordsFiltered = recordsFiltered;
 		this.data = data;
+		this.error = error;
 	}
 
 	private long draw;//请求次数
@@ -22,6 +23,16 @@ public class DataTableResult<T> {
 	private long recordsFiltered;
 	
 	private List<T> data;
+	
+	private String error;
+
+	public String getError() {
+		return error;
+	}
+
+	public void setError(String error) {
+		this.error = error;
+	}
 
 	public long getDraw() {
 		return draw;

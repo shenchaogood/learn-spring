@@ -1,95 +1,98 @@
 package sc.learn.manage.po;
 
+import java.io.Serializable;
 import java.util.Date;
 
-public class Privilege {
-    private Integer fId;
+public class Privilege implements Serializable {
+    private Integer id;
 
-    private String fName;
+    private String name;
 
-    private String fDescription;
+    private String description;
 
-    private String fUrl;
+    private String url;
 
-    private String fIcon;
+    private String icon;
 
-    private Boolean fLeaf;
+    private Boolean leaf;
 
-    private Integer fParentId;
+    private Integer parentId;
 
-    private Date fCreateTime;
+    private Date createTime;
 
-    private Date fUpdateTime;
+    private Date updateTime;
 
-    public Integer getfId() {
-        return fId;
+    private static final long serialVersionUID = 1L;
+
+    public Integer getId() {
+        return id;
     }
 
-    public void setfId(Integer fId) {
-        this.fId = fId;
+    public void setId(Integer id) {
+        this.id = id;
     }
 
-    public String getfName() {
-        return fName;
+    public String getName() {
+        return name;
     }
 
-    public void setfName(String fName) {
-        this.fName = fName == null ? null : fName.trim();
+    public void setName(String name) {
+        this.name = name == null ? null : name.trim();
     }
 
-    public String getfDescription() {
-        return fDescription;
+    public String getDescription() {
+        return description;
     }
 
-    public void setfDescription(String fDescription) {
-        this.fDescription = fDescription == null ? null : fDescription.trim();
+    public void setDescription(String description) {
+        this.description = description == null ? null : description.trim();
     }
 
-    public String getfUrl() {
-        return fUrl;
+    public String getUrl() {
+        return url;
     }
 
-    public void setfUrl(String fUrl) {
-        this.fUrl = fUrl == null ? null : fUrl.trim();
+    public void setUrl(String url) {
+        this.url = url == null ? null : url.trim();
     }
 
-    public String getfIcon() {
-        return fIcon;
+    public String getIcon() {
+        return icon;
     }
 
-    public void setfIcon(String fIcon) {
-        this.fIcon = fIcon == null ? null : fIcon.trim();
+    public void setIcon(String icon) {
+        this.icon = icon == null ? null : icon.trim();
     }
 
-    public Boolean getfLeaf() {
-        return fLeaf;
+    public Boolean getLeaf() {
+        return leaf;
     }
 
-    public void setfLeaf(Boolean fLeaf) {
-        this.fLeaf = fLeaf;
+    public void setLeaf(Boolean leaf) {
+        this.leaf = leaf;
     }
 
-    public Integer getfParentId() {
-        return fParentId;
+    public Integer getParentId() {
+        return parentId;
     }
 
-    public void setfParentId(Integer fParentId) {
-        this.fParentId = fParentId;
+    public void setParentId(Integer parentId) {
+        this.parentId = parentId;
     }
 
-    public Date getfCreateTime() {
-        return fCreateTime;
+    public Date getCreateTime() {
+        return createTime;
     }
 
-    public void setfCreateTime(Date fCreateTime) {
-        this.fCreateTime = fCreateTime;
+    public void setCreateTime(Date createTime) {
+        this.createTime = createTime;
     }
 
-    public Date getfUpdateTime() {
-        return fUpdateTime;
+    public Date getUpdateTime() {
+        return updateTime;
     }
 
-    public void setfUpdateTime(Date fUpdateTime) {
-        this.fUpdateTime = fUpdateTime;
+    public void setUpdateTime(Date updateTime) {
+        this.updateTime = updateTime;
     }
 }

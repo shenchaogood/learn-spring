@@ -1,55 +1,58 @@
 package sc.learn.manage.po;
 
+import java.io.Serializable;
 import java.util.Date;
 
-public class Role {
-    private Integer fId;
+public class Role implements Serializable {
+    private Integer id;
 
-    private String fName;
+    private String name;
 
-    private String fDescription;
+    private String description;
 
-    private Date fCreateTime;
+    private Date createTime;
 
-    private Date fUpdateTime;
+    private Date updateTime;
 
-    public Integer getfId() {
-        return fId;
+    private static final long serialVersionUID = 1L;
+
+    public Integer getId() {
+        return id;
     }
 
-    public void setfId(Integer fId) {
-        this.fId = fId;
+    public void setId(Integer id) {
+        this.id = id;
     }
 
-    public String getfName() {
-        return fName;
+    public String getName() {
+        return name;
     }
 
-    public void setfName(String fName) {
-        this.fName = fName == null ? null : fName.trim();
+    public void setName(String name) {
+        this.name = name == null ? null : name.trim();
     }
 
-    public String getfDescription() {
-        return fDescription;
+    public String getDescription() {
+        return description;
     }
 
-    public void setfDescription(String fDescription) {
-        this.fDescription = fDescription == null ? null : fDescription.trim();
+    public void setDescription(String description) {
+        this.description = description == null ? null : description.trim();
     }
 
-    public Date getfCreateTime() {
-        return fCreateTime;
+    public Date getCreateTime() {
+        return createTime;
     }
 
-    public void setfCreateTime(Date fCreateTime) {
-        this.fCreateTime = fCreateTime;
+    public void setCreateTime(Date createTime) {
+        this.createTime = createTime;
     }
 
-    public Date getfUpdateTime() {
-        return fUpdateTime;
+    public Date getUpdateTime() {
+        return updateTime;
     }
 
-    public void setfUpdateTime(Date fUpdateTime) {
-        this.fUpdateTime = fUpdateTime;
+    public void setUpdateTime(Date updateTime) {
+        this.updateTime = updateTime;
     }
 }

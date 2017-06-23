@@ -1,45 +1,48 @@
 package sc.learn.manage.po;
 
+import java.io.Serializable;
 import java.util.Date;
 
-public class RolePrivilege {
-    private Integer fRoleId;
+public class RolePrivilege implements Serializable {
+    private Integer roleId;
 
-    private Integer fPrivilegeId;
+    private Integer privilegeId;
 
-    private Date fCreateTime;
+    private Date createTime;
 
-    private Date fUpdateTime;
+    private Date updateTime;
 
-    public Integer getfRoleId() {
-        return fRoleId;
+    private static final long serialVersionUID = 1L;
+
+    public Integer getRoleId() {
+        return roleId;
     }
 
-    public void setfRoleId(Integer fRoleId) {
-        this.fRoleId = fRoleId;
+    public void setRoleId(Integer roleId) {
+        this.roleId = roleId;
     }
 
-    public Integer getfPrivilegeId() {
-        return fPrivilegeId;
+    public Integer getPrivilegeId() {
+        return privilegeId;
     }
 
-    public void setfPrivilegeId(Integer fPrivilegeId) {
-        this.fPrivilegeId = fPrivilegeId;
+    public void setPrivilegeId(Integer privilegeId) {
+        this.privilegeId = privilegeId;
     }
 
-    public Date getfCreateTime() {
-        return fCreateTime;
+    public Date getCreateTime() {
+        return createTime;
     }
 
-    public void setfCreateTime(Date fCreateTime) {
-        this.fCreateTime = fCreateTime;
+    public void setCreateTime(Date createTime) {
+        this.createTime = createTime;
     }
 
-    public Date getfUpdateTime() {
-        return fUpdateTime;
+    public Date getUpdateTime() {
+        return updateTime;
     }
 
-    public void setfUpdateTime(Date fUpdateTime) {
-        this.fUpdateTime = fUpdateTime;
+    public void setUpdateTime(Date updateTime) {
+        this.updateTime = updateTime;
     }
 }
