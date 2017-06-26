@@ -19,6 +19,10 @@ public class DataTableParam {
 		public void setRegex(boolean regex) {
 			this.regex = regex;
 		}
+		@Override
+		public String toString() {
+			return "Search [value=" + value + ", regex=" + regex + "]";
+		}
 	}
 	
 	public static class Order{
@@ -35,6 +39,10 @@ public class DataTableParam {
 		}
 		public void setDir(String dir) {
 			this.dir = dir;
+		}
+		@Override
+		public String toString() {
+			return "Order [column=" + column + ", dir=" + dir + "]";
 		}
 	}
 	
@@ -73,6 +81,10 @@ public class DataTableParam {
 		}
 		public void setSearch(Search search) {
 			this.search = search;
+		}
+		@Override
+		public String toString() {
+			return "Column [data=" + data + ", name=" + name + ", searchable=" + searchable + ", orderable=" + orderable + ", search=" + search + "]";
 		}
 	}
 	
@@ -136,4 +148,10 @@ public class DataTableParam {
 	public void setSearch(Search search) {
 		this.search = search;
 	}
+
+	@Override
+	public String toString() {
+		return "DataTableParam [draw=" + draw + ", start=" + start + ", length=" + length + ", columns=" + columns + ", order=" + order + ", search=" + search + "]";
+	}
+	
 }

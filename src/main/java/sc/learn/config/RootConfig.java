@@ -17,6 +17,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.context.annotation.FilterType;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.context.annotation.Profile;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.context.annotation.PropertySources;
 import org.springframework.core.env.Environment;
@@ -31,6 +32,7 @@ import redis.clients.jedis.JedisCluster;
 import redis.clients.jedis.JedisPoolConfig;
 import sc.learn.common.web.ClusterHttpSessionProvider;
 import sc.learn.common.web.HttpSessionProvider;
+import sc.learn.common.web.ServletHttpSessionProvider;
 
 @Lazy(false)
 @Configuration
@@ -40,7 +42,9 @@ import sc.learn.common.web.HttpSessionProvider;
 		@PropertySource("classpath:config/redis.properties")
 		})
 //@PropertySource("classpath:config/db.properties")
-@ComponentScan(basePackages="sc.learn",excludeFilters={@Filter(type=FilterType.ANNOTATION,value=EnableWebMvc.class)})
+@ComponentScan(basePackages="sc.learn",excludeFilters={
+		@Filter(type=FilterType.ANNOTATION,value=EnableWebMvc.class)
+		})
 public class RootConfig implements EnvironmentAware {
 	
 	private Environment env;
@@ -96,10 +100,16 @@ public class RootConfig implements EnvironmentAware {
 		return new JedisCluster(nodes, config);
 	}
 	
-	
+	@Profile({"PRODUCTION","TEST"})
 	@Bean
-	public HttpSessionProvider httpSessionProvider(JedisCluster jedisCluster){
+	public HttpSessionProvider clusterHttpSessionProvider(JedisCluster jedisCluster){
 		return new ClusterHttpSessionProvider(jedisCluster);
+	}
+	
+	@Profile("DEV")
+	@Bean
+	public HttpSessionProvider servletHttpSessionProvider(){
+		return new ServletHttpSessionProvider();
 	}
 	
 	

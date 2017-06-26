@@ -1,4 +1,4 @@
-package sc.learn.manage.aop;
+package sc.learn.manage.web.intercepter;
 
 import java.util.Arrays;
 
@@ -12,11 +12,11 @@ import org.springframework.stereotype.Component;
 
 @Aspect
 @Component
-public class BizParamPrintAspect {
+public class ControllerParamPrintAspect {
 	
-	private static final Logger LOGGER=LoggerFactory.getLogger(BizParamPrintAspect.class);
+	private static final Logger LOGGER=LoggerFactory.getLogger(ControllerParamPrintAspect.class);
 	
-    @Pointcut("execution(* sc.learn.*.biz.*.*(..))")  
+    @Pointcut("execution(* sc.learn.*.web.controller.*.*(..))")  
     private void anyMethod(){}//定义一个切入点  
       
     @Around("anyMethod()")  

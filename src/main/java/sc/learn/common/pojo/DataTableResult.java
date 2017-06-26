@@ -65,4 +65,9 @@ public class DataTableResult<T> {
 	public void setData(List<T> data) {
 		this.data = data;
 	}
+
+	@Override
+	public String toString() {
+		return "DataTableResult [draw=" + draw + ", recordsTotal=" + recordsTotal + ", recordsFiltered=" + recordsFiltered + ", data=" + data + ", error=" + error + "]";
+	}
 }

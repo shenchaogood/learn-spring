@@ -97,18 +97,17 @@ public abstract class BaseBiz<PO,MAPPER> {
 		}
 	}
 
-	
+	@Transactional(readOnly=true)
 	public DataTableResult<PO> list(DataTableParam param){
 		try{
 			Object mapperExample=mapperExampleClass.newInstance();
 			long recordsTotal=(Long)mapperClass.getMethod("countByExample", mapperExample.getClass()).invoke(mapper, mapperExample);
 			PageHelper.offsetPage(param.getStart(), param.getLength());
-			Object criteria=mapperExampleClass.getMethod("createCriteria",Void.class).invoke(mapperExample);
-			StringBuilder orderByClause=new StringBuilder();
-			param.getOrder().stream().reduce(orderByClause, (left,order)->
+			Object criteria=mapperExampleClass.getMethod("createCriteria").invoke(mapperExample);
+			StringBuilder orderByClause=param.getOrder().stream().reduce(new StringBuilder(), (left,order)->
 				left.append(param.getColumns().get(order.getColumn()).getData()).append(" ").append(order.getDir())
 				,(left,right)->left.append(right));
-			mapperExampleClass.getMethod("setOrderByClause", String.class).invoke(mapperExample, orderByClause.toString());
+			mapperExampleClass.getMethod("setOrderByClause", String.class).invoke(mapperExample, StringUtil.defaultIfBlank(orderByClause, null));
 			String searchValue=param.getSearch().getValue();
 			param.getColumns().forEach((column)->{
 				if(column.isSearchable()){
