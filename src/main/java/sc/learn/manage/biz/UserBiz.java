@@ -1,40 +1,32 @@
 package sc.learn.manage.biz;
 
-import java.lang.reflect.Method;
-import java.util.List;
-
-import org.apache.commons.beanutils.ConvertUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.github.pagehelper.PageHelper;
-import com.github.pagehelper.PageInfo;
-
-import sc.learn.common.pojo.DataTableParam;
-import sc.learn.common.pojo.DataTableResult;
+import sc.learn.common.biz.BaseBiz;
 import sc.learn.common.pojo.ResponseResult;
 import sc.learn.common.util.StringUtil;
 import sc.learn.common.util.security.Coder;
 import sc.learn.manage.mapper.UserMapper;
 import sc.learn.manage.po.User;
 import sc.learn.manage.po.UserExample;
-import sc.learn.manage.po.UserExample.Criteria;
-import sc.learn.manage.util.Contants;
 import sc.learn.manage.vo.UserVo;
 
 @Service
-public class UserBiz {
+public class UserBiz extends BaseBiz<User,UserMapper>{
 	
 	@Autowired
-	private UserMapper userMapper;
-	
+	public UserBiz(UserMapper mapper) throws ClassNotFoundException {
+		super(mapper);
+	}
+
 	public User login(UserVo user){
 		UserExample example=new UserExample();
 		example.createCriteria().andEmailEqualTo(user.getEmail()).andPasswordEqualTo(Coder.encryptMD5(user.getPassword()));
-		return userMapper.selectByExample(example).get(0);
+		return mapper.selectByExample(example).get(0);
 	}
 
-	public ResponseResult check(User user){
+	public ResponseResult checkAddParam(User user){
 		if(StringUtil.isBlank(user.getEmail())){
 			return ResponseResult.createFail("邮箱不能为空");
 		}else if(StringUtil.isBlank(user.getName())){
@@ -46,23 +38,23 @@ public class UserBiz {
 		}
 	}
 	
+/*	
 	public ResponseResult add(User user) {
-		ResponseResult ret=check(user);
+		ResponseResult ret=checkAddParam(user);
 		if(!ret.isSuccess()){
 			return ret;
 		}
-		if(userMapper.insert(user)>0){
+		if(mapper.insertSelective(user)>0){
 			return ResponseResult.createSuccess();
 		}else{
-			return ResponseResult.createFail(Contants.RECORD_EXISTS);
+			return ResponseResult.createFail(Constants.RECORD_EXISTS);
 		}
 	}
-
 	public DataTableResult<User> list(DataTableParam param) {
 		UserExample example=new UserExample();
-		long recordsTotal=userMapper.countByExample(example);
+		long recordsTotal=mapper.countByExample(example);
 		PageHelper.offsetPage(param.getStart(), param.getLength());
-		Criteria criteria=example.createCriteria();
+		Criteria criteria=example.createCriteria();mapper.deleteByExample(example);
 		
 		StringBuilder orderByClause=new StringBuilder();
 		param.getOrder().stream().reduce(orderByClause, (left,order)->
@@ -92,9 +84,10 @@ public class UserBiz {
 			}
 		});
 		
-		List<User> data=userMapper.selectByExample(example);
+		List<User> data=mapper.selectByExample(example);
 		PageInfo<User> pageInfo = new PageInfo<User>(data);
         long recordsFiltered = pageInfo.getTotal();
 		return DataTableResult.createDataTableResult(param.getDraw(), recordsTotal, recordsFiltered, data,"");
 	}
+*/	
 }

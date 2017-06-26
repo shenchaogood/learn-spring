@@ -23,7 +23,7 @@ import sc.learn.manage.web.intercepter.MethodPrintIntercepter;
 
 @Configuration
 @EnableWebMvc
-@ComponentScan("sc.learn")
+@ComponentScan("sc.learn.*.web")
 public class WebConfig extends WebMvcConfigurerAdapter{
 
 	@Bean

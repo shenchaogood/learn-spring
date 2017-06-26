@@ -13,7 +13,7 @@ import sc.learn.common.pojo.ResponseResult;
 import sc.learn.common.web.HttpSessionProvider;
 import sc.learn.manage.biz.UserBiz;
 import sc.learn.manage.po.User;
-import sc.learn.manage.util.Contants;
+import sc.learn.manage.util.Constants;
 import sc.learn.manage.vo.UserVo;
 
 @RestController
@@ -32,9 +32,9 @@ public class UserController {
 	public ResponseResult login(UserVo userVo){
 		User user=userBiz.login(userVo);
 		if(user==null){
-			return ResponseResult.createFail(Contants.LOGIN_USER_NO_EXISTS);
+			return ResponseResult.createFail(Constants.LOGIN_USER_NO_EXISTS);
 		}else{
-			httpSession.setAttibute(Contants.CURRENT_LOGIN_USER, user);
+			httpSession.setAttibute(Constants.CURRENT_LOGIN_USER, user);
 			return ResponseResult.createSuccess();
 		}
 	}
