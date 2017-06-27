@@ -49,5 +49,11 @@ public class UserController {
 		return userBiz.add(user);
 	}
 	
+	@RequestMapping("ex")
+	public ResponseResult ex(){
+		LOGGER.debug("故意的");
+		throw new RuntimeException("abc");
+	}
+	
 	
 }

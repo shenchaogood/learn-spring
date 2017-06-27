@@ -1,7 +1,5 @@
 package sc.learn.test.config;
 
-import java.util.List;
-
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.slf4j.Logger;
@@ -11,8 +9,9 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
+import sc.learn.common.web.HttpSessionProvider;
 import sc.learn.config.RootConfig;
-import sc.learn.test.mapper.TestMapper;
+import sc.learn.manage.biz.UserBiz;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes=RootConfig.class)
@@ -22,13 +21,15 @@ public class TestSpringConfig {
 	
 	
 	@Autowired
-	protected TestMapper testMapper;
+	private UserBiz userBiz;
 	
+	@Autowired
+	private HttpSessionProvider httpSession;
 	
 	@Test
 	public void testStartup(){
-		List<sc.learn.test.mapper.Test> tests=testMapper.findAll();
-		log.debug("testStartup:{}", tests);
+		userBiz.checkAddParam(null);
+		log.debug("{}",httpSession);
 	}
 
 }

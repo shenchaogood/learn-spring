@@ -27,7 +27,9 @@ public class UserBiz extends BaseBiz<User,UserMapper>{
 	}
 
 	public ResponseResult checkAddParam(User user){
-		if(StringUtil.isBlank(user.getEmail())){
+		if(user==null){
+			return ResponseResult.createFail("参数为空");
+		}else if(StringUtil.isBlank(user.getEmail())){
 			return ResponseResult.createFail("邮箱不能为空");
 		}else if(StringUtil.isBlank(user.getName())){
 			return ResponseResult.createFail("用户名不能为空");

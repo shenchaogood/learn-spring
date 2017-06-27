@@ -8,14 +8,14 @@ import org.apache.commons.lang3.StringUtils;
 
 
 public abstract class ZkConfig {
-	public static final String PROFILE_KEY="profile";
-	public static final String ZKSERVER_KEY="zkserver";
+	public static final String PROFILE_KEY="zk_profile";
+	public static final String ZKSERVER_KEY="zk_server";
 	public static final String SESSTION_TIMEOUT_KEY="zk_session_timeout";
 	public static final String CONNECTION_TIMEOUT_KEY="zk_connection_timeout";
-	public static final String MODULE_NAME_KEY="module_name";
-	public static final String SERVICE_PREFIX_KEY="services_prefix";
-	public static final String SERVICE_DEFAULT_IP_KEY="ip_default";
-	public static final String SERVICE_DEFAULT_PORT_KEY="port_default";
+	public static final String MODULE_NAME_KEY="zk_module_name";
+	public static final String SERVICE_PREFIX_KEY="zk_services_prefix";
+	public static final String SERVICE_DEFAULT_IP_KEY="zk_ip_default";
+	public static final String SERVICE_DEFAULT_PORT_KEY="zk_port_default";
 	public static final String ZK_AUTH_KEY="zk_auth";
 	private static final Properties CONFIG_MAP=new Properties();
 	static{

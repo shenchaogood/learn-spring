@@ -3,6 +3,7 @@ package sc.learn.config;
 
 import java.sql.SQLException;
 import java.util.HashSet;
+import java.util.Properties;
 import java.util.Set;
 
 import javax.sql.DataSource;
@@ -23,6 +24,9 @@ import org.springframework.context.annotation.PropertySources;
 import org.springframework.core.env.Environment;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.JavaMailSenderImpl;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 
 import com.alibaba.druid.pool.DruidDataSource;
@@ -39,11 +43,13 @@ import sc.learn.common.web.ServletHttpSessionProvider;
 @EnableAspectJAutoProxy
 @PropertySources(value={
 		@PropertySource("classpath:config/db.properties"),
-		@PropertySource("classpath:config/redis.properties")
+		@PropertySource("classpath:config/redis.properties"),
+		@PropertySource("classpath:config/mail.properties")
 		})
 //@PropertySource("classpath:config/db.properties")
 @ComponentScan(basePackages="sc.learn",excludeFilters={
-		@Filter(type=FilterType.ANNOTATION,value=EnableWebMvc.class)
+		@Filter(type=FilterType.ANNOTATION,value=EnableWebMvc.class),
+		@Filter(type=FilterType.ANNOTATION,value=Controller.class)
 		})
 public class RootConfig implements EnvironmentAware {
 	
@@ -85,7 +91,7 @@ public class RootConfig implements EnvironmentAware {
 	public MapperScannerConfigurer mapperScannerConfigurer(){
 		MapperScannerConfigurer mapperScannerConfigurer=new MapperScannerConfigurer();
 		mapperScannerConfigurer.setSqlSessionFactoryBeanName("sqlSessionFactory");
-		mapperScannerConfigurer.setBasePackage("sc.learn");
+		mapperScannerConfigurer.setBasePackage("sc.learn.*.mapper");
 		return mapperScannerConfigurer;
 	}
 	
@@ -100,12 +106,6 @@ public class RootConfig implements EnvironmentAware {
 		return new JedisCluster(nodes, config);
 	}
 	
-	@Profile({"PRODUCTION","TEST"})
-	@Bean
-	public HttpSessionProvider clusterHttpSessionProvider(JedisCluster jedisCluster){
-		return new ClusterHttpSessionProvider(jedisCluster);
-	}
-	
 	@Profile("DEV")
 	@Bean
 	public HttpSessionProvider servletHttpSessionProvider(){
@@ -113,32 +113,32 @@ public class RootConfig implements EnvironmentAware {
 	}
 	
 	
+	@Profile({"PRODUCTION","TEST"})
+	@Bean
+	public HttpSessionProvider clusterHttpSessionProvider(JedisCluster jedisCluster){
+		return new ClusterHttpSessionProvider(jedisCluster);
+	}
 	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
+	@Bean
+	public JavaMailSender javaMailSender(){
+		JavaMailSenderImpl mailSender=new JavaMailSenderImpl();
+		mailSender.setDefaultEncoding("UTF-8");
+		mailSender.setHost(env.getProperty("mail.host"));
+		mailSender.setUsername(env.getProperty("mail.username"));
+		mailSender.setPassword(env.getProperty("mail.password"));
+		mailSender.setPort(env.getProperty("mail.smtp.port",int.class));
+		
+		Properties mailProperties=new Properties();
+		mailProperties.setProperty("mail.smtp.starttls.enable", env.getProperty("mail.smtp.starttls.enable"));
+		mailProperties.setProperty("mail.smtp.socketFactory.class", "javax.net.ssl.SSLSocketFactory");
+		mailProperties.setProperty("mail.smtp.socketFactory.fallback", "false");
+		mailProperties.setProperty("mail.smtp.socketFactory.port", env.getProperty("mail.smtp.port"));
+		mailProperties.setProperty("mail.smtp.auth", env.getProperty("mail.smtp.auth"));
+		mailProperties.setProperty("mail.smtp.timeout", env.getProperty("mail.smtp.timeout"));
+		mailProperties.setProperty("mail.smtp.port", env.getProperty("mail.smtp.port"));
+		mailSender.setJavaMailProperties(mailProperties);
+		return mailSender;
+	}
 	
 	
 	

@@ -19,14 +19,14 @@ public class EnvironmentUtil {
 		environmentType=EnvironmentType.valueOf(profile.toUpperCase());
 	}
 	
-	private static EnvironmentUtil single=new EnvironmentUtil();
+	private static final EnvironmentUtil SINGLE=new EnvironmentUtil();
 	
 	/**
 	 * 本机环境
 	 * @return 本机环境
 	 */
 	public static EnvironmentType getLocalEnviromentType(){
-		return single.environmentType;
+		return SINGLE.environmentType;
 	}
 	
 	/**
@@ -34,7 +34,7 @@ public class EnvironmentUtil {
 	 * @return true 是  false 否
 	 */
 	public static boolean isProductionEnvironment(){
-		return single.environmentType.isProduction();
+		return SINGLE.environmentType.isProduction();
 	}
 	
 }
