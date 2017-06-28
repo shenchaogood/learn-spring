@@ -10,5 +10,9 @@ public interface Constants {
 	String RECORD_EXISTS="此记录已存在";
 
 	String INTERNAL_SERVER_ERROR = "服务器内部错误";
+
+	String NO_LOGIN = "用户未登录";
+
+	String NO_PERMISION = "没有权限";
 	
 }

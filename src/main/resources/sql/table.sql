@@ -24,7 +24,7 @@ create table if not exists t_privilege(
 	f_url varchar(255) unique not null default '' comment '请求URL，根据此URL进行权限拦截',
 	f_icon varchar(255) not null default '' comment '打算菜单树图标',
 	f_leaf boolean not null default false comment '是否为叶子节点',
-	f_parent_id int not null default 0 comment '菜单父节点',
+	f_parent_id int default 0 comment '菜单父节点',
 	f_create_time datetime not null default now() comment '创建时间',
 	f_update_time datetime not null default now() comment '最后修改时间',
 	foreign key(f_parent_id) references t_privilege(f_id)

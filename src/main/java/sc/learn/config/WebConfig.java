@@ -20,7 +20,7 @@ import org.springframework.web.servlet.view.InternalResourceViewResolver;
 
 import com.alibaba.fastjson.support.spring.FastJsonHttpMessageConverter;
 
-import sc.learn.manage.web.intercepter.MethodPrintIntercepter;
+import sc.learn.manage.web.intercepter.PrivilegeIntercepter;
 
 @Configuration
 @EnableWebMvc
@@ -54,7 +54,7 @@ public class WebConfig extends WebMvcConfigurerAdapter{
 	@Bean
 	public RequestMappingHandlerMapping requestMappingHandlerMapping(){
 		RequestMappingHandlerMapping handlerMapping=new RequestMappingHandlerMapping();
-		handlerMapping.setInterceptors(new MethodPrintIntercepter());
+		handlerMapping.setInterceptors(new PrivilegeIntercepter());
 		return handlerMapping;
 	}
 	

@@ -26,6 +26,17 @@ public class ResponseResult {
 	private boolean success;
 	
 	private String desc;
+	
+	private Object data;
+
+	public Object getData() {
+		return data;
+	}
+
+	public ResponseResult setData(Object data) {
+		this.data = data;
+		return this;
+	}
 
 	public boolean isSuccess() {
 		return success;
