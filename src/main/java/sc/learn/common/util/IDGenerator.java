@@ -5,8 +5,16 @@ import java.util.Map;
 
 public abstract class IDGenerator {
 	private static final Map<String,SnowflakeIdWorker> ID_WORKERS=new HashMap<>();
-	public static long generate(){
-		return 0;
+	public static long generate(String moduleName){
+		SnowflakeIdWorker generator=ID_WORKERS.get(moduleName);
+		if(generator==null){
+			synchronized (ID_WORKERS) {
+				if(generator==null){
+					generator = new SnowflakeIdWorker(1, 1);
+				}
+			}
+		}
+		return generator.nextId();
 	}
 }
 
