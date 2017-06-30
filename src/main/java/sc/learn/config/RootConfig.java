@@ -152,6 +152,16 @@ public class RootConfig implements EnvironmentAware {
 		return new ThriftServicePostProcessor();
 	}
 	
+//	@Bean
+//	public TUserService.Iface userServiceIface() throws IOException{
+//		return ThriftUtil.getIfaceClient(TUserService.Iface.class, 3000);
+//	}
+//	
+//	@Bean
+//	public TUserService.AsyncIface userServiceAsyncIface() throws IOException{
+//		return ThriftUtil.getIfaceClient(TUserService.AsyncIface.class, 3000);
+//	}
+	
 	
 	
 }

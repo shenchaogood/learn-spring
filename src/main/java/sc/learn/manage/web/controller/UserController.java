@@ -65,8 +65,9 @@ public class UserController {
 	}
 	
 	@RequestMapping("ex")
-	public ResponseResult ex(){
+	public ResponseResult ex() throws InterruptedException{
 		LOGGER.debug("故意的");
+		Thread.sleep(5000);
 		throw new RuntimeException("abc");
 	}
 	
