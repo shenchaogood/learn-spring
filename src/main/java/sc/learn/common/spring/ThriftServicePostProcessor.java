@@ -6,12 +6,10 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.config.BeanPostProcessor;
-import org.springframework.stereotype.Component;
 
 import sc.learn.common.spring.annotation.ThriftService;
 import sc.learn.common.util.ThriftUtil;
 
-@Component
 public class ThriftServicePostProcessor implements BeanPostProcessor,BeanFactoryAware{
 
 	protected final Logger LOGGER = LoggerFactory.getLogger(getClass());

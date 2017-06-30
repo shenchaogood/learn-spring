@@ -44,6 +44,17 @@ angular.module('app')
                     }]
                   }
               })
+              //操作员管理
+              .state('app.system.employee', {
+                  url: '/system/employee',
+                  templateUrl: 'tpl/system/employee.html',
+                  resolve: {
+                    deps: ['$ocLazyLoad',
+                      function( $ocLazyLoad ){
+                        return $ocLazyLoad.load(['js/controllers/system/employee.js']);
+                    }]
+                  }
+              })
               .state('app.ui', {
                   url: '/ui',
                   template: '<div ui-view class="fade-in-up"></div>'

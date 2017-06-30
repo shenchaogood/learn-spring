@@ -34,6 +34,8 @@ import com.alibaba.druid.pool.DruidDataSource;
 import redis.clients.jedis.HostAndPort;
 import redis.clients.jedis.JedisCluster;
 import redis.clients.jedis.JedisPoolConfig;
+import sc.learn.common.spring.BizParamPrintAspect;
+import sc.learn.common.spring.ThriftServicePostProcessor;
 import sc.learn.common.web.ClusterHttpSessionProvider;
 import sc.learn.common.web.HttpSessionProvider;
 import sc.learn.common.web.ServletHttpSessionProvider;
@@ -138,6 +140,16 @@ public class RootConfig implements EnvironmentAware {
 		mailProperties.setProperty("mail.smtp.port", env.getProperty("mail.smtp.port"));
 		mailSender.setJavaMailProperties(mailProperties);
 		return mailSender;
+	}
+	
+	@Bean
+	public BizParamPrintAspect bizParamPrintAspect(){
+		return new BizParamPrintAspect();
+	}
+	
+	@Bean
+	public ThriftServicePostProcessor ThriftServicePostProcessor(){
+		return new ThriftServicePostProcessor();
 	}
 	
 	

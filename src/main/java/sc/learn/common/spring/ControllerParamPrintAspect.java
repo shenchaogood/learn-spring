@@ -1,4 +1,4 @@
-package sc.learn.manage.web.intercepter;
+package sc.learn.common.spring;
 
 import java.util.Arrays;
 
@@ -8,10 +8,8 @@ import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
 
 @Aspect
-@Component
 public class ControllerParamPrintAspect {
 	
 	private static final Logger LOGGER=LoggerFactory.getLogger(ControllerParamPrintAspect.class);

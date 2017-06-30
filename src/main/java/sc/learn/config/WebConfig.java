@@ -20,6 +20,7 @@ import org.springframework.web.servlet.view.InternalResourceViewResolver;
 
 import com.alibaba.fastjson.support.spring.FastJsonHttpMessageConverter;
 
+import sc.learn.common.spring.ControllerParamPrintAspect;
 import sc.learn.manage.web.intercepter.PrivilegeIntercepter;
 
 @Configuration
@@ -66,5 +67,10 @@ public class WebConfig extends WebMvcConfigurerAdapter{
 		converter.setSupportedMediaTypes(Arrays.asList(MediaType.TEXT_HTML,MediaType.APPLICATION_JSON));
 		handlerAdapter.getMessageConverters().add(0,converter);
 		return handlerAdapter;
+	}
+	
+	@Bean
+	public ControllerParamPrintAspect controllerParamPrintAspect(){
+		return new ControllerParamPrintAspect();
 	}
 }
