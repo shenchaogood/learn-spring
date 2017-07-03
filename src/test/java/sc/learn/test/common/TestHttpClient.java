@@ -1,6 +1,7 @@
 package sc.learn.test.common;
 
 import java.io.InputStream;
+import java.nio.charset.Charset;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -11,10 +12,11 @@ import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.config.SocketConfig;
 import org.apache.http.conn.routing.HttpRoute;
+import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
-import org.apache.tomcat.util.http.fileupload.util.Streams;
 import org.junit.Test;
+import org.springframework.util.StreamUtils;
 
 public class TestHttpClient {
 	
@@ -39,9 +41,10 @@ public class TestHttpClient {
 					SocketConfig sockConfig=SocketConfig.custom().setSoTimeout(5000).build();
 					HttpGet get=new HttpGet("http://localhost:8080/learn-spring/manage/user/e"+ii+"x");
 					get.setConfig(config);
-					CloseableHttpResponse response=HttpClients.custom().setDefaultRequestConfig(config).setDefaultSocketConfig(sockConfig).setConnectionManager(cm).build().execute(get);
+					CloseableHttpClient httpClient=HttpClients.custom().setDefaultRequestConfig(config).setDefaultSocketConfig(sockConfig).setConnectionManager(cm).build();
+					CloseableHttpResponse response=httpClient.execute(get);
 					InputStream is=response.getEntity().getContent();
-					System.out.println(Streams.asString(is));
+					System.out.println(StreamUtils.copyToString(is, Charset.forName("UTF-8")));
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
