@@ -16,6 +16,7 @@ import org.slf4j.LoggerFactory;
 
 abstract class AbstractThriftClient implements ThriftClient, InvocationHandler {
 
+	protected int timeout;
 	protected final Logger LOGGER = LoggerFactory.getLogger(getClass());
 
 	protected class ThriftClientHolder {
@@ -32,13 +33,15 @@ abstract class AbstractThriftClient implements ThriftClient, InvocationHandler {
 
 	protected Class<?> clazz;
 
-	public AbstractThriftClient(Class<?> clazz) {
+	public AbstractThriftClient(Class<?> clazz,int timeout) {
 		this.clazz = clazz;
+		this.timeout=timeout;
 	}
 
 	@Override
 	public void bind(String ip, int port, int timeout) {
-		cache.computeIfAbsent(ip + ":" + port, p -> bindNewInstance(ip, port, timeout));
+		this.timeout=timeout;
+		cache.computeIfAbsent(ip + ":" + port, p -> bindNewInstance(ip, port));
 	}
 
 	@Override
@@ -47,7 +50,7 @@ abstract class AbstractThriftClient implements ThriftClient, InvocationHandler {
 			String[] ipPortTimeoutStr = ipPortTimeout.split(":");
 			if (!cache.containsKey(ipPortTimeoutStr[0] + ":" + ipPortTimeoutStr[1])) {
 				cache.computeIfAbsent(ipPortTimeoutStr[0] + ":" + ipPortTimeoutStr[1],
-						p -> bindNewInstance(ipPortTimeoutStr[0], Integer.parseInt(ipPortTimeoutStr[1]), ipPortTimeoutStr.length == 3 ? Integer.parseInt(ipPortTimeoutStr[2]) : 1000));
+						p -> bindNewInstance(ipPortTimeoutStr[0], Integer.parseInt(ipPortTimeoutStr[1])));
 			}
 		});
 		CollectionUtils.subtract(cache.entrySet(), ipPortTimeouts).forEach(item -> {
@@ -58,7 +61,7 @@ abstract class AbstractThriftClient implements ThriftClient, InvocationHandler {
 		});
 	}
 
-	protected abstract ThriftClientHolder bindNewInstance(String ip, int port, int timeout);
+	protected abstract ThriftClientHolder bindNewInstance(String ip, int port);
 
 	@Override
 	public Object createProxy() {
@@ -69,9 +72,12 @@ abstract class AbstractThriftClient implements ThriftClient, InvocationHandler {
 	public Object invoke(Object proxy, Method method, Object[] args) {
 		LOGGER.debug("执行方法:{}，参数:{}", method, Arrays.toString(args));
 		long startTime = System.currentTimeMillis();
-		int size = cache.values().size();
+		int size;
 		try {
-			if (size == 0) {
+			while ((size=(cache.values().size())) == 0&&timeout>System.currentTimeMillis()-startTime) {
+				Thread.sleep(timeout/5);
+			}
+			if(size == 0){
 				throw new RuntimeException("target 未生成,可能是因为服务未注册");
 			}
 			Object target = cache.values().toArray(new ThriftClientHolder[size])[new Random().nextInt(size)].target;

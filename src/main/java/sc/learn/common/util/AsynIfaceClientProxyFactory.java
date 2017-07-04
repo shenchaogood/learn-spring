@@ -11,11 +11,11 @@ import org.apache.thrift.transport.TNonblockingTransport;
 
 class AsynIfaceClientProxyFactory extends AbstractThriftClient {
 
-	public AsynIfaceClientProxyFactory(Class<?> clazz) {
-		super(clazz);
+	public AsynIfaceClientProxyFactory(Class<?> clazz,int timeout) {
+		super(clazz,timeout);
 	}
 
-	protected ThriftClientHolder bindNewInstance(String ip,int port,int timeout){
+	protected ThriftClientHolder bindNewInstance(String ip,int port){
 		try {
 			
 			TAsyncClientManager clientManager = new TAsyncClientManager();

@@ -14,7 +14,7 @@ public class TestService {
 	@Test
 	public void testThriftServer() throws Exception {
 		ThriftUtil.startThriftServer(new ManageService());
-		Thread.sleep(500000);
+		Thread.sleep(2000000);
 	}
 
 	@Test
@@ -24,7 +24,6 @@ public class TestService {
 		service.saveUser(new TUser().setEmail("6").setName("s").setPassword("g"));
 
 		TManageService.AsyncIface service2 = ThriftUtil.getAsyncIfaceClient(TManageService.AsyncIface.class, 5000);
-		System.out.println(service);
 		service2.saveUser(new TUser().setEmail("6").setName("s").setPassword("g"), new AsyncMethodCallback<Void>() {
 			@Override
 			public void onError(Exception exception) {

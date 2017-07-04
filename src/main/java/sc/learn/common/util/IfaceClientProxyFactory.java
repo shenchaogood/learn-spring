@@ -11,11 +11,11 @@ import org.apache.thrift.transport.TTransport;
 
 class IfaceClientProxyFactory extends AbstractThriftClient {
 
-	public IfaceClientProxyFactory(Class<?> clazz) {
-		super(clazz);
+	public IfaceClientProxyFactory(Class<?> clazz,int timeout) {
+		super(clazz,timeout);
 	}
 
-	protected ThriftClientHolder bindNewInstance(String ip, int port, int timeout) {
+	protected ThriftClientHolder bindNewInstance(String ip, int port) {
 		try {
 			
 			TTransport transport = new TFramedTransport(new TSocket(ip, port, timeout));
@@ -32,4 +32,5 @@ class IfaceClientProxyFactory extends AbstractThriftClient {
 			throw new RuntimeException(e);
 		}
 	}
+
 }

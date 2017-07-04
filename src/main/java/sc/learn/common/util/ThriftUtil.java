@@ -5,10 +5,8 @@ import java.lang.reflect.Constructor;
 import java.net.InetSocketAddress;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.tuple.Pair;
 import org.apache.thrift.TProcessor;
 import org.apache.thrift.protocol.TBinaryProtocol;
 import org.apache.thrift.server.TServer;
@@ -25,9 +23,9 @@ import org.slf4j.LoggerFactory;
 public abstract class ThriftUtil {
 
 	protected static final Logger LOGGER = LoggerFactory.getLogger(ThriftUtil.class);
-	private static final Logger LOG=LoggerFactory.getLogger(ZookeeperClient.class);
-	private static final Map<EnvironmentType, ZookeeperClient> ENV_CLIENT_MAP = new ConcurrentHashMap<>();
-	private static final Map<Class<?>, Pair<?, ?>> CLIENT_MAP = new ConcurrentHashMap<>();
+	private static final Logger LOG = LoggerFactory.getLogger(ZookeeperClient.class);
+	private static final Map<EnvironmentType, ZookeeperClient> ENV_CLIENT_MAP = new HashMap<>();
+	private static final Map<Class<?>, Object> CLIENT_MAP = new HashMap<>();
 
 	public static interface Constants {
 		static final String SERVICE_PREFIX = ZkConfig.SERVICE_PREFIX;;
@@ -39,88 +37,85 @@ public abstract class ThriftUtil {
 
 	}
 
-	@SuppressWarnings("unchecked")
-	public static <Iface> Iface getIfaceClient(Class<Iface> iface, int timeout) throws IOException {
-		return (Iface) createClient(iface,timeout).getLeft();
+	public static <Iface> Iface getIfaceClient(Class<Iface> iface, int timeout) throws IOException, ClassNotFoundException {
+		return createClient(iface, timeout);
+	}
+
+	public static <AsyncIface> AsyncIface getAsyncIfaceClient(Class<AsyncIface> asyncIface, int timeout) throws IOException, ClassNotFoundException {
+		return createClient(asyncIface, timeout);
 	}
 
 	@SuppressWarnings("unchecked")
-	public static <AsyncIface> AsyncIface getAsyncIfaceClient(Class<AsyncIface> asyncIface, int timeout) throws IOException{
-		return (AsyncIface) createClient(asyncIface,timeout).getRight();
-	}
-
-	public static Pair<?, ?> createClient(Class<?> clazz, int timeout) throws IOException {
-		String ifaceName = clazz.getName();
-		if (!ifaceName.endsWith(Constants.IFACE_SUFFIX) && !ifaceName.endsWith(Constants.ASYN_IFACE_SUFFIX)) {
-			throw new IllegalArgumentException(ifaceName + "不是合法thrift接口");
-		}
-
-		String serviceName = StringUtils.removeEnd(StringUtils.removeEnd(ifaceName, Constants.IFACE_SUFFIX), Constants.ASYN_IFACE_SUFFIX);
-
-		Pair<?, ?> client = (Pair<?, ?>) CLIENT_MAP.get(clazz);
+	public static <T> T createClient(Class<T> clazz, int timeout) throws IOException, ClassNotFoundException {
+		T client = (T) CLIENT_MAP.get(clazz);
 		if (client == null) {
-			ZookeeperClient zkClient = ENV_CLIENT_MAP.get(EnvironmentUtil.getLocalEnviromentType());
-			if (zkClient == null){
-				zkClient = new ZookeeperClient();
-				ENV_CLIENT_MAP.put(EnvironmentUtil.getLocalEnviromentType(), zkClient);
-			}
-
-			StringBuilder path = new StringBuilder(Constants.SERVICE_PREFIX);
-			if (!path.toString().endsWith("/")) {
-				path.append("/");
-			}
-			path.append(serviceName);
-
-			Class<?> syncClientName=null;
-			Class<?> asynClientName = null;
-			try {
-				syncClientName = Class.forName(serviceName + Constants.CLIENT_SUFFIX);
-				asynClientName = Class.forName(serviceName + Constants.ASYN_CLIENT_SUFFIX);
-			} catch (ClassNotFoundException e) {
-				e.printStackTrace();
-			}
-			ThriftClient ifaceObj=new IfaceClientProxyFactory(syncClientName);
-			ThriftClient asynIfaceObj=new AsynIfaceClientProxyFactory(asynClientName);
-			
-			client = Pair.of(ifaceObj.createProxy(),asynIfaceObj.createProxy());
-			CLIENT_MAP.put(clazz, client);
-			ZookeeperClient currZkCli=zkClient;
-			Map<String,Object> map=new HashMap<>();
-			ChildrenCallback cb=(rc, paths, ctx, children) -> {
-				switch (Code.get(rc)) {
-				case CONNECTIONLOSS:
-					currZkCli.getChildren(path.toString(),(Watcher)map.get("watcher"), (ChildrenCallback)map.get("cb"));
-					break;
-				case OK:
-					if (children == null || children.size() == 0) {
-						LOGGER.warn(path + "节点下无任何可用节点");
+			synchronized (ThriftUtil.class) {
+				if (client == null) {
+					String ifaceName = clazz.getName();
+					boolean isSynchronized;
+					String serviceName;
+					if (ifaceName.endsWith(Constants.IFACE_SUFFIX)) {
+						isSynchronized = true;
+						serviceName = StringUtils.removeEnd(ifaceName, Constants.IFACE_SUFFIX);
+					} else if (ifaceName.endsWith(Constants.ASYN_IFACE_SUFFIX)) {
+						isSynchronized = false;
+						serviceName = StringUtils.removeEnd(ifaceName, Constants.ASYN_IFACE_SUFFIX);
+					} else {
+						throw new IllegalArgumentException(ifaceName + "不是合法thrift接口");
 					}
-					ifaceObj.bindAll(children);
-					asynIfaceObj.bindAll(children);
-					break;
-				default:
-					LOGGER.info(KeeperException.create(Code.get(rc)).getMessage());
-					break;
+
+					ZookeeperClient zkClient = ENV_CLIENT_MAP.get(EnvironmentUtil.getLocalEnviromentType());
+					if (zkClient == null) {
+						zkClient = new ZookeeperClient();
+						ENV_CLIENT_MAP.put(EnvironmentUtil.getLocalEnviromentType(), zkClient);
+					}
+
+					StringBuilder path = new StringBuilder(Constants.SERVICE_PREFIX);
+					if (!path.toString().endsWith("/")) {
+						path.append("/");
+					}
+					path.append(serviceName);
+
+					ThriftClient ifaceObj = isSynchronized ? new IfaceClientProxyFactory(Class.forName(serviceName + Constants.CLIENT_SUFFIX), timeout)
+							: new AsynIfaceClientProxyFactory(Class.forName(serviceName + Constants.ASYN_CLIENT_SUFFIX), timeout);
+					client = (T) ifaceObj.createProxy();
+					CLIENT_MAP.put(clazz, client);
+					ZookeeperClient currZkCli = zkClient;
+					Map<String, Object> map = new HashMap<>();
+					ChildrenCallback cb = (rc, paths, ctx, children) -> {
+						switch (Code.get(rc)) {
+						case CONNECTIONLOSS:
+							currZkCli.getChildren(path.toString(), (Watcher) map.get("watcher"), (ChildrenCallback) map.get("cb"));
+							break;
+						case OK:
+							if (children == null || children.size() == 0) {
+								LOGGER.warn(path + "节点下无任何可用节点");
+							}
+							ifaceObj.bindAll(children);
+							break;
+						default:
+							LOGGER.info(KeeperException.create(Code.get(rc)).getMessage());
+							break;
+						}
+					};
+					Watcher watcher = event -> {
+						switch (event.getType()) {
+						case NodeChildrenChanged:
+							currZkCli.getChildren(path.toString(), (Watcher) map.get("watcher"), cb);
+							break;
+						default:
+							LOG.info(event.toString());
+							break;
+						}
+					};
+					map.put("cb", cb);
+					map.put("watcher", watcher);
+					zkClient.getChildren(path.toString(), watcher, cb);
 				}
-			};
-			
-			Watcher watcher=event->{
-				switch(event.getType()){
-				case NodeChildrenChanged:
-					currZkCli.getChildren(path.toString(),(Watcher)map.get("watcher"),cb);
-					break;
-				default:
-					LOG.info(event.toString());
-					break;
-				}
-			};
-			map.put("cb", cb);
-			map.put("watcher", watcher);
-			zkClient.getChildren(path.toString(),watcher,cb);
+			}
 		}
 		return client;
 	}
-	
 
 	public static void startThriftServer(Object thriftServiceObj) {
 
@@ -145,7 +140,7 @@ public abstract class ThriftUtil {
 				String serviceName = StringUtils.removeEnd(interfaceName, ThriftUtil.Constants.IFACE_SUFFIX);
 				String bindIp = ZkConfig.getServiceIp(serviceName);
 				int bindPort = ZkConfig.getServicePort(serviceName);
-				String path = Constants.SERVICE_PREFIX +"/"+serviceName + "/" + bindIp + ":" + bindPort;
+				String path = Constants.SERVICE_PREFIX + "/" + serviceName + "/" + bindIp + ":" + bindPort;
 				zkClient.createPath(path, "".getBytes(), ZookeeperClient.EPHEMERAL);
 				try {
 					Class<?> processorClass = Class.forName(serviceName + ThriftUtil.Constants.PROCESSOR_SUFFIX);
@@ -153,25 +148,29 @@ public abstract class ThriftUtil {
 					@SuppressWarnings("unchecked")
 					Constructor<TProcessor> ctor = (Constructor<TProcessor>) processorClass.getConstructor(ifaceClass);
 					TProcessor processor = ctor.newInstance(thriftServiceObj);
-					
-//					TNonblockingServerSocket socket = new TNonblockingServerSocket(new InetSocketAddress(bindIp, bindPort));
-//					THsHaServer.Args arg = new THsHaServer.Args(socket);
-//					// 高效率的、密集的二进制编码格式进行数据传输
-//					// 使用非阻塞方式，按块的大小进行传输，类似于 Java 中的 NIO
-//					arg.protocolFactory(new TCompactProtocol.Factory());
-//					arg.transportFactory(new TFramedTransport.Factory());
-//					arg.processorFactory(new TProcessorFactory(processor));
-//					TServer server = new THsHaServer(arg);
-					
-					
-					TNonblockingServerTransport socket=new TNonblockingServerSocket(new InetSocketAddress(bindIp, bindPort)); 
-			        TThreadedSelectorServer.Args arg=new TThreadedSelectorServer.Args(socket);
-			        arg.protocolFactory(new TBinaryProtocol.Factory());
-			        arg.processor(processor);
-			        TServer server=new TThreadedSelectorServer(arg);
-					
-//					TNonblockingServerTransport serverTransport = new TNonblockingServerSocket(new InetSocketAddress(bindIp, bindPort));
-//					TServer server = new TThreadedSelectorServer(new TThreadedSelectorServer.Args(serverTransport).processor(processor));
+
+					// TNonblockingServerSocket socket = new
+					// TNonblockingServerSocket(new InetSocketAddress(bindIp,
+					// bindPort));
+					// THsHaServer.Args arg = new THsHaServer.Args(socket);
+					// // 高效率的、密集的二进制编码格式进行数据传输
+					// // 使用非阻塞方式，按块的大小进行传输，类似于 Java 中的 NIO
+					// arg.protocolFactory(new TCompactProtocol.Factory());
+					// arg.transportFactory(new TFramedTransport.Factory());
+					// arg.processorFactory(new TProcessorFactory(processor));
+					// TServer server = new THsHaServer(arg);
+
+					TNonblockingServerTransport socket = new TNonblockingServerSocket(new InetSocketAddress(bindIp, bindPort));
+					TThreadedSelectorServer.Args arg = new TThreadedSelectorServer.Args(socket);
+					arg.protocolFactory(new TBinaryProtocol.Factory());
+					arg.processor(processor);
+					TServer server = new TThreadedSelectorServer(arg);
+
+					// TNonblockingServerTransport serverTransport = new
+					// TNonblockingServerSocket(new InetSocketAddress(bindIp,
+					// bindPort));
+					// TServer server = new TThreadedSelectorServer(new
+					// TThreadedSelectorServer.Args(serverTransport).processor(processor));
 					final ZookeeperClient zkcli = zkClient;
 					Runtime.getRuntime().addShutdownHook(new Thread(() -> {
 						try {
@@ -180,7 +179,7 @@ public abstract class ThriftUtil {
 						} catch (Exception e) {
 						}
 						server.stop();
-//						serverTransport.close();
+						// serverTransport.close();
 						socket.close();
 					}));
 					new Thread(server::serve).start();

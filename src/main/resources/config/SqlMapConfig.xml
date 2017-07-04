@@ -65,7 +65,7 @@ PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
 		遵循一些规范：需要将mapper接口类名和mapper.xml映射文件名称保持一致，且在一个目录 中
 		上边规范的前提是：使用的是mapper代理方法
 		 -->
-		<package name="sc.learn.manager.mapper"/>
+		<package name="sc.learn.manage.mapper"/>
 	</mappers>
 	
 </configuration>

@@ -49,7 +49,7 @@ public abstract class ZkConfig {
 	}
 	
 	public static final int getServicePort(String serviceName){
-		String key="port_"+serviceName;
+		String key="zk_port_"+serviceName;
 		String port=CONFIG_MAP.getProperty(key,System.getProperty(key, System.getenv(key)));
 		if(StringUtils.isBlank(port)){
 			port=SERVICE_DEFAULT_PORT;
