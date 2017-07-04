@@ -94,6 +94,10 @@
 		</pluginManagement>
 
 		<plugins>
+		<!-- 
+			在一个连续的编译环境中，您可能想让MGB作为Maven构建的一部分自动执行。
+			MBG插件将会绑定到Maven构建的 generate-sources 阶段。 所以他会在编译步骤之前执行。 此外注意MBG目标将绑定生成Java和XML资源文件的建立，他们都将包括在生成的JAR包内
+		 -->
 			<plugin>
 				<groupId>org.mybatis.generator</groupId>
 				<artifactId>mybatis-generator-maven-plugin</artifactId>
@@ -107,7 +111,7 @@
 					<execution>
 						<id>Generate MyBatis Artifacts</id>
 						<goals>
-							<goal>generate</goal>
+							<!-- <goal>generate</goal> -->
 						</goals>
 					</execution>
 				</executions>

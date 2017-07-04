@@ -3,6 +3,7 @@
         PUBLIC "-//mybatis.org//DTD MyBatis Generator Configuration 1.0//EN"  
         "http://mybatis.org/dtd/mybatis-generator-config_1_0.dtd"> 
 <!-- mvn mybatis-generator:generate -->
+<!-- mvn -Dmybatis.generator.overwrite=true mybatis-generator:generate -->
 <generatorConfiguration>
 	<!-- 可以用于加载配置项或者配置文件，在整个配置文件中就可以使用${propertyKey}的方式来引用配置项 resource：配置资源加载地址，使用resource，MBG从classpath开始找，比如com/myproject/generatorConfig.properties 
 		url：配置资源加载地质，使用URL的方式，比如file:///C:/myfolder/generatorConfig.properties. 注意，两个属性只能选址一个; 另外，如果使用了mybatis-generator-maven-plugin，那么在pom.xml中定义的properties都可以直接在generatorConfig.xml中使用 
@@ -81,7 +82,7 @@
 		</javaClientGenerator>
 
 		<!-- 指定数据库表，要生成哪些表，就写哪些表，要和数据库中对应，不能写错！ -->
-		<!-- <table tableName="t_user" mapperName="UserMapper" domainObjectName="User">
+		<table tableName="t_user" mapperName="UserMapper" domainObjectName="User">
 			<generatedKey column="f_id" sqlStatement="MySql" identity="true" />
 			<columnRenamingRule searchString="^f_" replaceString="" />
 		</table>
@@ -98,7 +99,6 @@
 		</table>
 		<table tableName="t_user_role" mapperName="UserRoleMapper" domainObjectName="UserRole">
 			<columnRenamingRule searchString="^f_" replaceString="" />
-		</table> -->
-
+		</table>
 	</context>
 </generatorConfiguration>
