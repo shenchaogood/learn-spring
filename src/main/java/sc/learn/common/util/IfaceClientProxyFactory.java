@@ -18,12 +18,11 @@ class IfaceClientProxyFactory extends AbstractThriftClient {
 	protected ThriftClientHolder bindNewInstance(String ip, int port) {
 		try {
 			
-			TTransport transport = new TFramedTransport(new TSocket(ip, port, timeout));
-	        TProtocol protocol = new TBinaryProtocol(transport);
-			
 //			TTransport transport = new TFramedTransport(new TSocket(ip, port, timeout));
 //			TProtocol protocol = new TCompactProtocol(transport);
 			
+			TTransport transport = new TFramedTransport(new TSocket(ip, port, timeout));
+	        TProtocol protocol = new TBinaryProtocol(transport);
 			transport.open();
 			Constructor<?> syncConstructor = clazz.getConstructor(TProtocol.class);
 			return new ThriftClientHolder(transport, syncConstructor.newInstance(protocol));

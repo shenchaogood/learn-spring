@@ -1,6 +1,6 @@
 package sc.learn.test.service;
 
-import org.apache.thrift.async.AsyncMethodCallback;
+import org.apache.thrift.TException;
 import org.junit.Test;
 
 import sc.learn.common.util.ThriftUtil;
@@ -19,10 +19,28 @@ public class TestService {
 
 	@Test
 	public void testThriftClient() throws Exception {
-		TManageService.Iface service = ThriftUtil.getIfaceClient(TManageService.Iface.class, 5000);
-		service.saveUser(new TUser().setEmail("6").setName("s").setPassword("g"));
-		service.saveUser(new TUser().setEmail("6").setName("s").setPassword("g"));
-
+		final TManageService.Iface service = ThriftUtil.getIfaceClient(TManageService.Iface.class, 5000);
+		TUser user = service.getUserById(1);
+		System.out.println(user);
+		for(int i=0;i<5;i++){
+			new Thread(){
+				@Override
+				public void run() {
+					try {
+						TUser user = service.getUserById(1);
+						System.out.println(user);
+						service.saveUser(new TUser().setEmail("6").setName("s").setPassword("g"));
+					} catch (TException e) {
+						e.printStackTrace();
+					}
+					
+				}
+			}.start();
+		}
+		
+		/*
+		
+		
 		TManageService.AsyncIface service2 = ThriftUtil.getAsyncIfaceClient(TManageService.AsyncIface.class, 5000);
 		service2.saveUser(new TUser().setEmail("6").setName("s").setPassword("g"), new AsyncMethodCallback<Void>() {
 			@Override
@@ -34,6 +52,18 @@ public class TestService {
 				System.out.println("onComplete");
 			}
 		});
-		Thread.sleep(1000);
+		
+		service2.getUserById(1, new AsyncMethodCallback<TUser>() {
+			@Override
+			public void onComplete(TUser response) {
+				
+			}
+			@Override
+			public void onError(Exception exception) {
+				
+			}
+		});
+		*/
+		Thread.sleep(5000);
 	}
 }
