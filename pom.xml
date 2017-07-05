@@ -30,6 +30,7 @@
 		<fastjson-version>1.2.32</fastjson-version>
 		<jackson-version>2.6.7</jackson-version>
 		<slf4j-api-version>1.7.25</slf4j-api-version>
+		<joda-time-version>2.9.9</joda-time-version>
 	</properties>
 
 	<build>
@@ -582,6 +583,11 @@
 		    <groupId>javax.mail</groupId>  
 		    <artifactId>mail</artifactId>  
 		    <version>1.4.7</version>  
+		</dependency>
+		<dependency>
+		    <groupId>joda-time</groupId>
+		    <artifactId>joda-time</artifactId>
+		    <version>${joda-time-version}</version>
 		</dependency>
 	</dependencies>
 </project>
