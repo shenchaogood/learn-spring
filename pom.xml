@@ -8,7 +8,6 @@
 
 	<properties>
 		<thrift-plugin-version>0.1.11</thrift-plugin-version>
-
 		<servlet-version>3.1.0</servlet-version>
 		<jsp-version>2.3.1</jsp-version>
 		<jstl-version>1.2.1</jstl-version>
