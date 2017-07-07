@@ -24,5 +24,6 @@ public class ThriftAsyncIfaceTransport extends TNonblockingSocket implements Acq
 	public int getThriftPort() {
 		return port;
 	}
+
 	
 }

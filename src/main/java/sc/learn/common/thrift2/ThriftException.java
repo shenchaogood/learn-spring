@@ -11,6 +11,5 @@ public class ThriftException extends RuntimeException {
 	public ThriftException(Throwable cause) {
         super(cause);
     }
-	
 
 }
