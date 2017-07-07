@@ -38,7 +38,8 @@ public class DispatcherServletInitializer extends AbstractAnnotationConfigDispat
 	@Override
 	protected Filter[] getServletFilters() {
 		//HttpPutFormContentFilter <form action="" method="put" enctype="application/x-www-form-urlencoded">
-		return new Filter[]{new CharacterEncodingFilter("UTF-8"),new HttpPutFormContentFilter()};
+		return new Filter[]{
+				new CharacterEncodingFilter("UTF-8"),new HttpPutFormContentFilter()};
 	}
 	
 	@Override

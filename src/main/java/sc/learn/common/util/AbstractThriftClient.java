@@ -5,17 +5,17 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 import java.util.Random;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.Set;
 
-import org.apache.commons.collections4.CollectionUtils;
+import org.apache.mina.util.ConcurrentHashSet;
 import org.apache.thrift.transport.TTransport;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 abstract class AbstractThriftClient implements ThriftClient, InvocationHandler {
 
+	private static final ThreadLocal<ThriftClientHolder> THREAD_LOCAL=new ThreadLocal<>();
 	protected int timeout;
 	protected final Logger LOGGER = LoggerFactory.getLogger(getClass());
 
@@ -29,7 +29,7 @@ abstract class AbstractThriftClient implements ThriftClient, InvocationHandler {
 		}
 	}
 
-	protected Map<String, ThriftClientHolder> cache = new ConcurrentHashMap<>();
+	protected Set<String> cache = new ConcurrentHashSet<>();
 
 	protected Class<?> clazz;
 
@@ -39,26 +39,9 @@ abstract class AbstractThriftClient implements ThriftClient, InvocationHandler {
 	}
 
 	@Override
-	public void bind(String ip, int port, int timeout) {
-		this.timeout=timeout;
-		cache.computeIfAbsent(ip + ":" + port, p -> bindNewInstance(ip, port));
-	}
-
-	@Override
-	public void bindAll(List<String> ipPortTimeouts) {
-		ipPortTimeouts.forEach(ipPortTimeout -> {
-			String[] ipPortTimeoutStr = ipPortTimeout.split(":");
-			if (!cache.containsKey(ipPortTimeoutStr[0] + ":" + ipPortTimeoutStr[1])) {
-				cache.computeIfAbsent(ipPortTimeoutStr[0] + ":" + ipPortTimeoutStr[1],
-						p -> bindNewInstance(ipPortTimeoutStr[0], Integer.parseInt(ipPortTimeoutStr[1])));
-			}
-		});
-		CollectionUtils.subtract(cache.entrySet(), ipPortTimeouts).forEach(item -> {
-			ThriftClientHolder holder = cache.remove(item);
-			if (holder != null) {
-				holder.transport.close();
-			}
-		});
+	public void bindAll(List<String> ipPorts) {
+		cache.clear();
+		cache.addAll(ipPorts);
 	}
 
 	protected abstract ThriftClientHolder bindNewInstance(String ip, int port);
@@ -73,20 +56,30 @@ abstract class AbstractThriftClient implements ThriftClient, InvocationHandler {
 		LOGGER.debug("执行方法:{}，参数:{}", method, Arrays.toString(args));
 		long startTime = System.currentTimeMillis();
 		int size;
+		ThriftClientHolder clientHolder=THREAD_LOCAL.get();
 		try {
-			while ((size=(cache.values().size())) == 0&&timeout>System.currentTimeMillis()-startTime) {
-				Thread.sleep(timeout/5);
+			if(clientHolder==null){
+				while ((size=(cache.size())) == 0&&timeout>System.currentTimeMillis()-startTime) {
+					Thread.sleep(timeout/5);
+				}
+				if(size == 0){
+					throw new RuntimeException("target 未生成,可能是因为服务未注册");
+				}
+				String[] ipPort = cache.toArray(new String[size])[new Random().nextInt(size)].split(":");
+				clientHolder=bindNewInstance(ipPort[0], Integer.parseInt(ipPort[1]));
+				THREAD_LOCAL.set(clientHolder);
 			}
-			if(size == 0){
-				throw new RuntimeException("target 未生成,可能是因为服务未注册");
-			}
-			Object target = cache.values().toArray(new ThriftClientHolder[size])[new Random().nextInt(size)].target;
-			Object result = method.invoke(target, args);
+			System.out.println(clientHolder.target);
+			Object result = method.invoke(clientHolder.target, args);
 			LOGGER.debug("执行方法:{}，结果:{}，用时:{}", method, result, System.currentTimeMillis() - startTime);
 			return result;
 		} catch (Exception e) {
 			LOGGER.error("执行方法:{}，异常:{}", method, e);
 			throw new RuntimeException(e);
+		}finally {
+			if(clientHolder!=null){
+//				clientHolder.transport.close();
+			}
 		}
 	}
 }

@@ -6,7 +6,5 @@ interface ThriftClient {
 
 	Object createProxy();
 	
-	void bind(String ip,int port,int timeout);
-
-	void bindAll(List<String> ipPortTimeouts);
+	void bindAll(List<String> ipPort);
 }
