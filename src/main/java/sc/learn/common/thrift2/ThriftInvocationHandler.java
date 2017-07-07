@@ -18,15 +18,16 @@ public class ThriftInvocationHandler<IFACE> implements InvocationHandler {
 	
     protected final Logger LOGGER = LoggerFactory.getLogger(getClass());
 
-    private AbstractThriftTransportPool<? extends TTransport> pool; // 连接池
+    private AbstractThriftTransportPool<TTransport> pool; // 连接池
     private boolean isSynchronized;
     private String serviceName;
     private ThriftProtocolEnum protocol;
     private ThriftServiceStatus thriftServiceStatus;// 服务状态
 
-    public ThriftInvocationHandler(AbstractThriftTransportPool<? extends TTransport> pool,
+    @SuppressWarnings("unchecked")
+	public ThriftInvocationHandler(AbstractThriftTransportPool<? extends TTransport> pool,
     		String serviceName, boolean isSynchronized,ThriftProtocolEnum protocol) {
-        this.pool =  pool;
+        this.pool = (AbstractThriftTransportPool<TTransport>) pool;
         this.isSynchronized=isSynchronized;
         this.protocol = protocol;
         this.serviceName=serviceName;

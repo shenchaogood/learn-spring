@@ -20,14 +20,4 @@ public abstract class AbstractThriftTransportPool<T extends TTransport> extends 
 	public boolean isSynchronized(){
 		return factory.isSynchronized();
 	}
-
-	public void invalidateObject(TTransport transport) throws Exception {
-		super.invalidateObject((T) transport);
-	}
-
-	public void returnObject(TTransport transport) throws Exception {
-		super.returnObject((T) transport);
-	}
-	
-
 }

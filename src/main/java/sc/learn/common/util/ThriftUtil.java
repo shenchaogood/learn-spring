@@ -37,7 +37,7 @@ public abstract class ThriftUtil {
 	protected static final Logger LOGGER = LoggerFactory.getLogger(ThriftUtil.class);
 	private static final Map<EnvironmentType, ZookeeperClient> ENV_CLIENT_MAP = new HashMap<>();
 	
-	private static final Map<Class<?>,AbstractThriftTransportPool<?>> TRANSPORT_REGISTER=new HashMap<>();
+	private static final Map<Class<?>,AbstractThriftTransportPool<? extends TTransport>> TRANSPORT_REGISTER=new HashMap<>();
 
 	public static void registTransportPool(Class<?> iface,AbstractThriftTransportPool<?> pool){
 		if(!TRANSPORT_REGISTER.containsKey(iface)){
