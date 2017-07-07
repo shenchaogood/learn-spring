@@ -41,7 +41,7 @@ public class ThriftServiceProxyFactory<IFACE> implements FactoryBean<IFACE>, Ini
         }else{
         	objectClass = (Class<IFACE>) classLoader.loadClass(service + ThriftUtil.Constants.ASYN_IFACE_SUFFIX);
         }
-        proxyClient =ThriftUtil.createClient(objectClass, timeout, (servicePath)->null, protocol);
+        proxyClient =ThriftUtil.createClient(objectClass, timeout, pool, protocol);
     }
     
     @Override

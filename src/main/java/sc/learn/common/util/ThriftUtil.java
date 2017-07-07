@@ -64,13 +64,8 @@ public abstract class ThriftUtil {
         return tProtocolFactory;
     }
 
-	public static interface ProvideTransportFillBackServicePath{
-		AbstractThriftTransportPool<TTransport> providePath(String serviceName);
-	}
-	
-	
 	@SuppressWarnings("unchecked")
-	public static <T> T createClient(Class<T> clazz, int timeout, ProvideTransportFillBackServicePath provider, ThriftProtocolEnum protocol) {
+	public static <T> T createClient(Class<T> clazz, int timeout, AbstractThriftTransportPool<TTransport> pool, ThriftProtocolEnum protocol) {
 		String ifaceName = clazz.getName();
 		boolean isSynchronized;
 		String serviceName;
@@ -88,8 +83,6 @@ public abstract class ThriftUtil {
 			addressPath.append("/");
 		}
 		addressPath.append(serviceName);
-		
-		AbstractThriftTransportPool<TTransport> pool=provider.providePath(serviceName);
 		
 		// 加载第三方提供的接口和Client类
 		// 设置创建handler
