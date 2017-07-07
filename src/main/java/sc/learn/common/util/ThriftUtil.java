@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.curator.framework.CuratorFramework;
 import org.apache.thrift.TProcessor;
 import org.apache.thrift.protocol.TBinaryProtocol;
 import org.apache.thrift.protocol.TCompactProtocol;
@@ -24,7 +25,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import sc.learn.common.thrift2.AbstractThriftTransportPool;
+import sc.learn.common.thrift2.AddressProvider;
+import sc.learn.common.thrift2.ThriftAsyncIfaceTransportPool;
 import sc.learn.common.thrift2.ThriftException;
+import sc.learn.common.thrift2.ThriftIfaceTransportPool;
 import sc.learn.common.thrift2.ThriftInvocationHandler;
 import sc.learn.common.thrift2.ThriftProtocolEnum;
 
@@ -32,7 +36,19 @@ public abstract class ThriftUtil {
 
 	protected static final Logger LOGGER = LoggerFactory.getLogger(ThriftUtil.class);
 	private static final Map<EnvironmentType, ZookeeperClient> ENV_CLIENT_MAP = new HashMap<>();
+	
+	private static final Map<Class<?>,AbstractThriftTransportPool<?>> TRANSPORT_REGISTER=new HashMap<>();
 
+	public static void registTransportPool(Class<?> iface,AbstractThriftTransportPool<?> pool){
+		if(!TRANSPORT_REGISTER.containsKey(iface)){
+			synchronized (TRANSPORT_REGISTER) {
+				if(!TRANSPORT_REGISTER.containsKey(iface)){
+					TRANSPORT_REGISTER.put(iface, pool);
+				}
+			}
+		}
+	}
+	
 	public static interface Constants {
 		static final String SERVICE_PREFIX = ZkConfig.SERVICE_PREFIX;;
 		static final String IFACE_SUFFIX = "$Iface";
@@ -65,7 +81,7 @@ public abstract class ThriftUtil {
     }
 
 	@SuppressWarnings("unchecked")
-	public static <T> T createClient(Class<T> clazz, int timeout, AbstractThriftTransportPool<TTransport> pool, ThriftProtocolEnum protocol) {
+	public static <T> T createClient(Class<T> clazz, int timeout, ThriftProtocolEnum protocol,CuratorFramework zkClient) {
 		String ifaceName = clazz.getName();
 		boolean isSynchronized;
 		String serviceName;
@@ -84,6 +100,22 @@ public abstract class ThriftUtil {
 		}
 		addressPath.append(serviceName);
 		
+		AbstractThriftTransportPool<? extends TTransport> pool = TRANSPORT_REGISTER.get(clazz);
+		if(pool==null){
+			synchronized (ThriftUtil.class) {
+				if(!TRANSPORT_REGISTER.containsKey(clazz)){
+					if(isSynchronized){
+						pool=new ThriftIfaceTransportPool(new AddressProvider(null, zkClient, addressPath.toString())
+								, timeout, 40, 40, 1, 1000);
+					}else{
+						pool=new ThriftAsyncIfaceTransportPool(new AddressProvider(null, zkClient, addressPath.toString())
+								, timeout, 40, 40, 1, 1000);
+					}
+					registTransportPool(clazz, pool);
+				}
+			}
+		}
+		
 		// 加载第三方提供的接口和Client类
 		// 设置创建handler
 		InvocationHandler clientHandler = new ThriftInvocationHandler<T>(pool, serviceName, isSynchronized, protocol);
@@ -91,7 +123,6 @@ public abstract class ThriftUtil {
 	}
 
 	public static void startThriftServer(Object thriftServiceObj,ThriftProtocolEnum protocol) {
-
 		EnvironmentType env = EnvironmentUtil.getLocalEnviromentType();
 		ZookeeperClient zkClient = ENV_CLIENT_MAP.get(env);
 		if (zkClient == null) {

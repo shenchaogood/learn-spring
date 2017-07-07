@@ -1,9 +1,11 @@
 package sc.learn.common.thrift2;
 
+import org.apache.curator.framework.CuratorFramework;
 import org.apache.thrift.transport.TTransport;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
 
+import sc.learn.common.util.StringUtil;
 import sc.learn.common.util.ThriftUtil;
 
 public class ThriftServiceProxyFactory<IFACE> implements FactoryBean<IFACE>, InitializingBean {
@@ -23,6 +25,8 @@ public class ThriftServiceProxyFactory<IFACE> implements FactoryBean<IFACE>, Ini
     
     private int timeout;
     
+    private CuratorFramework zkClient;
+    
     /**
      * 传输协议
      * 1.TBinaryProtocol – 二进制格式.
@@ -41,7 +45,7 @@ public class ThriftServiceProxyFactory<IFACE> implements FactoryBean<IFACE>, Ini
         }else{
         	objectClass = (Class<IFACE>) classLoader.loadClass(service + ThriftUtil.Constants.ASYN_IFACE_SUFFIX);
         }
-        proxyClient =ThriftUtil.createClient(objectClass, timeout, pool, protocol);
+        proxyClient =ThriftUtil.createClient(objectClass, timeout, protocol,zkClient);
     }
     
     @Override
@@ -60,7 +64,9 @@ public class ThriftServiceProxyFactory<IFACE> implements FactoryBean<IFACE>, Ini
     }
 
     public void setProtocol(String protocol) {
-        this.protocol = ThriftProtocolEnum.valueOf(protocol);
+    	if(StringUtil.isNotBlank(protocol)){
+    		this.protocol = ThriftProtocolEnum.valueOf(protocol);
+    	}
     }
 
     public void setService(String service) {
@@ -70,4 +76,8 @@ public class ThriftServiceProxyFactory<IFACE> implements FactoryBean<IFACE>, Ini
     public void setPool(AbstractThriftTransportPool<TTransport> pool) {
         this.pool = pool;
     }
+
+	public void setZkClient(CuratorFramework zkClient) {
+		this.zkClient = zkClient;
+	}
 }

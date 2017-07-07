@@ -5,7 +5,7 @@ import org.apache.commons.pool.impl.GenericObjectPool;
 public class ThriftIfaceTransportPool extends AbstractThriftTransportPool<ThriftIfaceTransport> {
 
     public ThriftIfaceTransportPool(AddressProvider addressProvider, int timeout,int maxActive, int maxIdle, int minIdle,
-            long maxWait) throws Exception {
+            long maxWait)  {
         /**
          * 池策略：最大连接数，最大等待时间，最大空闲数，最小空闲数由人工配置，
          * 最大连接数尽量=最大空闲数，最小空闲数尽量为0，以便清除无用线程

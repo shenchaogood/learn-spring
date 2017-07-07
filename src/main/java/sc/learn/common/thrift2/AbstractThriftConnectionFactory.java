@@ -8,14 +8,14 @@ import org.apache.thrift.transport.TTransport;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class AbstractThriftConnectionFactory<T extends TTransport> extends BasePoolableObjectFactory<T> {
+public abstract class AbstractThriftConnectionFactory<T extends TTransport> extends BasePoolableObjectFactory<T> {
     private final Logger LOGGER = LoggerFactory.getLogger(getClass());
 
     private final AddressProvider addressProvider;
     private int timeout;
     private boolean isIface;
 
-    protected AbstractThriftConnectionFactory(AddressProvider addressProvider,int timeout,boolean isIface) throws Exception {
+    protected AbstractThriftConnectionFactory(AddressProvider addressProvider,int timeout,boolean isIface) {
         this.addressProvider = addressProvider;
         this.timeout=timeout;
         this.isIface=isIface;
