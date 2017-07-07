@@ -1,7 +1,6 @@
 package sc.learn.test.service;
 
 import org.apache.thrift.TException;
-import org.apache.thrift.async.AsyncMethodCallback;
 import org.junit.Test;
 
 import sc.learn.common.util.ThriftUtil;
@@ -14,13 +13,13 @@ public class TestService {
 
 	@Test
 	public void testThriftServer() throws Exception {
-		ThriftUtil.startThriftServer(new ManageService());
+		ThriftUtil.startThriftServer(new ManageService(),null);
 		Thread.sleep(2000000);
 	}
 
 	@Test
 	public void testThriftClient() throws Exception {
-		TManageService.Iface service = ThriftUtil.getIfaceClient(TManageService.Iface.class, 5000);
+		TManageService.Iface service = ThriftUtil.createClient(TManageService.Iface.class, 5000,null,null);
 		service.getUserById(1);
 		service.getUserById(1);
 		for(int i=0;i<5;i++){
@@ -40,7 +39,7 @@ public class TestService {
 		}
 		
 		
-//		TManageService.AsyncIface service2 = ThriftUtil.getAsyncIfaceClient(TManageService.AsyncIface.class, 5000);
+//		TManageService.AsyncIface service2 = ThriftUtil.getAsyncIfaceClient(TManageService.AsyncIface.class, 5000,null,null);
 //		
 //		service2.saveUser(new TUser().setEmail("6").setName("s").setPassword("g"), new AsyncMethodCallback<Void>() {
 //			@Override

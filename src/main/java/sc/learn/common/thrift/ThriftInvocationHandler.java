@@ -21,10 +21,9 @@ public class ThriftInvocationHandler implements InvocationHandler {
     private static Logger LOGGER = LoggerFactory.getLogger(ThriftInvocationHandler.class);
 
     private GenericObjectPool<ThriftTSocket> pool; // 连接池
-    private TServiceClientFactory<TServiceClient> tServiceClientFactory = null;
+    private TServiceClientFactory<TServiceClient> tServiceClientFactory;
     private Integer protocol;
     private ThriftServiceStatus thriftServiceStatus;// 服务状态
-    private AddressProvider addressProvider;
 
     public ThriftInvocationHandler(GenericObjectPool<ThriftTSocket> pool,
             TServiceClientFactory<TServiceClient> tServiceClientFactory, Integer protocol, String serviceName,
@@ -33,7 +32,6 @@ public class ThriftInvocationHandler implements InvocationHandler {
         this.tServiceClientFactory = tServiceClientFactory;
         this.protocol = protocol;
         this.thriftServiceStatus = new ThriftServiceStatus(serviceName);
-        this.addressProvider = addressProvider;
     }
 
     @Override

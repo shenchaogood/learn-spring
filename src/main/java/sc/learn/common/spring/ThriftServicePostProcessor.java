@@ -25,7 +25,7 @@ public class ThriftServicePostProcessor implements BeanPostProcessor,BeanFactory
 	public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
 		Class<?> cls =  bean.getClass();
         if (cls.isAnnotationPresent(ThriftService.class)&&!beanFactory.containsBean(beanName)) {
-            ThriftUtil.startThriftServer(bean);
+            ThriftUtil.startThriftServer(bean,null);
             LOGGER.debug("启动Thrift服务:" + bean.getClass().getName());
         }
 		return bean;

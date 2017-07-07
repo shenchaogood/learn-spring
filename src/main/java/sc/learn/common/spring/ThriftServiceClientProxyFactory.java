@@ -26,7 +26,7 @@ public class ThriftServiceClientProxyFactory implements FactoryBean<Object>, Ini
     private Object proxyClient;
 
     private Class<Object> objectClass;
-
+    
     /**
      * 传输协议
      * 1.TBinaryProtocol – 二进制格式.
@@ -43,13 +43,13 @@ public class ThriftServiceClientProxyFactory implements FactoryBean<Object>, Ini
     public void afterPropertiesSet() throws Exception {
         // 加载第三方提供的接口和Client.Factory类
         ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-        this.objectClass = (Class<Object>) classLoader.loadClass(this.service + "$Iface");
+        objectClass = (Class<Object>) classLoader.loadClass(this.service + "$Iface");
         Class<TServiceClientFactory<TServiceClient>> tServiceClientFactoryClass = (Class<TServiceClientFactory<TServiceClient>>) classLoader
                 .loadClass(this.service + "$Client$Factory");
         // 设置创建handler
         InvocationHandler clientHandler = new ThriftInvocationHandler(this.thriftGenericObjectPool,
                 tServiceClientFactoryClass.newInstance(), this.protocol, this.service, this.addressProvider);
-        this.proxyClient = Proxy.newProxyInstance(classLoader, new Class[] { this.objectClass }, clientHandler);
+        this.proxyClient = Proxy.newProxyInstance(classLoader, new Class[] { objectClass }, clientHandler);
     }
 
     @Override
@@ -82,4 +82,5 @@ public class ThriftServiceClientProxyFactory implements FactoryBean<Object>, Ini
     public void setThriftGenericObjectPool(ThriftGenericObjectPool thriftGenericObjectPool) {
         this.thriftGenericObjectPool = thriftGenericObjectPool;
     }
+
 }

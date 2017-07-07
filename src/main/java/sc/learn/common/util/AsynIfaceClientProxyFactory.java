@@ -32,4 +32,5 @@ class AsynIfaceClientProxyFactory extends AbstractThriftClient {
 			throw new RuntimeException(e);
 		}
 	}
+	
 }
