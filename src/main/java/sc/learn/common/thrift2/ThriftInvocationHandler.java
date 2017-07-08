@@ -48,8 +48,8 @@ public class ThriftInvocationHandler<IFACE> implements InvocationHandler {
             transport = pool.borrowObject();
             ifBorrowException = false;
             String interfaceWholeName;
-            if(transport instanceof AcquirableThriftAddress){
-            	AcquirableThriftAddress thriftAddress=(AcquirableThriftAddress)transport;
+            if(AcquirableThriftAddress.class.isInstance(transport)){
+            	AcquirableThriftAddress thriftAddress=AcquirableThriftAddress.class.cast(transport);
             	interfaceWholeName = getInterfaceName(method) + "&ip=" + thriftAddress.getThriftHost() + ":"
                         + thriftAddress.getThriftPort();
             }else{
