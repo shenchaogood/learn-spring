@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Triple;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.thrift.TProcessor;
 import org.apache.thrift.protocol.TBinaryProtocol;
@@ -38,7 +39,9 @@ public abstract class ThriftUtil {
 	private static final Map<EnvironmentType, ZookeeperClient> ENV_CLIENT_MAP = new HashMap<>();
 	
 	private static final Map<Class<?>,AbstractThriftTransportPool<? extends TTransport>> TRANSPORT_REGISTER=new HashMap<>();
-
+	
+	private static final Map<Class<?>,AddressProvider> ADDRESSPROVIDER_MAP=new HashMap<>();
+	
 	public static void registTransportPool(Class<?> iface,AbstractThriftTransportPool<?> pool){
 		if(!TRANSPORT_REGISTER.containsKey(iface)){
 			synchronized (TRANSPORT_REGISTER) {
@@ -50,7 +53,7 @@ public abstract class ThriftUtil {
 	}
 	
 	public static interface Constants {
-		static final String SERVICE_PREFIX = ZkConfig.SERVICE_PREFIX;;
+		static final String SERVICE_PREFIX = ZkConfig.SERVICE_PREFIX.endsWith("/")?ZkConfig.SERVICE_PREFIX:ZkConfig.SERVICE_PREFIX+"/";
 		static final String IFACE_SUFFIX = "$Iface";
 		static final String ASYN_IFACE_SUFFIX = "$AsyncIface";
 		static final String ASYN_CLIENT_SUFFIX = "$AsyncClient";
@@ -79,47 +82,58 @@ public abstract class ThriftUtil {
         }
         return tProtocolFactory;
     }
-
-	@SuppressWarnings("unchecked")
-	public static <T> T createClient(Class<T> clazz, int timeout, ThriftProtocolEnum protocol,CuratorFramework zkClient) {
-		String ifaceName = clazz.getName();
-		boolean isSynchronized;
+	
+	public static Triple<Boolean,String,String> fetchSynchronizedAndIfacePathAndServiceName(Class<?> ifaceClass){
+		String ifaceName = ifaceClass.getName();
 		String serviceName;
-		if (ifaceName.endsWith(Constants.IFACE_SUFFIX)) {
-			isSynchronized = true;
+		boolean isSynchronized;
+		if (ifaceName.endsWith(Constants.IFACE_SUFFIX)){
+			isSynchronized=true;
 			serviceName = StringUtils.removeEnd(ifaceName, Constants.IFACE_SUFFIX);
 		} else if (ifaceName.endsWith(Constants.ASYN_IFACE_SUFFIX)) {
-			isSynchronized = false;
+			isSynchronized=false;
 			serviceName = StringUtils.removeEnd(ifaceName, Constants.ASYN_IFACE_SUFFIX);
 		} else {
 			throw new ThriftException(ifaceName + "不是合法thrift接口");
 		}
-		StringBuilder addressPath = new StringBuilder(Constants.SERVICE_PREFIX);
-		if (!addressPath.toString().endsWith("/")) {
-			addressPath.append("/");
-		}
-		addressPath.append(serviceName);
-		
-		AbstractThriftTransportPool<? extends TTransport> pool = TRANSPORT_REGISTER.get(clazz);
+		StringBuilder addressPath = new StringBuilder(Constants.SERVICE_PREFIX).append(serviceName);
+		return Triple.of(isSynchronized, addressPath.toString(),serviceName);
+	}
+	
+	@SuppressWarnings("unchecked")
+	public static <T> T createClient(Class<T> ifaceClass, int timeout, ThriftProtocolEnum protocol,CuratorFramework zkClient) {
+		AbstractThriftTransportPool<? extends TTransport> pool = TRANSPORT_REGISTER.get(ifaceClass);
+		Triple<Boolean,String,String> sis=fetchSynchronizedAndIfacePathAndServiceName(ifaceClass);
 		if(pool==null){
 			synchronized (ThriftUtil.class) {
-				if(!TRANSPORT_REGISTER.containsKey(clazz)){
-					if(isSynchronized){
-						pool=new ThriftIfaceTransportPool(new AddressProvider(null, zkClient, addressPath.toString())
-								, timeout, 40, 40, 1, 1000);
-					}else{
-						pool=new ThriftAsyncIfaceTransportPool(new AddressProvider(null, zkClient, addressPath.toString())
-								, timeout, 40, 40, 1, 1000);
+				if(!TRANSPORT_REGISTER.containsKey(ifaceClass)){
+					try {
+						AddressProvider addressProvider=ADDRESSPROVIDER_MAP.get(Class.forName(sis.getRight()));
+						if(addressProvider==null){
+							synchronized (ThriftUtil.class) {
+								if(addressProvider==null){
+									addressProvider=new AddressProvider(null, zkClient, sis.getMiddle());
+									ADDRESSPROVIDER_MAP.put(Class.forName(sis.getRight()), addressProvider);
+								}
+							}
+						}
+						if(sis.getLeft()){
+							pool=new ThriftIfaceTransportPool(addressProvider ,timeout, 8, 8, 1, 1000);
+						}else{
+							pool=new ThriftAsyncIfaceTransportPool(addressProvider, timeout, 8, 8, 1, 1000);
+						}
+						registTransportPool(ifaceClass, pool);
+					} catch (ClassNotFoundException e) {
+						throw new ThriftException(e);
 					}
-					registTransportPool(clazz, pool);
 				}
 			}
 		}
 		
 		// 加载第三方提供的接口和Client类
 		// 设置创建handler
-		InvocationHandler clientHandler = new ThriftInvocationHandler<T>(pool, serviceName, isSynchronized, protocol);
-		return (T) Proxy.newProxyInstance(ThriftUtil.class.getClassLoader(), new Class[] { clazz }, clientHandler);
+		InvocationHandler clientHandler = new ThriftInvocationHandler<T>(pool, sis.getRight(), sis.getLeft(), protocol);
+		return (T) Proxy.newProxyInstance(ThriftUtil.class.getClassLoader(), new Class[] { ifaceClass }, clientHandler);
 	}
 
 	public static void startThriftServer(Object thriftServiceObj,ThriftProtocolEnum protocol) {

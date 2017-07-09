@@ -20,6 +20,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import sc.learn.common.util.StringUtil;
+import sc.learn.common.util.ThriftUtil;
 
 public class AddressProvider {
     private static Logger LOGGER = LoggerFactory.getLogger(AddressProvider.class);
@@ -45,9 +46,8 @@ public class AddressProvider {
      * zookeeper 监控
      */
     private PathChildrenCache cachedPath;
-
-    public AddressProvider() {
-    }
+    
+    private Class<?> ifaceClass;
 
     public AddressProvider(String backupAddress, CuratorFramework zkClient, String zookeeperPath) {
         // 默认使用配置文件中的IP列表
@@ -56,15 +56,28 @@ public class AddressProvider {
         Collections.shuffle(this.backupAddresses);
         Collections.shuffle(this.serverAddresses);
 
+        try {
+			ifaceClass=Class.forName(StringUtil.removeStart(zookeeperPath,ThriftUtil.Constants.SERVICE_PREFIX));
+		} catch (ClassNotFoundException e1) {
+			LOGGER.warn("{} 没有对应的zookeeper节点",zookeeperPath);
+		}
+        
         // 配置zookeeper时，启动客户端
-        if (!StringUtil.isBlank(zookeeperPath) && zkClient != null) {
-            buildPathChildrenCache(zkClient, zookeeperPath, true);
-            try {
-				cachedPath.start(StartMode.POST_INITIALIZED_EVENT);
-			} catch (Exception e) {
-				throw new ThriftException(e);
-			}
+        if (!StringUtil.isBlank(zookeeperPath)){
+        	
+        	if(zkClient != null) {
+	            buildPathChildrenCache(zkClient, zookeeperPath, true);
+	            try {
+					cachedPath.start(StartMode.POST_INITIALIZED_EVENT);
+				} catch (Exception e) {
+					throw new ThriftException(e);
+				}
+        	}
         }
+    }
+    
+    public Class<?> getIfaceClass(){
+    	return ifaceClass;
     }
 
     public InetSocketAddress selectOne() {

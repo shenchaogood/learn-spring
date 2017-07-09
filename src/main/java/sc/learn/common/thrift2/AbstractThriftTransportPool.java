@@ -3,6 +3,8 @@ package sc.learn.common.thrift2;
 import org.apache.commons.pool.impl.GenericObjectPool;
 import org.apache.thrift.transport.TTransport;
 
+import sc.learn.common.util.ThriftUtil;
+
 public abstract class AbstractThriftTransportPool<T extends TTransport> extends GenericObjectPool<T>{
 
 	private AbstractThriftConnectionFactory<T> factory;
@@ -15,9 +17,11 @@ public abstract class AbstractThriftTransportPool<T extends TTransport> extends 
 				timeBetweenEvictionRunsMillis, numTestsPerEvictionRun, minEvictableIdleTimeMillis, testWhileIdle, 
 				softMinEvictableIdleTimeMillis,lifo);
 		this.factory=factory;
+		ThriftUtil.registTransportPool(factory.getIfaceClass(), this);
 	}
 	
 	public boolean isSynchronized(){
 		return factory.isSynchronized();
 	}
+	
 }

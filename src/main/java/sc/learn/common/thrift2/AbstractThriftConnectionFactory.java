@@ -21,14 +21,15 @@ public abstract class AbstractThriftConnectionFactory<T extends TTransport> exte
         this.isIface=isIface;
     }
     
+    public Class<?> getIfaceClass(){
+    	return addressProvider.getIfaceClass();
+    }
+    
     public boolean isSynchronized(){
     	return isIface;
     }
 
-    /**
-     * return 
-     * 		never null
-     */
+    
     @SuppressWarnings("unchecked")
 	@Override
     public T makeObject() throws Exception {
