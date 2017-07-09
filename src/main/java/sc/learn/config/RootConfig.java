@@ -1,6 +1,8 @@
 package sc.learn.config;
 
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.sql.SQLException;
 import java.util.HashSet;
 import java.util.Properties;
@@ -10,6 +12,8 @@ import javax.sql.DataSource;
 
 import org.mybatis.spring.SqlSessionFactoryBean;
 import org.mybatis.spring.mapper.MapperScannerConfigurer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.EnvironmentAware;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
@@ -36,6 +40,8 @@ import redis.clients.jedis.JedisCluster;
 import redis.clients.jedis.JedisPoolConfig;
 import sc.learn.common.spring.BizParamPrintAspect;
 import sc.learn.common.spring.ThriftServicePostProcessor;
+import sc.learn.common.util.ExceptionUtil;
+import sc.learn.common.util.ZkConfig;
 import sc.learn.common.web.ClusterHttpSessionProvider;
 import sc.learn.common.web.HttpSessionProvider;
 import sc.learn.common.web.ServletHttpSessionProvider;
@@ -43,22 +49,38 @@ import sc.learn.common.web.ServletHttpSessionProvider;
 @Lazy(false)
 @Configuration
 @EnableAspectJAutoProxy
-@PropertySources(value={
+@PropertySources({
 		@PropertySource("classpath:config/db.properties"),
 		@PropertySource("classpath:config/redis.properties"),
-		@PropertySource("classpath:config/mail.properties")
-		})
-//@PropertySource("classpath:config/db.properties")
+		@PropertySource("classpath:config/mail.properties"),
+		@PropertySource("classpath:config/zookeeper.properties")
+	})
 @ComponentScan(basePackages="sc.learn",excludeFilters={
 		@Filter(type=FilterType.ANNOTATION,value=EnableWebMvc.class),
 		@Filter(type=FilterType.ANNOTATION,value=Controller.class)
 		})
 public class RootConfig implements EnvironmentAware {
 	
+	private static final Logger LOGGER=LoggerFactory.getLogger(RootConfig.class);
+	
 	private Environment env;
 	@Override
 	public void setEnvironment(Environment environment) {
 		env=environment;
+		try {
+			for(Field field:ZkConfig.class.getDeclaredFields()){
+				if(field.getName().endsWith("_KEY")||field.getName().endsWith("CONFIG_MAP")){
+					continue;
+				}
+				field.setAccessible(true);//将字段的访问权限设为true：即去除private修饰符的影响  
+				Field modifiers =field.getClass().getDeclaredField("modifiers");//去除final修饰符的影响，将字段设为可修改的
+				modifiers.setAccessible(true);  
+			    modifiers.setInt(field, field.getModifiers() & ~Modifier.FINAL);//fianl标志位置0  
+			    field.set(null,env.getProperty(field.getName()+"_KEY"));  
+			}
+		} catch(Exception e) {
+			LOGGER.error(ExceptionUtil.getStackTrace(e));
+		}  
 	}
 	
 	@Bean(initMethod="init",destroyMethod="close")

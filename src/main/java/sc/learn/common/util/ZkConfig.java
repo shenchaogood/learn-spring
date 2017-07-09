@@ -17,6 +17,7 @@ public abstract class ZkConfig {
 	public static final String SERVICE_DEFAULT_IP_KEY="zk_ip_default";
 	public static final String SERVICE_DEFAULT_PORT_KEY="zk_port_default";
 	public static final String ZK_AUTH_KEY="zk_auth";
+	public static final String ENVIRONMENT_KEY="zk_environment";
 	private static final Properties CONFIG_MAP=new Properties();
 	static{
 		try {
@@ -36,8 +37,10 @@ public abstract class ZkConfig {
 	public static final String SERVICE_DEFAULT_IP = CONFIG_MAP.getProperty(SERVICE_DEFAULT_IP_KEY,System.getProperty(SERVICE_DEFAULT_IP_KEY, System.getenv(SERVICE_DEFAULT_IP_KEY)));
 	public static final String SERVICE_DEFAULT_PORT = CONFIG_MAP.getProperty(SERVICE_DEFAULT_PORT_KEY,System.getProperty(SERVICE_DEFAULT_PORT_KEY, System.getenv(SERVICE_DEFAULT_PORT_KEY)));
 	public static final boolean ZK_AUTH = BooleanUtils.toBoolean(CONFIG_MAP.getProperty(ZK_AUTH_KEY,System.getProperty(ZK_AUTH_KEY, System.getenv(ZK_AUTH_KEY))));
+	public static final String ENVIRONMENT = CONFIG_MAP.getProperty(ENVIRONMENT_KEY,System.getProperty(ENVIRONMENT_KEY, System.getenv(ENVIRONMENT_KEY)));
+	
 	public static final String getServiceIp(String serviceName){
-		String key="ip_"+serviceName;
+		String key="zk_ip_"+serviceName;
 		String ip=CONFIG_MAP.getProperty(key,System.getProperty(key, System.getenv(key)));
 		if(StringUtils.isBlank(ip)){
 			ip=SERVICE_DEFAULT_IP;

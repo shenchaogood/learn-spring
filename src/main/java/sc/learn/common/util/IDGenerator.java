@@ -10,7 +10,7 @@ public abstract class IDGenerator {
 		if(generator==null){
 			synchronized (ID_WORKERS) {
 				if(generator==null){
-					generator = new SnowflakeIdWorker(1, 1);
+					generator = new SnowflakeIdWorker(EnvironmentUtil.getEnvironmentNumber(), 1);//TODO 1
 					ID_WORKERS.put(moduleName, generator);
 				}
 			}

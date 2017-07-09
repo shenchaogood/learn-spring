@@ -11,7 +11,9 @@ import org.springframework.web.filter.CharacterEncodingFilter;
 import org.springframework.web.filter.HttpPutFormContentFilter;
 import org.springframework.web.servlet.support.AbstractAnnotationConfigDispatcherServletInitializer;
 
+import sc.learn.common.util.EnvironmentType;
 import sc.learn.common.util.EnvironmentUtil;
+import sc.learn.common.util.StringUtil;
 
 public class DispatcherServletInitializer extends AbstractAnnotationConfigDispatcherServletInitializer {
 
@@ -46,7 +48,7 @@ public class DispatcherServletInitializer extends AbstractAnnotationConfigDispat
 	public void onStartup(ServletContext servletContext) throws ServletException {
 //		System.setProperty("spring.profiles.active", EnvironmentUtil.getLocalEnviromentType().name());
 //		 context.getEnvironment().setActiveProfiles(EnvironmentUtil.getLocalEnviromentType().name());
-		servletContext.setInitParameter("spring.profiles.default", EnvironmentUtil.getLocalEnviromentType().name());
+		servletContext.setInitParameter("spring.profiles.default", StringUtil.defaultString(EnvironmentUtil.getLocalEnviromentType().name(),EnvironmentType.DEV.name()));
 		servletContext.addListener(RequestContextListener.class);
 		super.onStartup(servletContext);
 	}

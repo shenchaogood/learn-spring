@@ -8,6 +8,7 @@ import java.util.Queue;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.curator.framework.CuratorFramework;
@@ -16,6 +17,7 @@ import org.apache.curator.framework.recipes.cache.PathChildrenCache;
 import org.apache.curator.framework.recipes.cache.PathChildrenCache.StartMode;
 import org.apache.curator.framework.recipes.cache.PathChildrenCacheEvent;
 import org.apache.curator.framework.recipes.cache.PathChildrenCacheListener;
+import org.apache.curator.utils.ZKPaths;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -122,6 +124,14 @@ public class AddressProvider {
                     return;
                 case INITIALIZED:
                     LOGGER.warn(logPrefix + "Connection init ...");
+                    break;
+                case CHILD_ADDED: 
+                case CHILD_UPDATED: 
+                case CHILD_REMOVED: 
+                	String path = ZKPaths.getNodeFromPath(event.getData().getPath());
+                    String dataStr = new String(event.getData().getData());
+                	LOGGER.info(logPrefix + eventType +": " + path + ", data " + dataStr);
+                    break;
                 default:
                 }
                 // 任何节点的时机数据变动,都会rebuild,此处为一个"简单的"做法.
@@ -141,11 +151,7 @@ public class AddressProvider {
                     LOGGER.error(logPrefix + "server ips in zookeeper is empty");
                     return;
                 }else{
-                	List<InetSocketAddress> lastServerAddress = new LinkedList<InetSocketAddress>();
-                    for (ChildData data : children) {
-                        String address = new String(data.getData(), "utf-8");
-                        lastServerAddress.add(transferSingle(address));
-                    }
+                	List<InetSocketAddress> lastServerAddress =children.stream().map((childDate)->transferSingle(new String(childDate.getData()))).collect(Collectors.toList());
                     serverAddresses.addAll(lastServerAddress);
                     Collections.shuffle(serverAddresses);
                 }

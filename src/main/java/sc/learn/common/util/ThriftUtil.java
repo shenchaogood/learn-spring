@@ -10,7 +10,11 @@ import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Triple;
+import org.apache.curator.RetryPolicy;
 import org.apache.curator.framework.CuratorFramework;
+import org.apache.curator.framework.CuratorFrameworkFactory;
+import org.apache.curator.framework.recipes.cache.PathChildrenCache;
+import org.apache.curator.retry.ExponentialBackoffRetry;
 import org.apache.thrift.TProcessor;
 import org.apache.thrift.protocol.TBinaryProtocol;
 import org.apache.thrift.protocol.TCompactProtocol;
@@ -22,6 +26,7 @@ import org.apache.thrift.server.TThreadedSelectorServer;
 import org.apache.thrift.transport.TNonblockingServerSocket;
 import org.apache.thrift.transport.TNonblockingServerTransport;
 import org.apache.thrift.transport.TTransport;
+import org.apache.zookeeper.CreateMode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -134,6 +139,74 @@ public abstract class ThriftUtil {
 		// 设置创建handler
 		InvocationHandler clientHandler = new ThriftInvocationHandler<T>(pool, sis.getRight(), sis.getLeft(), protocol);
 		return (T) Proxy.newProxyInstance(ThriftUtil.class.getClassLoader(), new Class[] { ifaceClass }, clientHandler);
+	}
+	
+	public static void startThriftServer(Object thriftServiceObj,ThriftProtocolEnum protocol,final CuratorFramework zkClient) {
+		Class<?>[] ifaces=thriftServiceObj.getClass().getInterfaces();
+		if(ArrayUtil.isEmpty(ifaces)){
+			throw new ThriftException(thriftServiceObj.getClass().getName()+"不是一个有效的thrift实现");
+		}
+		
+		for (Class<?> inter : thriftServiceObj.getClass().getInterfaces()) {
+			String interfaceName = inter.getName();
+			if (interfaceName.endsWith(ThriftUtil.Constants.IFACE_SUFFIX)) {
+				String serviceName = StringUtils.removeEnd(interfaceName, ThriftUtil.Constants.IFACE_SUFFIX);
+				String bindIp = ZkConfig.getServiceIp(serviceName);
+				int bindPort = ZkConfig.getServicePort(serviceName);
+				String path = Constants.SERVICE_PREFIX + "/" + serviceName ;
+				try {
+					zkClient.create().creatingParentsIfNeeded().forPath(path, new byte[0]);
+					zkClient.create().withMode(CreateMode.EPHEMERAL).forPath(path+"/"+EnvironmentUtil.getEnvironmentName() ,(bindIp + ":" + bindPort).getBytes());
+					Class<?> processorClass = Class.forName(serviceName + ThriftUtil.Constants.PROCESSOR_SUFFIX);
+					Class<?> ifaceClass = Class.forName(serviceName + ThriftUtil.Constants.IFACE_SUFFIX);
+					@SuppressWarnings("unchecked")
+					Constructor<TProcessor> ctor = (Constructor<TProcessor>) processorClass.getConstructor(ifaceClass);
+					TProcessor processor = ctor.newInstance(thriftServiceObj);
+
+					// TNonblockingServerSocket socket = new
+					// TNonblockingServerSocket(new InetSocketAddress(bindIp,
+					// bindPort));
+					// THsHaServer.Args arg = new THsHaServer.Args(socket);
+					// // 高效率的、密集的二进制编码格式进行数据传输
+					// // 使用非阻塞方式，按块的大小进行传输，类似于 Java 中的 NIO
+					// arg.protocolFactory(new TCompactProtocol.Factory());
+					// arg.transportFactory(new TFramedTransport.Factory());
+					// arg.processorFactory(new TProcessorFactory(processor));
+					// TServer server = new THsHaServer(arg);
+
+					TNonblockingServerTransport socket = new TNonblockingServerSocket(new InetSocketAddress(bindIp, bindPort));
+					TThreadedSelectorServer.Args arg = new TThreadedSelectorServer.Args(socket);
+					arg.protocolFactory(getTProtocolFactory(protocol));
+					arg.processor(processor);
+					TServer server = new TThreadedSelectorServer(arg);
+
+					// TNonblockingServerTransport serverTransport = new
+					// TNonblockingServerSocket(new InetSocketAddress(bindIp,
+					// bindPort));
+					// TServer server = new TThreadedSelectorServer(new
+					// TThreadedSelectorServer.Args(serverTransport).processor(processor));
+					Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+						try {
+							zkClient.delete().forPath(path);
+						} catch (Exception e) {
+						}finally {
+							if(server!=null&&server.isServing()){
+								server.stop();
+							}
+							if(socket!=null){
+								socket.close();
+							}
+							// serverTransport.close();
+						}
+						
+						
+					}));
+					new Thread(server::serve).start();
+				} catch (Exception e) {
+					throw new ThriftException(e);
+				}
+			}
+		}
 	}
 
 	public static void startThriftServer(Object thriftServiceObj,ThriftProtocolEnum protocol) {
