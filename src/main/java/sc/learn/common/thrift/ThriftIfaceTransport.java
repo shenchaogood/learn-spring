@@ -1,4 +1,4 @@
-package sc.learn.common.thrift2;
+package sc.learn.common.thrift;
 
 import org.apache.thrift.transport.TFramedTransport;
 import org.apache.thrift.transport.TSocket;

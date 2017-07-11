@@ -1,4 +1,4 @@
-package sc.learn.common.thrift2;
+package sc.learn.common.thrift;
 
 
 public class ThriftIfaceConnectionFactory extends AbstractThriftConnectionFactory<ThriftIfaceTransport> {

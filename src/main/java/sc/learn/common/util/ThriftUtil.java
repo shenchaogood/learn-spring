@@ -1,6 +1,5 @@
 package sc.learn.common.util;
 
-import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Proxy;
@@ -27,13 +26,13 @@ import org.apache.zookeeper.CreateMode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import sc.learn.common.thrift2.AbstractThriftTransportPool;
-import sc.learn.common.thrift2.AddressProvider;
-import sc.learn.common.thrift2.ThriftAsyncIfaceTransportPool;
-import sc.learn.common.thrift2.ThriftException;
-import sc.learn.common.thrift2.ThriftIfaceTransportPool;
-import sc.learn.common.thrift2.ThriftInvocationHandler;
-import sc.learn.common.thrift2.ThriftProtocolEnum;
+import sc.learn.common.thrift.AbstractThriftTransportPool;
+import sc.learn.common.thrift.AddressProvider;
+import sc.learn.common.thrift.ThriftAsyncIfaceTransportPool;
+import sc.learn.common.thrift.ThriftException;
+import sc.learn.common.thrift.ThriftIfaceTransportPool;
+import sc.learn.common.thrift.ThriftInvocationHandler;
+import sc.learn.common.thrift.ThriftProtocolEnum;
 
 public abstract class ThriftUtil {
 
@@ -85,8 +84,7 @@ public abstract class ThriftUtil {
         return tProtocolFactory;
     }
 	
-	public static Triple<Boolean,String,String> fetchSynchronizedAndIfacePathAndServiceName(Class<?> ifaceClass){
-		String ifaceName = ifaceClass.getName();
+	public static Triple<Boolean,String,String> fetchSynchronizedAndIfacePathAndServiceName(String ifaceName){
 		String serviceName;
 		boolean isSynchronized;
 		if (ifaceName.endsWith(Constants.IFACE_SUFFIX)){
@@ -100,6 +98,10 @@ public abstract class ThriftUtil {
 		}
 		StringBuilder addressPath = new StringBuilder(Constants.SERVICE_PREFIX).append("/").append(serviceName);
 		return Triple.of(isSynchronized, addressPath.toString(),serviceName);
+	}
+	
+	public static Triple<Boolean,String,String> fetchSynchronizedAndIfacePathAndServiceName(Class<?> ifaceClass){
+		return fetchSynchronizedAndIfacePathAndServiceName(ifaceClass.getName());
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -167,9 +169,7 @@ public abstract class ThriftUtil {
 					Constructor<TProcessor> ctor = (Constructor<TProcessor>) processorClass.getConstructor(ifaceClass);
 					TProcessor processor = ctor.newInstance(thriftServiceObj);
 
-					// TNonblockingServerSocket socket = new
-					// TNonblockingServerSocket(new InetSocketAddress(bindIp,
-					// bindPort));
+					// TNonblockingServerSocket socket = new TNonblockingServerSocket(new InetSocketAddress(bindIp, bindPort));
 					// THsHaServer.Args arg = new THsHaServer.Args(socket);
 					// // 高效率的、密集的二进制编码格式进行数据传输
 					// // 使用非阻塞方式，按块的大小进行传输，类似于 Java 中的 NIO
@@ -177,18 +177,12 @@ public abstract class ThriftUtil {
 					// arg.transportFactory(new TFramedTransport.Factory());
 					// arg.processorFactory(new TProcessorFactory(processor));
 					// TServer server = new THsHaServer(arg);
-
 					TNonblockingServerTransport socket = new TNonblockingServerSocket(new InetSocketAddress(bindIp, bindPort));
 					TThreadedSelectorServer.Args arg = new TThreadedSelectorServer.Args(socket);
 					arg.protocolFactory(getTProtocolFactory(protocol));
 					arg.processor(processor);
 					TServer server = new TThreadedSelectorServer(arg);
 
-					// TNonblockingServerTransport serverTransport = new
-					// TNonblockingServerSocket(new InetSocketAddress(bindIp,
-					// bindPort));
-					// TServer server = new TThreadedSelectorServer(new
-					// TThreadedSelectorServer.Args(serverTransport).processor(processor));
 					Runtime.getRuntime().addShutdownHook(new Thread(() -> {
 						try {
 							zkClient.delete().forPath(path);
@@ -210,77 +204,4 @@ public abstract class ThriftUtil {
 			}
 		}
 	}
-
-	public static void startThriftServer(Object thriftServiceObj,ThriftProtocolEnum protocol) {
-		EnvironmentType env = EnvironmentUtil.getLocalEnviromentType();
-		ZookeeperClient zkClient = ENV_CLIENT_MAP.get(env);
-		if (zkClient == null) {
-			try {
-				synchronized (ThriftUtil.class) {
-					if (zkClient == null) {
-						zkClient = new ZookeeperClient();
-						ENV_CLIENT_MAP.put(env, zkClient);
-					}
-				}
-			} catch (IOException e) {
-				throw new RuntimeException(e);
-			}
-		}
-
-		for (Class<?> inter : thriftServiceObj.getClass().getInterfaces()) {
-			String interfaceName = inter.getName();
-			if (interfaceName.endsWith(ThriftUtil.Constants.IFACE_SUFFIX)) {
-				String serviceName = StringUtils.removeEnd(interfaceName, ThriftUtil.Constants.IFACE_SUFFIX);
-				String bindIp = ZkConfig.getServiceIp(serviceName);
-				int bindPort = ZkConfig.getServicePort(serviceName);
-				String path = Constants.SERVICE_PREFIX + "/" + serviceName + "/" + bindIp + ":" + bindPort;
-				zkClient.createPath(path, "".getBytes(), ZookeeperClient.EPHEMERAL);
-				try {
-					Class<?> processorClass = Class.forName(serviceName + ThriftUtil.Constants.PROCESSOR_SUFFIX);
-					Class<?> ifaceClass = Class.forName(serviceName + ThriftUtil.Constants.IFACE_SUFFIX);
-					@SuppressWarnings("unchecked")
-					Constructor<TProcessor> ctor = (Constructor<TProcessor>) processorClass.getConstructor(ifaceClass);
-					TProcessor processor = ctor.newInstance(thriftServiceObj);
-
-					// TNonblockingServerSocket socket = new
-					// TNonblockingServerSocket(new InetSocketAddress(bindIp,
-					// bindPort));
-					// THsHaServer.Args arg = new THsHaServer.Args(socket);
-					// // 高效率的、密集的二进制编码格式进行数据传输
-					// // 使用非阻塞方式，按块的大小进行传输，类似于 Java 中的 NIO
-					// arg.protocolFactory(new TCompactProtocol.Factory());
-					// arg.transportFactory(new TFramedTransport.Factory());
-					// arg.processorFactory(new TProcessorFactory(processor));
-					// TServer server = new THsHaServer(arg);
-
-					TNonblockingServerTransport socket = new TNonblockingServerSocket(new InetSocketAddress(bindIp, bindPort));
-					TThreadedSelectorServer.Args arg = new TThreadedSelectorServer.Args(socket);
-					arg.protocolFactory(getTProtocolFactory(protocol));
-					arg.processor(processor);
-					TServer server = new TThreadedSelectorServer(arg);
-
-					// TNonblockingServerTransport serverTransport = new
-					// TNonblockingServerSocket(new InetSocketAddress(bindIp,
-					// bindPort));
-					// TServer server = new TThreadedSelectorServer(new
-					// TThreadedSelectorServer.Args(serverTransport).processor(processor));
-					final ZookeeperClient zkcli = zkClient;
-					Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-						try {
-							zkcli.deletePath(path);
-							zkcli.close();
-						} catch (Exception e) {
-						}
-						server.stop();
-						// serverTransport.close();
-						socket.close();
-					}));
-					new Thread(server::serve).start();
-				} catch (Exception e) {
-					throw new RuntimeException(e);
-				}
-			}
-		}
-	}
-
 }

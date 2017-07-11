@@ -1,4 +1,4 @@
-package sc.learn.common.thrift2;
+package sc.learn.common.thrift;
 
 import java.lang.reflect.ParameterizedType;
 import java.net.InetSocketAddress;

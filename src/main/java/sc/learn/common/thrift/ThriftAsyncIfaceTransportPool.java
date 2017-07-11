@@ -2,10 +2,10 @@ package sc.learn.common.thrift;
 
 import org.apache.commons.pool.impl.GenericObjectPool;
 
-public class ThriftGenericObjectPool extends GenericObjectPool<ThriftTSocket> {
+public class ThriftAsyncIfaceTransportPool extends AbstractThriftTransportPool<ThriftAsyncIfaceTransport> {
 
-    public ThriftGenericObjectPool(AddressProvider addressProvider, int maxActive, int maxIdle, int minIdle,
-            long maxWait) throws Exception {
+    public ThriftAsyncIfaceTransportPool(AddressProvider addressProvider, int timeout,int maxActive, int maxIdle, int minIdle,
+            long maxWait) {
         /**
          * 池策略：最大连接数，最大等待时间，最大空闲数，最小空闲数由人工配置，
          * 最大连接数尽量=最大空闲数，最小空闲数尽量为0，以便清除无用线程
@@ -20,7 +20,7 @@ public class ThriftGenericObjectPool extends GenericObjectPool<ThriftTSocket> {
          * GenericObjectPool.DEFAULT_SOFT_MIN_EVICTABLE_IDLE_TIME_MILLIS
          * GenericObjectPool.DEFAULT_LIFO 后入先出队列，保证不是所有的连接都在使用，及时被清除
          */
-        super(new ThriftConnectionPoolFactory(addressProvider), maxActive, GenericObjectPool.WHEN_EXHAUSTED_BLOCK,
+        super(new ThriftAsyncIfaceConnectionFactory(addressProvider,timeout), maxActive, GenericObjectPool.WHEN_EXHAUSTED_BLOCK,
                 maxWait, maxIdle, minIdle, GenericObjectPool.DEFAULT_TEST_ON_BORROW,
                 GenericObjectPool.DEFAULT_TEST_ON_RETURN, 60 * 1000, 5, 60 * 10 * 1000,
                 GenericObjectPool.DEFAULT_TEST_WHILE_IDLE,

@@ -8,6 +8,7 @@ import java.util.Queue;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.curator.framework.CuratorFramework;
@@ -16,10 +17,12 @@ import org.apache.curator.framework.recipes.cache.PathChildrenCache;
 import org.apache.curator.framework.recipes.cache.PathChildrenCache.StartMode;
 import org.apache.curator.framework.recipes.cache.PathChildrenCacheEvent;
 import org.apache.curator.framework.recipes.cache.PathChildrenCacheListener;
+import org.apache.curator.utils.ZKPaths;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import sc.learn.common.util.StringUtil;
+import sc.learn.common.util.ThriftUtil;
 
 public class AddressProvider {
     private static Logger LOGGER = LoggerFactory.getLogger(AddressProvider.class);
@@ -45,31 +48,47 @@ public class AddressProvider {
      * zookeeper 监控
      */
     private PathChildrenCache cachedPath;
+    
+    private Class<?> ifaceClass;
 
-    public AddressProvider() {
-    }
-
-    public AddressProvider(String backupAddress, CuratorFramework zkClient, String zookeeperPath) throws Exception {
+    public AddressProvider(String backupAddress, CuratorFramework zkClient, String zookeeperPath) {
         // 默认使用配置文件中的IP列表
-        this.backupAddresses.addAll(this.transfer(backupAddress));
+        this.backupAddresses.addAll(transfer(backupAddress));
         this.serverAddresses.addAll(this.backupAddresses);
         Collections.shuffle(this.backupAddresses);
         Collections.shuffle(this.serverAddresses);
 
+        try {
+			ifaceClass=Class.forName(StringUtil.removeStart(zookeeperPath,ThriftUtil.Constants.SERVICE_PREFIX+"/"));
+		} catch (ClassNotFoundException e1) {
+			LOGGER.warn("{} 没有对应的zookeeper节点",zookeeperPath);
+		}
+        
         // 配置zookeeper时，启动客户端
-        if (!StringUtil.isBlank(zookeeperPath) && zkClient != null) {
-            this.buildPathChildrenCache(zkClient, zookeeperPath, true);
-            cachedPath.start(StartMode.POST_INITIALIZED_EVENT);
+        if (!StringUtil.isBlank(zookeeperPath)){
+        	
+        	if(zkClient != null) {
+	            buildPathChildrenCache(zkClient, zookeeperPath, true);
+	            try {
+					cachedPath.start(StartMode.POST_INITIALIZED_EVENT);
+				} catch (Exception e) {
+					throw new ThriftException(e);
+				}
+        	}
         }
+    }
+    
+    public Class<?> getIfaceClass(){
+    	return ifaceClass;
     }
 
     public InetSocketAddress selectOne() {
         loopLock.lock();
         try {
-            if (this.loop.isEmpty()) {
-                this.loop.addAll(this.serverAddresses);
+            if (loop.isEmpty()) {
+                loop.addAll(this.serverAddresses);
             }
-            return this.loop.poll();
+            return loop.poll();
         } finally {
             loopLock.unlock();
         }
@@ -86,7 +105,7 @@ public class AddressProvider {
      * @param cacheData
      * @throws Exception
      */
-    private void buildPathChildrenCache(final CuratorFramework client, String path, Boolean cacheData) throws Exception {
+    private void buildPathChildrenCache(final CuratorFramework client, String path, Boolean cacheData) {
         final String logPrefix = "buildPathChildrenCache_" + path + "_";
         cachedPath = new PathChildrenCache(client, path, cacheData);
         cachedPath.getListenable().addListener(new PathChildrenCacheListener() {
@@ -105,6 +124,14 @@ public class AddressProvider {
                     return;
                 case INITIALIZED:
                     LOGGER.warn(logPrefix + "Connection init ...");
+                    break;
+                case CHILD_ADDED: 
+                case CHILD_UPDATED: 
+                case CHILD_REMOVED: 
+                	String path = ZKPaths.getNodeFromPath(event.getData().getPath());
+                    String dataStr = new String(event.getData().getData());
+                	LOGGER.info(logPrefix + eventType +": " + path + ", data " + dataStr);
+                    break;
                 default:
                 }
                 // 任何节点的时机数据变动,都会rebuild,此处为一个"简单的"做法.
@@ -124,11 +151,7 @@ public class AddressProvider {
                     LOGGER.error(logPrefix + "server ips in zookeeper is empty");
                     return;
                 }else{
-                	List<InetSocketAddress> lastServerAddress = new LinkedList<InetSocketAddress>();
-                    for (ChildData data : children) {
-                        String address = new String(data.getData(), "utf-8");
-                        lastServerAddress.add(transferSingle(address));
-                    }
+                	List<InetSocketAddress> lastServerAddress =children.stream().map((childDate)->transferSingle(new String(childDate.getData()))).collect(Collectors.toList());
                     serverAddresses.addAll(lastServerAddress);
                     Collections.shuffle(serverAddresses);
                 }
@@ -157,15 +180,13 @@ public class AddressProvider {
      * @return
      */
     private List<InetSocketAddress> transfer(String serverAddresses) {
-        if (StringUtil.isBlank(serverAddresses)) {
-            return null;
-        }
-        List<InetSocketAddress> tempServerAdress = new LinkedList<InetSocketAddress>();
-        String[] hostnames = serverAddresses.split(",;");
-        for (String hostname : hostnames) {
-            tempServerAdress.add(this.transferSingle(hostname));
+    	List<InetSocketAddress> tempServerAdress = new LinkedList<InetSocketAddress>();
+        if (StringUtil.isNotBlank(serverAddresses)) {
+        	String[] hostnames = serverAddresses.split(",;");
+            for (String hostname : hostnames) {
+                tempServerAdress.add(this.transferSingle(hostname));
+            }
         }
         return tempServerAdress;
     }
-
 }

@@ -7,7 +7,7 @@ import org.apache.thrift.TException;
 import org.apache.thrift.async.AsyncMethodCallback;
 import org.junit.Test;
 
-import sc.learn.common.thrift2.ThriftProtocolEnum;
+import sc.learn.common.thrift.ThriftProtocolEnum;
 import sc.learn.common.util.ThriftUtil;
 import sc.learn.common.util.ZkConfig;
 import sc.learn.manage.model.TUser;

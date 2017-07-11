@@ -5,25 +5,31 @@ import java.util.Properties;
 
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import sc.learn.config.RootConfig;
 
 
 public abstract class ZkConfig {
-	public static final String PROFILE_KEY="zk_profile";
-	public static final String ZK_SERVER_KEY="zk_server";
-	public static final String ZK_SESSTION_TIMEOUT_KEY="zk_session_timeout";
-	public static final String CONNECTION_TIMEOUT_KEY="zk_connection_timeout";
-	public static final String MODULE_NAME_KEY="zk_module_name";
-	public static final String SERVICE_PREFIX_KEY="zk_services_prefix";
-	public static final String SERVICE_DEFAULT_IP_KEY="zk_ip_default";
-	public static final String SERVICE_DEFAULT_PORT_KEY="zk_port_default";
-	public static final String ZK_AUTH_KEY="zk_auth";
-	public static final String ENVIRONMENT_KEY="zk_environment";
+	private static final Logger LOGGER=LoggerFactory.getLogger(RootConfig.class);
+	
+	private static final String PROFILE_KEY="zk_profile";
+	private static final String ZK_SERVER_KEY="zk_server";
+	private static final String ZK_SESSTION_TIMEOUT_KEY="zk_session_timeout";
+	private static final String CONNECTION_TIMEOUT_KEY="zk_connection_timeout";
+	private static final String MODULE_NAME_KEY="zk_module_name";
+	private static final String SERVICE_PREFIX_KEY="zk_services_prefix";
+	private static final String SERVICE_DEFAULT_IP_KEY="zk_ip_default";
+	private static final String SERVICE_DEFAULT_PORT_KEY="zk_port_default";
+	private static final String ZK_AUTH_KEY="zk_auth";
+	private static final String ENVIRONMENT_KEY="zk_environment";
 	private static final Properties CONFIG_MAP=new Properties();
 	static{
 		try {
 			CONFIG_MAP.load(ZkConfig.class.getResourceAsStream("/config/zookeeper.properties"));
 		} catch (IOException e) {
-			e.printStackTrace();
+			LOGGER.error(ExceptionUtil.getStackTrace(e));
 		}
 	}
 	

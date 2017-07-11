@@ -45,12 +45,11 @@ public class ZookeeperFactory implements FactoryBean<CuratorFramework>, Closeabl
 		this.namespace = namespace;
 	}
 
-	public void setZkClient(CuratorFramework zkClient) {
-		this.zkClient = zkClient;
-	}
-
 	@Override
 	public CuratorFramework getObject() throws Exception {
+		if(zkClient==null){
+			afterPropertiesSet();
+		}
 		return zkClient;
 	}
 
@@ -66,7 +65,7 @@ public class ZookeeperFactory implements FactoryBean<CuratorFramework>, Closeabl
 
 	public static CuratorFramework create(String connectString, int sessionTimeout, int connectionTimeout, String namespace) {
 		return CuratorFrameworkFactory.builder().connectString(connectString).sessionTimeoutMs(sessionTimeout)
-				.connectionTimeoutMs(30000).canBeReadOnly(true).namespace(namespace)
+				.connectionTimeoutMs(connectionTimeout).canBeReadOnly(true).namespace(namespace)
 				.retryPolicy(new ExponentialBackoffRetry(1000, Integer.MAX_VALUE)).defaultData(null).build();
 		
 	}

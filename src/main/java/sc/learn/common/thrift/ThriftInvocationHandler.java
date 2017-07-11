@@ -1,93 +1,111 @@
 package sc.learn.common.thrift;
 
+import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 
-import org.apache.commons.pool.impl.GenericObjectPool;
-import org.apache.thrift.TServiceClient;
-import org.apache.thrift.TServiceClientFactory;
-import org.apache.thrift.protocol.TBinaryProtocol;
-import org.apache.thrift.protocol.TCompactProtocol;
-import org.apache.thrift.protocol.TJSONProtocol;
+import org.apache.thrift.async.TAsyncClientManager;
 import org.apache.thrift.protocol.TProtocol;
-import org.apache.thrift.protocol.TSimpleJSONProtocol;
-import org.apache.thrift.transport.TFramedTransport;
-import org.apache.thrift.transport.TSocket;
+import org.apache.thrift.protocol.TProtocolFactory;
+import org.apache.thrift.transport.TNonblockingTransport;
 import org.apache.thrift.transport.TTransport;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class ThriftInvocationHandler implements InvocationHandler {
-    private static Logger LOGGER = LoggerFactory.getLogger(ThriftInvocationHandler.class);
+import sc.learn.common.util.ThriftUtil;
 
-    private GenericObjectPool<ThriftTSocket> pool; // 连接池
-    private TServiceClientFactory<TServiceClient> tServiceClientFactory;
-    private Integer protocol;
+public class ThriftInvocationHandler<IFACE> implements InvocationHandler {
+	
+    protected final Logger LOGGER = LoggerFactory.getLogger(getClass());
+
+    private AbstractThriftTransportPool<TTransport> pool; // 连接池
+    private boolean isSynchronized;
+    private String serviceName;
+    private ThriftProtocolEnum protocol;
     private ThriftServiceStatus thriftServiceStatus;// 服务状态
 
-    public ThriftInvocationHandler(GenericObjectPool<ThriftTSocket> pool,
-            TServiceClientFactory<TServiceClient> tServiceClientFactory, Integer protocol, String serviceName,
-            AddressProvider addressProvider) {
-        this.pool = pool;
-        this.tServiceClientFactory = tServiceClientFactory;
+    @SuppressWarnings("unchecked")
+	public ThriftInvocationHandler(AbstractThriftTransportPool<? extends TTransport> pool,
+    		String serviceName, boolean isSynchronized,ThriftProtocolEnum protocol) {
+        this.pool = (AbstractThriftTransportPool<TTransport>) pool;
+        this.isSynchronized=isSynchronized;
         this.protocol = protocol;
+        this.serviceName=serviceName;
         this.thriftServiceStatus = new ThriftServiceStatus(serviceName);
     }
 
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Exception {
         String logPrefix = "ThriftInvocationHandler_";
-        ThriftTSocket thriftTSocket = null;
         boolean ifBorrowException = true;
+        TTransport transport=null;
         try {
             // 服务处于“切服”状态时 直接返回null
-            if (!this.thriftServiceStatus.ifServiceUsable()) {
+            if (!thriftServiceStatus.ifServiceUsable()) {
                 return null;
             }
-
             // 当第三方服务不可用时，会阻塞在这里一定时间后抛出异常，并进行服务状态统计
-            thriftTSocket = this.pool.borrowObject();
+            transport = pool.borrowObject();
             ifBorrowException = false;
-
-            String interfaceWholeName = this.getInterfaceName(method) + "&ip=" + thriftTSocket.getHostThrift() + ":"
-                    + thriftTSocket.getPortThrift();
+            String interfaceWholeName;
+            if(AcquirableThriftAddress.class.isInstance(transport)){
+            	AcquirableThriftAddress thriftAddress=AcquirableThriftAddress.class.cast(transport);
+            	interfaceWholeName = getInterfaceName(method) + "&ip=" + thriftAddress.getThriftHost() + ":"
+                        + thriftAddress.getThriftPort();
+            }else{
+            	interfaceWholeName = getInterfaceName(method) + "&ip=unknow" + ":unknow";
+            }
             LOGGER.info(logPrefix + interfaceWholeName + " borrowed:" + this.pool.getNumActive() + "  idle:"
                     + this.pool.getNumIdle() + " total :" + (this.pool.getNumActive() + this.pool.getNumIdle()));
-
             long startTime = System.currentTimeMillis();
             long costTime;
             Object o = null;
             try {
-                o = method.invoke(this.tServiceClientFactory.getClient(this.getTProtocol(thriftTSocket)), args);
+            	Object target;
+            	Class<?> clientClass;
+            	TProtocolFactory protocolFactory = ThriftUtil.getTProtocolFactory(protocol);
+            	if(isSynchronized){
+            		clientClass=getClass().getClassLoader().loadClass(serviceName+ThriftUtil.Constants.CLIENT_SUFFIX);
+        	        TProtocol protocol =protocolFactory.getProtocol(transport);
+        	        // transport.open(); pool factory已经打开了
+        			Constructor<?> syncConstructor = clientClass.getConstructor(TProtocol.class);
+        			target=syncConstructor.newInstance(protocol);
+            	}else{
+            		clientClass=getClass().getClassLoader().loadClass(serviceName+ThriftUtil.Constants.ASYN_CLIENT_SUFFIX);
+            		TAsyncClientManager clientManager = new TAsyncClientManager();
+        	        Constructor<?> asynConstructor = clientClass.getConstructor(TProtocolFactory.class, TAsyncClientManager.class, TNonblockingTransport.class);
+        	        target = asynConstructor.newInstance(protocolFactory, clientManager, transport);
+            	}
+                o = method.invoke(target, args);
                 costTime = System.currentTimeMillis() - startTime;
-                LOGGER.info(this.getUrl(interfaceWholeName, args) + "|200|0|" + costTime + "|0");
+                LOGGER.info(getUrl(interfaceWholeName, args) + "|200|0|" + costTime + "|0");
             } catch (Exception e) {
                 costTime = System.currentTimeMillis() - startTime;
-                LOGGER.error(this.getUrl(interfaceWholeName, args) + "|000|0|" + costTime + "|1");
+                LOGGER.error(getUrl(interfaceWholeName, args) + "|000|0|" + costTime + "|1");
                 // 抛出异常的连接认为不可用，从池中remove掉
-                this.pool.invalidateObject(thriftTSocket);
-                thriftTSocket = null;
-                o = null;
+                if(transport!=null){
+                	pool.invalidateObject(transport);
+                	transport = null;
+                }
+                throw new ThriftException(e);
             }
-
             return o;
         } catch (Exception e) {
             LOGGER.error("thrift invoke error", e);
             if (ifBorrowException) {
                 this.thriftServiceStatus.checkThriftServiceStatus();
             }
-            return null;
+            throw new ThriftException(e);
         } finally {
-            if (thriftTSocket != null) {
-                this.pool.returnObject(thriftTSocket);
+            if (transport != null) {
+                this.pool.returnObject(transport);
             }
         }
     }
 
     private String getInterfaceName(Method method) {
-        String interfaceName = method.getDeclaringClass().toString();
-        interfaceName = interfaceName.substring(10, interfaceName.length());
-        return interfaceName + "$" + method.getName();
+        String interfaceName = method.getDeclaringClass().getName();
+        return interfaceName + "." + method.getName();
     }
 
     private String getUrl(String service, Object[] args) {
@@ -102,28 +120,5 @@ public class ThriftInvocationHandler implements InvocationHandler {
             wholeUrl.append(" ]");
         }
         return wholeUrl.toString();
-    }
-
-    private TProtocol getTProtocol(TSocket tSocket) {
-        // 服务端均为非阻塞类型
-        TTransport transport = new TFramedTransport(tSocket);
-        TProtocol tProtocol = null;
-        switch (this.protocol) {
-        case 1:
-            tProtocol = new TBinaryProtocol(transport);
-            break;
-        case 2:
-            tProtocol = new TCompactProtocol(transport);
-            break;
-        case 3:
-            tProtocol = new TJSONProtocol(transport);
-            break;
-        case 4:
-            tProtocol = new TSimpleJSONProtocol(transport);
-            break;
-        default:
-            tProtocol = new TBinaryProtocol(transport);
-        }
-        return tProtocol;
     }
 }

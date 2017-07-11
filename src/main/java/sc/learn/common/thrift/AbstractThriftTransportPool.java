@@ -1,4 +1,4 @@
-package sc.learn.common.thrift2;
+package sc.learn.common.thrift;
 
 import org.apache.commons.pool.impl.GenericObjectPool;
 import org.apache.thrift.transport.TTransport;

@@ -11,6 +11,8 @@ import java.util.Set;
 import javax.sql.DataSource;
 
 import org.apache.commons.beanutils.ConvertUtils;
+import org.apache.commons.lang3.tuple.Triple;
+import org.apache.curator.framework.CuratorFramework;
 import org.mybatis.spring.SqlSessionFactoryBean;
 import org.mybatis.spring.mapper.MapperScannerConfigurer;
 import org.slf4j.Logger;
@@ -41,12 +43,17 @@ import redis.clients.jedis.JedisCluster;
 import redis.clients.jedis.JedisPoolConfig;
 import sc.learn.common.spring.BizParamPrintAspect;
 import sc.learn.common.spring.ThriftServicePostProcessor;
+import sc.learn.common.spring.ZookeeperFactory;
+import sc.learn.common.thrift.AddressProvider;
+import sc.learn.common.thrift.ThriftAsyncIfaceTransportPool;
 import sc.learn.common.util.ExceptionUtil;
 import sc.learn.common.util.StringUtil;
+import sc.learn.common.util.ThriftUtil;
 import sc.learn.common.util.ZkConfig;
 import sc.learn.common.web.ClusterHttpSessionProvider;
 import sc.learn.common.web.HttpSessionProvider;
 import sc.learn.common.web.ServletHttpSessionProvider;
+import sc.learn.manage.service.TManageService;
 
 @Lazy(false)
 @Configuration
@@ -62,9 +69,7 @@ import sc.learn.common.web.ServletHttpSessionProvider;
 		@Filter(type=FilterType.ANNOTATION,value=Controller.class)
 		})
 public class RootConfig implements EnvironmentAware {
-	
 	private static final Logger LOGGER=LoggerFactory.getLogger(RootConfig.class);
-	
 	private Environment env;
 	@Override
 	public void setEnvironment(Environment environment) {
@@ -174,6 +179,23 @@ public class RootConfig implements EnvironmentAware {
 	@Bean
 	public ThriftServicePostProcessor ThriftServicePostProcessor(){
 		return new ThriftServicePostProcessor();
+	}
+	
+	@Bean
+	public ZookeeperFactory zookeeperFactory(){
+		ZookeeperFactory zookeeperFactory=new ZookeeperFactory();
+		zookeeperFactory.setZookeeperHosts(ZkConfig.ZK_SERVER);
+		zookeeperFactory.setNamespace("");
+		zookeeperFactory.setConnectionTimeout(ZkConfig.ZK_CONNECTION_TIMEOUT);
+		zookeeperFactory.setSessionTimeout(ZkConfig.ZK_SESSION_TIMEOUT);
+		return zookeeperFactory;
+	}
+	
+	@Bean
+	public ThriftAsyncIfaceTransportPool thriftAsyncIfaceTransportPool(CuratorFramework zkClient){
+		Triple<Boolean,String,String> triple=ThriftUtil.fetchSynchronizedAndIfacePathAndServiceName(TManageService.Iface.class);
+		AddressProvider addressProvider=new AddressProvider("", zkClient, triple.getMiddle());
+		return new ThriftAsyncIfaceTransportPool(addressProvider, timeout, maxActive, maxIdle, minIdle, maxWait);
 	}
 	
 //	@Bean

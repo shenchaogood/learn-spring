@@ -1,10 +1,12 @@
-package sc.learn.common.thrift2;
+package sc.learn.common.spring;
 
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.thrift.transport.TTransport;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
 
+import sc.learn.common.thrift.AbstractThriftTransportPool;
+import sc.learn.common.thrift.ThriftProtocolEnum;
 import sc.learn.common.util.StringUtil;
 import sc.learn.common.util.ThriftUtil;
 

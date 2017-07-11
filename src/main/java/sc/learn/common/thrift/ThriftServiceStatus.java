@@ -10,7 +10,7 @@ import sc.learn.common.util.DateTimeUtil;
 
 public class ThriftServiceStatus {
 
-    private static Logger serviceStatusLoger = LoggerFactory.getLogger("serviceStatusLoger");
+    private static Logger serviceStatusLoger = LoggerFactory.getLogger(ThriftServiceStatus.class);
     private static Logger apiSwitchMonitor = LoggerFactory.getLogger("apiSwitchMonitorLog");
 
     private static final int INTERFACE_TOTAL_COUNT = 30;// 服务访问次数达到该值进行切服计算
