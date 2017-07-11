@@ -67,7 +67,7 @@ public class ThriftInvocationHandler<IFACE> implements InvocationHandler {
             	if(isSynchronized){
             		clientClass=getClass().getClassLoader().loadClass(serviceName+ThriftUtil.Constants.CLIENT_SUFFIX);
         	        TProtocol protocol =protocolFactory.getProtocol(transport);
-        	        transport.open();
+        	        // transport.open(); pool factory已经打开了
         			Constructor<?> syncConstructor = clientClass.getConstructor(TProtocol.class);
         			target=syncConstructor.newInstance(protocol);
             	}else{
@@ -83,9 +83,11 @@ public class ThriftInvocationHandler<IFACE> implements InvocationHandler {
                 costTime = System.currentTimeMillis() - startTime;
                 LOGGER.error(getUrl(interfaceWholeName, args) + "|000|0|" + costTime + "|1");
                 // 抛出异常的连接认为不可用，从池中remove掉
-                pool.invalidateObject(transport);
-                transport = null;
-                o = null;
+                if(transport!=null){
+                	pool.invalidateObject(transport);
+                	transport = null;
+                }
+                throw new ThriftException(e);
             }
             return o;
         } catch (Exception e) {
@@ -93,7 +95,7 @@ public class ThriftInvocationHandler<IFACE> implements InvocationHandler {
             if (ifBorrowException) {
                 this.thriftServiceStatus.checkThriftServiceStatus();
             }
-            return null;
+            throw new ThriftException(e);
         } finally {
             if (transport != null) {
                 this.pool.returnObject(transport);

@@ -1,29 +1,28 @@
 package sc.learn.manage.po;
 
 import java.io.Serializable;
-import java.util.Date;
 
-public class UserRole extends UserRoleKey implements Serializable {
-    private Date createTime;
+public class UserRoleKey implements Serializable {
+    private Integer userId;
 
-    private Date updateTime;
+    private Integer roleId;
 
     private static final long serialVersionUID = 1L;
 
-    public Date getCreateTime() {
-        return createTime;
+    public Integer getUserId() {
+        return userId;
     }
 
-    public void setCreateTime(Date createTime) {
-        this.createTime = createTime;
+    public void setUserId(Integer userId) {
+        this.userId = userId;
     }
 
-    public Date getUpdateTime() {
-        return updateTime;
+    public Integer getRoleId() {
+        return roleId;
     }
 
-    public void setUpdateTime(Date updateTime) {
-        this.updateTime = updateTime;
+    public void setRoleId(Integer roleId) {
+        this.roleId = roleId;
     }
 
     @Override
@@ -32,8 +31,8 @@ public class UserRole extends UserRoleKey implements Serializable {
         sb.append(getClass().getSimpleName());
         sb.append(" [");
         sb.append("Hash = ").append(hashCode());
-        sb.append(", createTime=").append(createTime);
-        sb.append(", updateTime=").append(updateTime);
+        sb.append(", userId=").append(userId);
+        sb.append(", roleId=").append(roleId);
         sb.append(", serialVersionUID=").append(serialVersionUID);
         sb.append("]");
         return sb.toString();
@@ -50,11 +49,9 @@ public class UserRole extends UserRoleKey implements Serializable {
         if (getClass() != that.getClass()) {
             return false;
         }
-        UserRole other = (UserRole) that;
+        UserRoleKey other = (UserRoleKey) that;
         return (this.getUserId() == null ? other.getUserId() == null : this.getUserId().equals(other.getUserId()))
-            && (this.getRoleId() == null ? other.getRoleId() == null : this.getRoleId().equals(other.getRoleId()))
-            && (this.getCreateTime() == null ? other.getCreateTime() == null : this.getCreateTime().equals(other.getCreateTime()))
-            && (this.getUpdateTime() == null ? other.getUpdateTime() == null : this.getUpdateTime().equals(other.getUpdateTime()));
+            && (this.getRoleId() == null ? other.getRoleId() == null : this.getRoleId().equals(other.getRoleId()));
     }
 
     @Override
@@ -63,8 +60,6 @@ public class UserRole extends UserRoleKey implements Serializable {
         int result = 1;
         result = prime * result + ((getUserId() == null) ? 0 : getUserId().hashCode());
         result = prime * result + ((getRoleId() == null) ? 0 : getRoleId().hashCode());
-        result = prime * result + ((getCreateTime() == null) ? 0 : getCreateTime().hashCode());
-        result = prime * result + ((getUpdateTime() == null) ? 0 : getUpdateTime().hashCode());
         return result;
     }
 }

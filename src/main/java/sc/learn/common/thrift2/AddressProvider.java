@@ -53,13 +53,13 @@ public class AddressProvider {
 
     public AddressProvider(String backupAddress, CuratorFramework zkClient, String zookeeperPath) {
         // 默认使用配置文件中的IP列表
-        this.backupAddresses.addAll(this.transfer(backupAddress));
+        this.backupAddresses.addAll(transfer(backupAddress));
         this.serverAddresses.addAll(this.backupAddresses);
         Collections.shuffle(this.backupAddresses);
         Collections.shuffle(this.serverAddresses);
 
         try {
-			ifaceClass=Class.forName(StringUtil.removeStart(zookeeperPath,ThriftUtil.Constants.SERVICE_PREFIX));
+			ifaceClass=Class.forName(StringUtil.removeStart(zookeeperPath,ThriftUtil.Constants.SERVICE_PREFIX+"/"));
 		} catch (ClassNotFoundException e1) {
 			LOGGER.warn("{} 没有对应的zookeeper节点",zookeeperPath);
 		}
@@ -85,10 +85,10 @@ public class AddressProvider {
     public InetSocketAddress selectOne() {
         loopLock.lock();
         try {
-            if (this.loop.isEmpty()) {
-                this.loop.addAll(this.serverAddresses);
+            if (loop.isEmpty()) {
+                loop.addAll(this.serverAddresses);
             }
-            return this.loop.poll();
+            return loop.poll();
         } finally {
             loopLock.unlock();
         }
@@ -180,15 +180,13 @@ public class AddressProvider {
      * @return
      */
     private List<InetSocketAddress> transfer(String serverAddresses) {
-        if (StringUtil.isBlank(serverAddresses)) {
-            return null;
-        }
-        List<InetSocketAddress> tempServerAdress = new LinkedList<InetSocketAddress>();
-        String[] hostnames = serverAddresses.split(",;");
-        for (String hostname : hostnames) {
-            tempServerAdress.add(this.transferSingle(hostname));
+    	List<InetSocketAddress> tempServerAdress = new LinkedList<InetSocketAddress>();
+        if (StringUtil.isNotBlank(serverAddresses)) {
+        	String[] hostnames = serverAddresses.split(",;");
+            for (String hostname : hostnames) {
+                tempServerAdress.add(this.transferSingle(hostname));
+            }
         }
         return tempServerAdress;
     }
-
 }

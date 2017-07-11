@@ -42,6 +42,7 @@
 	    <property name="endingDelimiter" value="`"/>
 	
 		<!-- <plugin type="org.mybatis.generator.plugins.RenameExampleClassPlugin" /> -->
+		<!-- <plugin type="org.mybatis.generator.plugins.RowLimitPlugin"/> -->
 		<plugin type="org.mybatis.generator.plugins.SerializablePlugin" />
 		<plugin type="org.mybatis.generator.plugins.ToStringPlugin" />
 		<plugin type="org.mybatis.generator.plugins.EqualsHashCodePlugin" />
@@ -50,7 +51,7 @@
 			<property name="suppressAllComments" value="true" />
 		</commentGenerator>
 		<!--mysql数据库连接的信息：驱动类、连接地址、用户名、密码 -->
-		<jdbcConnection driverClass="com.mysql.cj.jdbc.Driver" connectionURL="jdbc:mysql:///test?characterEncoding=utf8&amp;serverTimezone=UTC" userId="root"
+		<jdbcConnection driverClass="com.mysql.jdbc.Driver" connectionURL="jdbc:mysql:///test?characterEncoding=utf8" userId="root"
 			password="sc123+-*/">
 		</jdbcConnection>
 

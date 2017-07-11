@@ -3,7 +3,7 @@ package sc.learn.manage.po;
 import java.io.Serializable;
 import java.util.Date;
 
-public class User implements Serializable,Comparable<User> {
+public class User implements Serializable {
     private Integer id;
 
     private String name;
@@ -115,9 +115,4 @@ public class User implements Serializable,Comparable<User> {
         result = prime * result + ((getUpdateTime() == null) ? 0 : getUpdateTime().hashCode());
         return result;
     }
-
-	@Override
-	public int compareTo(User o) {
-		return id-o.getId();
-	}
 }

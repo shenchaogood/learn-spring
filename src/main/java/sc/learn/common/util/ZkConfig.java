@@ -9,8 +9,8 @@ import org.apache.commons.lang3.StringUtils;
 
 public abstract class ZkConfig {
 	public static final String PROFILE_KEY="zk_profile";
-	public static final String ZKSERVER_KEY="zk_server";
-	public static final String SESSTION_TIMEOUT_KEY="zk_session_timeout";
+	public static final String ZK_SERVER_KEY="zk_server";
+	public static final String ZK_SESSTION_TIMEOUT_KEY="zk_session_timeout";
 	public static final String CONNECTION_TIMEOUT_KEY="zk_connection_timeout";
 	public static final String MODULE_NAME_KEY="zk_module_name";
 	public static final String SERVICE_PREFIX_KEY="zk_services_prefix";
@@ -28,9 +28,9 @@ public abstract class ZkConfig {
 	}
 	
 	
-	public final static String ZK_SERVER = CONFIG_MAP.getProperty(ZKSERVER_KEY,System.getProperty(ZKSERVER_KEY, System.getenv(ZKSERVER_KEY)));
+	public final static String ZK_SERVER = CONFIG_MAP.getProperty(ZK_SERVER_KEY,System.getProperty(ZK_SERVER_KEY, System.getenv(ZK_SERVER_KEY)));
 	public final static String PROFILE =CONFIG_MAP.getProperty(PROFILE_KEY,System.getProperty(PROFILE_KEY, System.getenv(PROFILE_KEY)));
-	public final static int ZK_SESSION_TIMEOUT=Integer.parseInt(CONFIG_MAP.getProperty(SESSTION_TIMEOUT_KEY,System.getProperty(SESSTION_TIMEOUT_KEY, System.getenv(SESSTION_TIMEOUT_KEY))));
+	public final static int ZK_SESSION_TIMEOUT=Integer.parseInt(CONFIG_MAP.getProperty(ZK_SESSTION_TIMEOUT_KEY,System.getProperty(ZK_SESSTION_TIMEOUT_KEY, System.getenv(ZK_SESSTION_TIMEOUT_KEY))));
 	public final static int ZK_CONNECTION_TIMEOUT=Integer.parseInt(CONFIG_MAP.getProperty(CONNECTION_TIMEOUT_KEY,System.getProperty(CONNECTION_TIMEOUT_KEY, System.getenv(CONNECTION_TIMEOUT_KEY))));
 	public static final String MODULE_NAME = CONFIG_MAP.getProperty(MODULE_NAME_KEY,System.getProperty(MODULE_NAME_KEY, System.getenv(MODULE_NAME_KEY)));
 	public static final String SERVICE_PREFIX = CONFIG_MAP.getProperty(SERVICE_PREFIX_KEY,System.getProperty(SERVICE_PREFIX_KEY, System.getenv(SERVICE_PREFIX_KEY)));

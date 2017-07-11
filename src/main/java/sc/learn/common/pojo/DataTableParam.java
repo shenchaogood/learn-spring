@@ -1,5 +1,6 @@
 package sc.learn.common.pojo;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class DataTableParam {
@@ -95,11 +96,11 @@ public class DataTableParam {
 	
 	private int length;
 
-	private List<Column> columns;
+	private List<Column> columns=new ArrayList<>(0);
 	
-	private List<Order> order;
+	private List<Order> order=new ArrayList<>(0);
 	
-	private Search search;
+	private Search search=new Search();
 
 	public int getDraw() {
 		return draw;

@@ -10,11 +10,8 @@ import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Triple;
-import org.apache.curator.RetryPolicy;
 import org.apache.curator.framework.CuratorFramework;
-import org.apache.curator.framework.CuratorFrameworkFactory;
-import org.apache.curator.framework.recipes.cache.PathChildrenCache;
-import org.apache.curator.retry.ExponentialBackoffRetry;
+import org.apache.curator.framework.imps.CuratorFrameworkState;
 import org.apache.thrift.TProcessor;
 import org.apache.thrift.protocol.TBinaryProtocol;
 import org.apache.thrift.protocol.TCompactProtocol;
@@ -58,7 +55,7 @@ public abstract class ThriftUtil {
 	}
 	
 	public static interface Constants {
-		static final String SERVICE_PREFIX = ZkConfig.SERVICE_PREFIX.endsWith("/")?ZkConfig.SERVICE_PREFIX:ZkConfig.SERVICE_PREFIX+"/";
+		static final String SERVICE_PREFIX = ZkConfig.SERVICE_PREFIX;
 		static final String IFACE_SUFFIX = "$Iface";
 		static final String ASYN_IFACE_SUFFIX = "$AsyncIface";
 		static final String ASYN_CLIENT_SUFFIX = "$AsyncClient";
@@ -101,12 +98,15 @@ public abstract class ThriftUtil {
 		} else {
 			throw new ThriftException(ifaceName + "不是合法thrift接口");
 		}
-		StringBuilder addressPath = new StringBuilder(Constants.SERVICE_PREFIX).append(serviceName);
+		StringBuilder addressPath = new StringBuilder(Constants.SERVICE_PREFIX).append("/").append(serviceName);
 		return Triple.of(isSynchronized, addressPath.toString(),serviceName);
 	}
 	
 	@SuppressWarnings("unchecked")
 	public static <T> T createClient(Class<T> ifaceClass, int timeout, ThriftProtocolEnum protocol,CuratorFramework zkClient) {
+		if(zkClient.getState()==CuratorFrameworkState.LATENT){
+			zkClient.start();
+		}
 		AbstractThriftTransportPool<? extends TTransport> pool = TRANSPORT_REGISTER.get(ifaceClass);
 		Triple<Boolean,String,String> sis=fetchSynchronizedAndIfacePathAndServiceName(ifaceClass);
 		if(pool==null){
@@ -146,7 +146,9 @@ public abstract class ThriftUtil {
 		if(ArrayUtil.isEmpty(ifaces)){
 			throw new ThriftException(thriftServiceObj.getClass().getName()+"不是一个有效的thrift实现");
 		}
-		
+		if(zkClient.getState()==CuratorFrameworkState.LATENT){
+			zkClient.start();
+		}
 		for (Class<?> inter : thriftServiceObj.getClass().getInterfaces()) {
 			String interfaceName = inter.getName();
 			if (interfaceName.endsWith(ThriftUtil.Constants.IFACE_SUFFIX)) {
@@ -155,7 +157,9 @@ public abstract class ThriftUtil {
 				int bindPort = ZkConfig.getServicePort(serviceName);
 				String path = Constants.SERVICE_PREFIX + "/" + serviceName ;
 				try {
-					zkClient.create().creatingParentsIfNeeded().forPath(path, new byte[0]);
+					if(zkClient.checkExists().forPath(path)==null){
+						zkClient.create().creatingParentsIfNeeded().forPath(path, new byte[0]);
+					}
 					zkClient.create().withMode(CreateMode.EPHEMERAL).forPath(path+"/"+EnvironmentUtil.getEnvironmentName() ,(bindIp + ":" + bindPort).getBytes());
 					Class<?> processorClass = Class.forName(serviceName + ThriftUtil.Constants.PROCESSOR_SUFFIX);
 					Class<?> ifaceClass = Class.forName(serviceName + ThriftUtil.Constants.IFACE_SUFFIX);
@@ -198,8 +202,6 @@ public abstract class ThriftUtil {
 							}
 							// serverTransport.close();
 						}
-						
-						
 					}));
 					new Thread(server::serve).start();
 				} catch (Exception e) {

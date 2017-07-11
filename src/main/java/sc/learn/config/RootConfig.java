@@ -10,6 +10,7 @@ import java.util.Set;
 
 import javax.sql.DataSource;
 
+import org.apache.commons.beanutils.ConvertUtils;
 import org.mybatis.spring.SqlSessionFactoryBean;
 import org.mybatis.spring.mapper.MapperScannerConfigurer;
 import org.slf4j.Logger;
@@ -41,6 +42,7 @@ import redis.clients.jedis.JedisPoolConfig;
 import sc.learn.common.spring.BizParamPrintAspect;
 import sc.learn.common.spring.ThriftServicePostProcessor;
 import sc.learn.common.util.ExceptionUtil;
+import sc.learn.common.util.StringUtil;
 import sc.learn.common.util.ZkConfig;
 import sc.learn.common.web.ClusterHttpSessionProvider;
 import sc.learn.common.web.HttpSessionProvider;
@@ -75,8 +77,8 @@ public class RootConfig implements EnvironmentAware {
 				field.setAccessible(true);//将字段的访问权限设为true：即去除private修饰符的影响  
 				Field modifiers =field.getClass().getDeclaredField("modifiers");//去除final修饰符的影响，将字段设为可修改的
 				modifiers.setAccessible(true);  
-			    modifiers.setInt(field, field.getModifiers() & ~Modifier.FINAL);//fianl标志位置0  
-			    field.set(null,env.getProperty(field.getName()+"_KEY"));  
+			    modifiers.setInt(field, field.getModifiers() & ~Modifier.FINAL);//fianl标志位置0
+			    field.set(null,ConvertUtils.convert(env.getProperty(StringUtil.lowerCase(field.getName())), field.getType()));  
 			}
 		} catch(Exception e) {
 			LOGGER.error(ExceptionUtil.getStackTrace(e));

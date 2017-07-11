@@ -1,5 +1,6 @@
 package sc.learn.common.thrift2;
 
+import java.lang.reflect.ParameterizedType;
 import java.net.InetSocketAddress;
 import java.util.Iterator;
 
@@ -33,16 +34,19 @@ public abstract class AbstractThriftConnectionFactory<T extends TTransport> exte
     @SuppressWarnings("unchecked")
 	@Override
     public T makeObject() throws Exception {
-    	Class<T> socketClass=(Class<T>)getClass().getGenericSuperclass();
+    	Class<T> socketClass=(Class<T>)((ParameterizedType)getClass().getGenericSuperclass()).getActualTypeArguments()[0];
     	if(socketClass==null){
     		throw new ThriftException("必须指明AbstractThriftConnectionPoolFactory类的泛型");
     	}
         String logPrefix = "makeObject_"+socketClass.getSimpleName()+"_";
         T thriftTSocket = null;
-        InetSocketAddress address = null;
+        InetSocketAddress address = addressProvider.selectOne();
+        for(int i=0;i<5&&address==null;i++){
+        	Thread.sleep(timeout/5);
+        	address = addressProvider.selectOne();
+        }
         Exception exception = null;
         try {
-            address = this.addressProvider.selectOne();
             thriftTSocket =  socketClass.getConstructor(String.class,int.class,int.class).newInstance(address.getHostName(), address.getPort(), timeout);
             if(isIface){
             	thriftTSocket.open();
