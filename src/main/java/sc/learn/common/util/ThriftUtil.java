@@ -35,12 +35,8 @@ import sc.learn.common.thrift.ThriftInvocationHandler;
 import sc.learn.common.thrift.ThriftProtocolEnum;
 
 public abstract class ThriftUtil {
-
-	protected static final Logger LOGGER = LoggerFactory.getLogger(ThriftUtil.class);
-	private static final Map<EnvironmentType, ZookeeperClient> ENV_CLIENT_MAP = new HashMap<>();
-	
+	private static final Logger LOGGER = LoggerFactory.getLogger(ThriftUtil.class);
 	private static final Map<Class<?>,AbstractThriftTransportPool<? extends TTransport>> TRANSPORT_REGISTER=new HashMap<>();
-	
 	private static final Map<Class<?>,AddressProvider> ADDRESSPROVIDER_MAP=new HashMap<>();
 	
 	public static void registTransportPool(Class<?> iface,AbstractThriftTransportPool<?> pool){
@@ -54,7 +50,6 @@ public abstract class ThriftUtil {
 	}
 	
 	public static interface Constants {
-		static final String SERVICE_PREFIX = ZkConfig.SERVICE_PREFIX;
 		static final String IFACE_SUFFIX = "$Iface";
 		static final String ASYN_IFACE_SUFFIX = "$AsyncIface";
 		static final String ASYN_CLIENT_SUFFIX = "$AsyncClient";
@@ -96,7 +91,7 @@ public abstract class ThriftUtil {
 		} else {
 			throw new ThriftException(ifaceName + "不是合法thrift接口");
 		}
-		StringBuilder addressPath = new StringBuilder(Constants.SERVICE_PREFIX).append("/").append(serviceName);
+		StringBuilder addressPath = new StringBuilder(ZkConfig.ZK_SERVICE_PREFIX).append("/").append(serviceName);
 		return Triple.of(isSynchronized, addressPath.toString(),serviceName);
 	}
 	
@@ -144,6 +139,7 @@ public abstract class ThriftUtil {
 	}
 	
 	public static void startThriftServer(Object thriftServiceObj,ThriftProtocolEnum protocol,final CuratorFramework zkClient) {
+		LOGGER.debug("启动thrift服务!");
 		Class<?>[] ifaces=thriftServiceObj.getClass().getInterfaces();
 		if(ArrayUtil.isEmpty(ifaces)){
 			throw new ThriftException(thriftServiceObj.getClass().getName()+"不是一个有效的thrift实现");
@@ -157,7 +153,7 @@ public abstract class ThriftUtil {
 				String serviceName = StringUtils.removeEnd(interfaceName, ThriftUtil.Constants.IFACE_SUFFIX);
 				String bindIp = ZkConfig.getServiceIp(serviceName);
 				int bindPort = ZkConfig.getServicePort(serviceName);
-				String path = Constants.SERVICE_PREFIX + "/" + serviceName ;
+				String path = ZkConfig.ZK_SERVICE_PREFIX + "/" + serviceName ;
 				try {
 					if(zkClient.checkExists().forPath(path)==null){
 						zkClient.create().creatingParentsIfNeeded().forPath(path, new byte[0]);

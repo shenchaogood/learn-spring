@@ -7,7 +7,7 @@ public class EnvironmentUtil {
 	 * @return 本机环境
 	 */
 	public static EnvironmentType getLocalEnviromentType(){
-		return EnvironmentType.valueOf(ZkConfig.PROFILE);
+		return EnvironmentType.valueOf(ZkConfig.ZK_PROFILE);
 	}
 	
 	/**
@@ -19,11 +19,11 @@ public class EnvironmentUtil {
 	}
 	
 	public static int getEnvironmentNumber(){
-		return Integer.parseInt(ZkConfig.ENVIRONMENT.split("__")[1]);
+		return Integer.parseInt(ZkConfig.ZK_ENVIRONMENT.split("__")[1]);
 	}
 	
 	public static String getEnvironmentName(){
-		return ZkConfig.ENVIRONMENT.split("__")[0];
+		return ZkConfig.ZK_ENVIRONMENT.split("__")[0];
 	}
 	
 }

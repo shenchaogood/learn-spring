@@ -33,8 +33,7 @@ public class UserController {
 	private UserBiz userBiz;
 	@Autowired
 	private PrivilegeBiz privilegeBiz;
-	
-	
+
 	@RequestMapping("login")
 	public ResponseResult login(UserVo userVo){
 		User user=userBiz.login(userVo);
@@ -65,7 +64,7 @@ public class UserController {
 	}
 	
 	@RequestMapping("ex")
-	public ResponseResult ex() throws InterruptedException{
+	public ResponseResult ex() throws Exception{
 		LOGGER.debug("故意的");
 		Thread.sleep(5000);
 		throw new RuntimeException("abc");

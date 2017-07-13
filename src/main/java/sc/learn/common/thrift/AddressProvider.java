@@ -22,7 +22,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import sc.learn.common.util.StringUtil;
-import sc.learn.common.util.ThriftUtil;
+import sc.learn.common.util.ZkConfig;
 
 public class AddressProvider {
     private static Logger LOGGER = LoggerFactory.getLogger(AddressProvider.class);
@@ -59,22 +59,19 @@ public class AddressProvider {
         Collections.shuffle(this.serverAddresses);
 
         try {
-			ifaceClass=Class.forName(StringUtil.removeStart(zookeeperPath,ThriftUtil.Constants.SERVICE_PREFIX+"/"));
+			ifaceClass=Class.forName(StringUtil.removeStart(zookeeperPath,ZkConfig.ZK_SERVICE_PREFIX+"/"));
 		} catch (ClassNotFoundException e1) {
 			LOGGER.warn("{} 没有对应的zookeeper节点",zookeeperPath);
 		}
         
         // 配置zookeeper时，启动客户端
-        if (!StringUtil.isBlank(zookeeperPath)){
-        	
-        	if(zkClient != null) {
-	            buildPathChildrenCache(zkClient, zookeeperPath, true);
-	            try {
-					cachedPath.start(StartMode.POST_INITIALIZED_EVENT);
-				} catch (Exception e) {
-					throw new ThriftException(e);
-				}
-        	}
+        if (StringUtil.isNotBlank(zookeeperPath)&&zkClient != null){
+            buildPathChildrenCache(zkClient, zookeeperPath, true);
+            try {
+				cachedPath.start(StartMode.POST_INITIALIZED_EVENT);
+			} catch (Exception e) {
+				throw new ThriftException(e);
+			}
         }
     }
     

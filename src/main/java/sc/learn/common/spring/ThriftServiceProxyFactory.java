@@ -1,33 +1,22 @@
 package sc.learn.common.spring;
 
 import org.apache.curator.framework.CuratorFramework;
-import org.apache.thrift.transport.TTransport;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
 
-import sc.learn.common.thrift.AbstractThriftTransportPool;
 import sc.learn.common.thrift.ThriftProtocolEnum;
 import sc.learn.common.util.StringUtil;
 import sc.learn.common.util.ThriftUtil;
 
 public class ThriftServiceProxyFactory<IFACE> implements FactoryBean<IFACE>, InitializingBean {
-    /**
-     * 接口的完整路径
-     */
-    private String service;
-
-    /**
-     * 连接池
-     */
-    private AbstractThriftTransportPool<TTransport> pool;
 
     private IFACE proxyClient;
 
-    private Class<IFACE> objectClass;
-    
     private int timeout;
     
     private CuratorFramework zkClient;
+    
+    private Class<IFACE> ifaceClass;
     
     /**
      * 传输协议
@@ -38,16 +27,19 @@ public class ThriftServiceProxyFactory<IFACE> implements FactoryBean<IFACE>, Ini
      */
     private ThriftProtocolEnum protocol;
 
-    @SuppressWarnings("unchecked")
     @Override
     public void afterPropertiesSet() throws Exception {
-        ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-        if(pool.isSynchronized()){
-        	objectClass = (Class<IFACE>) classLoader.loadClass(service + ThriftUtil.Constants.IFACE_SUFFIX);
-        }else{
-        	objectClass = (Class<IFACE>) classLoader.loadClass(service + ThriftUtil.Constants.ASYN_IFACE_SUFFIX);
-        }
-        proxyClient =ThriftUtil.createClient(objectClass, timeout, protocol,zkClient);
+//        ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+//        if(triple.getLeft()){
+//        	objectClass = (Class<IFACE>) classLoader.loadClass(service + ThriftUtil.Constants.IFACE_SUFFIX);
+//        }else{
+//        	objectClass = (Class<IFACE>) classLoader.loadClass(service + ThriftUtil.Constants.ASYN_IFACE_SUFFIX);
+//        }
+//    	ParameterizedType c=(ParameterizedType)getClass().getGenericInterfaces()[0];
+//    	System.out.println(c.getActualTypeArguments()[0]);
+//    	Class<IFACE> objectClass= (Class<IFACE>)((ParameterizedType)getClass().getGenericInterfaces()[0]).getActualTypeArguments()[0]; 
+//        Triple<Boolean,String,String> triple=ThriftUtil.fetchSynchronizedAndIfacePathAndServiceName(objectClass);
+        proxyClient =ThriftUtil.createClient(ifaceClass, timeout, protocol,zkClient);
     }
     
     @Override
@@ -57,10 +49,14 @@ public class ThriftServiceProxyFactory<IFACE> implements FactoryBean<IFACE>, Ini
 
     @Override
     public Class<IFACE> getObjectType() {
-        return objectClass;
+        return ifaceClass;
     }
 
-    @Override
+    public void setIfaceClass(Class<IFACE> ifaceClass) {
+		this.ifaceClass = ifaceClass;
+	}
+
+	@Override
     public boolean isSingleton() {
         return true;
     }
@@ -71,15 +67,11 @@ public class ThriftServiceProxyFactory<IFACE> implements FactoryBean<IFACE>, Ini
     	}
     }
 
-    public void setService(String service) {
-        this.service = service;
-    }
-
-    public void setPool(AbstractThriftTransportPool<TTransport> pool) {
-        this.pool = pool;
-    }
-
 	public void setZkClient(CuratorFramework zkClient) {
 		this.zkClient = zkClient;
+	}
+
+	public void setTimeout(int timeout) {
+		this.timeout = timeout;
 	}
 }

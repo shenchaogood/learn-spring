@@ -43,9 +43,12 @@ import redis.clients.jedis.JedisCluster;
 import redis.clients.jedis.JedisPoolConfig;
 import sc.learn.common.spring.BizParamPrintAspect;
 import sc.learn.common.spring.ThriftServicePostProcessor;
+import sc.learn.common.spring.ThriftServiceProxyFactory;
 import sc.learn.common.spring.ZookeeperFactory;
 import sc.learn.common.thrift.AddressProvider;
 import sc.learn.common.thrift.ThriftAsyncIfaceTransportPool;
+import sc.learn.common.thrift.ThriftIfaceTransportPool;
+import sc.learn.common.thrift.ThriftProtocolEnum;
 import sc.learn.common.util.ExceptionUtil;
 import sc.learn.common.util.StringUtil;
 import sc.learn.common.util.ThriftUtil;
@@ -192,22 +195,26 @@ public class RootConfig implements EnvironmentAware {
 	}
 	
 	@Bean
-	public ThriftAsyncIfaceTransportPool thriftAsyncIfaceTransportPool(CuratorFramework zkClient){
+	public ThriftIfaceTransportPool thriftIfaceTransportPool(CuratorFramework zkClient){
 		Triple<Boolean,String,String> triple=ThriftUtil.fetchSynchronizedAndIfacePathAndServiceName(TManageService.Iface.class);
 		AddressProvider addressProvider=new AddressProvider("", zkClient, triple.getMiddle());
-		return new ThriftAsyncIfaceTransportPool(addressProvider, timeout, maxActive, maxIdle, minIdle, maxWait);
+//		return new ThriftAsyncIfaceTransportPool(addressProvider, timeout, maxActive, maxIdle, minIdle, maxWait);
+		return new ThriftIfaceTransportPool(addressProvider, 3000, 10, 10, 1, 1000);
+	}
+	@Bean
+	public ThriftAsyncIfaceTransportPool thriftAsyncIfaceTransportPool(CuratorFramework zkClient){
+		Triple<Boolean,String,String> triple=ThriftUtil.fetchSynchronizedAndIfacePathAndServiceName(TManageService.AsyncIface.class);
+		AddressProvider addressProvider=new AddressProvider("", zkClient, triple.getMiddle());
+		return new ThriftAsyncIfaceTransportPool(addressProvider, 3000, 10, 10, 1, 1000);
 	}
 	
-//	@Bean
-//	public TUserService.Iface userServiceIface() throws IOException{
-//		return ThriftUtil.getIfaceClient(TUserService.Iface.class, 3000);
-//	}
-//	
-//	@Bean
-//	public TUserService.AsyncIface userServiceAsyncIface() throws IOException{
-//		return ThriftUtil.getIfaceClient(TUserService.AsyncIface.class, 3000);
-//	}
-	
-	
-	
+	@Bean
+	public ThriftServiceProxyFactory<TManageService.Iface> thriftServiceProxyFactory(CuratorFramework zkClient){
+		ThriftServiceProxyFactory<TManageService.Iface> thriftServiceProxyFactory=new ThriftServiceProxyFactory<>();
+		thriftServiceProxyFactory.setZkClient(zkClient);
+		thriftServiceProxyFactory.setProtocol(ThriftProtocolEnum.BINARY.name());
+		thriftServiceProxyFactory.setTimeout(3000);
+		thriftServiceProxyFactory.setIfaceClass(TManageService.Iface.class);
+		return thriftServiceProxyFactory;
+	}
 }

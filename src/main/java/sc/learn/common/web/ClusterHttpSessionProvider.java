@@ -8,7 +8,7 @@ import sc.learn.common.util.ZkConfig;
 public class ClusterHttpSessionProvider implements HttpSessionProvider {
 
 	private static final int DEFAULT_SESSTION_TIMEOUT=20*60*1000;
-	private static final String HTTP_SESSION_PREFIX=ZkConfig.MODULE_NAME;
+	private static final String HTTP_SESSION_PREFIX=ZkConfig.ZK_MODULE_NAME;
 	
 	private JedisCluster jedisCluster;
 	
