@@ -158,7 +158,11 @@ public abstract class ThriftUtil {
 					if(zkClient.checkExists().forPath(path)==null){
 						zkClient.create().creatingParentsIfNeeded().forPath(path, new byte[0]);
 					}
-					zkClient.create().withMode(CreateMode.EPHEMERAL).forPath(path+"/"+EnvironmentUtil.getEnvironmentName() ,(bindIp + ":" + bindPort).getBytes());
+					if(zkClient.checkExists().forPath(path+"/"+EnvironmentUtil.getEnvironmentName())==null){
+						zkClient.create().withMode(CreateMode.EPHEMERAL).forPath(path+"/"+EnvironmentUtil.getEnvironmentName() ,(bindIp + ":" + bindPort).getBytes());
+					}else{
+						return;
+					}
 					Class<?> processorClass = Class.forName(serviceName + ThriftUtil.Constants.PROCESSOR_SUFFIX);
 					Class<?> ifaceClass = Class.forName(serviceName + ThriftUtil.Constants.IFACE_SUFFIX);
 					@SuppressWarnings("unchecked")

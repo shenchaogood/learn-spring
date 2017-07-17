@@ -63,7 +63,7 @@ public class TestPdf {
 		document.close();
 	}
 
-	@Test
+//	@Test
 	public void createPdf3() throws Exception {
 		String dest = "sub_superscript.pdf";
 		String font = "resources/fonts/Cardo-Regular.ttf";
@@ -126,7 +126,7 @@ public class TestPdf {
 		document.close();
 	}
 
-	@Test
+//	@Test
 	public void createPdf6() throws Exception {
 		String dest = "bullets.pdf";
 		String[] items = { "Insurance system", "Agent", "Agency", "Agent Enrollment", "Agent Settings", "Appointment", "Continuing Education", "Hierarchy",
@@ -254,7 +254,7 @@ public class TestPdf {
 
 	}
 
-	@Test
+//	@Test
 	public void createPdf10() throws Exception {
 		class ImageBackgroundEvent implements PdfPCellEvent {
 

@@ -4,11 +4,9 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 
-import org.junit.Test;
-
 public class TestBlockIO {
 
-	@Test
+//	@Test
 	public void testServer() throws Exception {
 		try(DatagramSocket socket = new DatagramSocket(8800);){
 			boolean isFirst=true;
@@ -28,7 +26,7 @@ public class TestBlockIO {
 		
 	}
 
-	@Test
+//	@Test
 	public void testClient() throws Exception {
 		InetAddress address = InetAddress.getByName("localhost");
 		int port = 8800;

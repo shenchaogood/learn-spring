@@ -5,6 +5,7 @@ import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
@@ -26,6 +27,7 @@ public class TestSpringConfig {
 	private UserBiz userBiz;
 	
 	@Autowired
+	@Qualifier("thriftServiceProxyFactory")
 	private TManageService.Iface manageIface;
 	
 	@Autowired
