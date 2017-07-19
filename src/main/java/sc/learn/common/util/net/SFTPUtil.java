@@ -1,4 +1,4 @@
-package sc.learn.common.util;
+package sc.learn.common.util.net;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;

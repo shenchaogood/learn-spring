@@ -2,8 +2,8 @@ package sc.learn.test.common;
 
 import org.junit.Test;
 
-import sc.learn.common.util.SFTPUtil;
-import sc.learn.common.util.SFTPUtil.SFTPClient;
+import sc.learn.common.util.net.SFTPUtil;
+import sc.learn.common.util.net.SFTPUtil.SFTPClient;
 
 public class TestSftpUtil {
 	

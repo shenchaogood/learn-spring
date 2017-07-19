@@ -1,7 +1,10 @@
 package sc.learn.test.common;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
+import java.util.Arrays;
+import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -18,7 +21,53 @@ import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.junit.Test;
 import org.springframework.util.StreamUtils;
 
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
+import com.google.common.collect.Maps;
+
+import sc.learn.common.util.net.HttpClientUtil;
+import sc.learn.common.util.net.HttpClientUtil.HttpResult;
+
 public class TestHttpClient {
+	
+	@Test
+	public void testSendSms() throws IOException{
+		String url="https://sandboxapp.cloopen.com:8883/2013-12-26/Accounts/accountSid/SMS/TemplateSMS?sig=C1F20E7A9";
+		JSONObject json=new JSONObject();
+		json.put("to", "18600138712");
+		json.put("appId", "ff8080813fc70a7b013fc72312324213");
+		json.put("templateId", "1");
+		json.put("datas", new JSONArray(Arrays.asList("123456","30")));
+		
+		Map<String,String> headers=Maps.newHashMap();
+		headers.put("Accept", "application/json");
+		headers.put("Content-Type", "application/xml;charset=utf-8");
+		headers.put("Authorization", "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
+		
+		HttpResult result=HttpClientUtil.post(url, json.toJSONString(), headers, null);
+		System.out.println(result);
+	}
+	
+	@Test
+	public void testCreateSMSTemplate() throws IOException{
+		String url="https://sandboxapp.cloopen.com:8883/2013-12-26/Accounts/accountSid/SMS/CreateSMSTemplate?sig=C1F20E7A9";
+		JSONObject json=new JSONObject();
+		json.put("appId", "aaf98f8946471bb00146806064f02206");
+		json.put("productType", "1");
+		json.put("addr", "http://yuntong.com/app");
+		json.put("title", "title");
+		json.put("signature", "signature");
+		json.put("templateContent", "{},{}");
+		json.put("auditNotifyUrl", "http://www.baidu.com");
+		
+		Map<String,String> headers=Maps.newHashMap();
+		headers.put("Accept", "application/json");
+		headers.put("Content-Type", "application/xml;charset=utf-8");
+		headers.put("Authorization", "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
+		
+		HttpResult result=HttpClientUtil.post(url, json.toJSONString(), headers, null);
+		System.out.println(result);
+	}
 	
 	@Test
 	public void testHttpClient() throws InterruptedException{

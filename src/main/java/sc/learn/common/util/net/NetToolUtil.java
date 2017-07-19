@@ -1,4 +1,4 @@
-package sc.learn.common.util;
+package sc.learn.common.util.net;
 
 import java.net.Inet4Address;
 import java.net.InetAddress;
