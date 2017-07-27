@@ -2,13 +2,13 @@ package sc.learn.test.common;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import org.apache.http.HttpEntity;
 import org.apache.http.HttpHost;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -19,7 +19,6 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.junit.Test;
-import org.springframework.util.StreamUtils;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -73,14 +72,22 @@ public class TestHttpClient {
 	public void testHttpClient() throws InterruptedException{
 		int count=10;
 		PoolingHttpClientConnectionManager cm = new PoolingHttpClientConnectionManager();
-		CountDownLatch countDownLatch = new CountDownLatch(count);
-		cm.setMaxTotal(5);
-		cm.setDefaultMaxPerRoute(7);
-		cm.setMaxPerRoute(new HttpRoute(new HttpHost("localhost", 8080)), 1);
-		ExecutorService executors = Executors.newFixedThreadPool(count);
-		for(int i=0;i<count;i++){
+		CountDownLatch countDownLatch = new CountDownLatch(10);
+		cm.setMaxTotal(10);
+		cm.setDefaultMaxPerRoute(3);
+		
+		HttpHost httphost=HttpHost.create("https://www.baidu.com");
+		HttpRoute httproute=new HttpRoute(httphost);
+		cm.setMaxPerRoute(httproute, 5);
+		ExecutorService executors = Executors.newFixedThreadPool(10);
+//		executors=Executors.newSingleThreadExecutor();
+		for(int i=0;i<10;i++){
 			final int ii=i;
 			executors.submit(()->{
+//				int max=cm.getStats(new HttpRoute(new HttpHost("www.google.com.hk", 80,"https"))).getMax();
+//				if(max==5){
+//					cm.setDefaultMaxPerRoute(10);
+//				}
 				try {
 					/**
 					 * Socket timeout in SocketConfig represents the default value applied to newly created connections. 
@@ -88,14 +95,23 @@ public class TestHttpClient {
 					 */
 					RequestConfig config=RequestConfig.custom().setConnectionRequestTimeout(1).build();
 					SocketConfig sockConfig=SocketConfig.custom().setSoTimeout(5000).build();
-					HttpGet get=new HttpGet("http://localhost:8080/learn-spring/manage/user/e"+ii+"x");
+					String url="https://www.baidu.com";
+					HttpGet get=new HttpGet(url);
 					get.setConfig(config);
 					CloseableHttpClient httpClient=HttpClients.custom().setDefaultRequestConfig(config).setDefaultSocketConfig(sockConfig).setConnectionManager(cm).build();
 					CloseableHttpResponse response=httpClient.execute(get);
-					InputStream is=response.getEntity().getContent();
-					System.out.println(StreamUtils.copyToString(is, Charset.forName("UTF-8")));
+					HttpEntity entity=response.getEntity();
+					InputStream is=entity.getContent();
+					System.out.println(ii);
+//					System.out.println(StreamUtils.copyToString(is, Charset.forName("UTF-8")));
+//					response.close();
+					is.close();
 				} catch (Exception e) {
-					e.printStackTrace();
+//					e.printStackTrace();
+					System.err.println(e.getMessage());
+				}finally {
+					
+					System.out.println(cm.getStats(httproute));;
 				}
 				countDownLatch.countDown();
 				

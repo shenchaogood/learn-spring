@@ -20,8 +20,6 @@ public class TestCoder {
 	public void testBase64() throws Exception{
 		File f=new File(getClass().getResource("/car.gif").getFile());
 		byte[] bytes=FileUtils.readFileToByteArray(f);
-		String base64=Coder.encryptBASE64(bytes);
-		System.out.println(Coder.encryptMD5(base64));
 		System.out.println(Base64.encodeBase64URLSafeString(Coder.encryptMD5(bytes)));
 	}
 	

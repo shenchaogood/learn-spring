@@ -8,6 +8,7 @@ import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 
 import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.codec.binary.Hex;
 
 /**
  * 基础加密组件
@@ -62,10 +63,8 @@ public abstract class Coder {
 	 * @throws Exception
 	 */
 	public static byte[] encryptMD5(byte[] data) throws Exception {
-
 		MessageDigest md5 = MessageDigest.getInstance(KEY_MD5);
 		md5.update(data);
-
 		return md5.digest();
 
 	}
@@ -78,7 +77,7 @@ public abstract class Coder {
 	 * @return base64
 	 * @throws Exception
 	 */
-	public static String encryptMD5(String data) {
+	public static String encryptBase64MD5(String data) {
 		try {
 			MessageDigest md5 = MessageDigest.getInstance(KEY_MD5);
 			md5.update(data.getBytes());
@@ -86,8 +85,16 @@ public abstract class Coder {
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
-
-
+	}
+	
+	public static String encryptHexMD5(String data) {
+		try {
+			MessageDigest md5 = MessageDigest.getInstance(KEY_MD5);
+			md5.update(data.getBytes());
+			return Hex.encodeHexString(md5.digest());
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 	/**

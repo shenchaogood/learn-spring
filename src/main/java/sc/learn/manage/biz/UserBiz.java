@@ -22,7 +22,7 @@ public class UserBiz extends BaseBiz<User,UserMapper>{
 
 	public User login(UserVo user){
 		UserExample example=new UserExample();
-		example.createCriteria().andEmailEqualTo(user.getEmail()).andPasswordEqualTo(Coder.encryptMD5(user.getPassword()));
+		example.createCriteria().andEmailEqualTo(user.getEmail()).andPasswordEqualTo(Coder.encryptBase64MD5(user.getPassword()));
 		return mapper.selectByExample(example).get(0);
 	}
 
