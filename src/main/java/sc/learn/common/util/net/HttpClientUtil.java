@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 import javax.net.ssl.SSLException;
 import javax.net.ssl.SSLHandshakeException;
@@ -67,6 +68,10 @@ public class HttpClientUtil {
     private static final int MAX_CONNECTION=100;
     
     private static PoolingHttpClientConnectionManager CONNECTION_MANAGER=generatePoolConnectionManager();
+    /**
+	 * Socket timeout in SocketConfig represents the default value applied to newly created connections. 
+	 * This value can be overwritten for individual requests by setting a non zero value of socket timeout in RequestConfig.
+	 */
     private static final RequestConfig DEFAULT_REQUEST_CONFIG=RequestConfig.custom()
     		.setConnectionRequestTimeout(1000)
     		.setConnectTimeout(MAX_TIMEOUT)
@@ -79,6 +84,8 @@ public class HttpClientUtil {
     	PoolingHttpClientConnectionManager connMgr = new PoolingHttpClientConnectionManager();  
         connMgr.setMaxTotal(MAX_CONNECTION);  
         connMgr.setDefaultMaxPerRoute(MAX_CONNECTION/5*4);  
+        //关闭空闲两分钟的连接
+        connMgr.closeIdleConnections(300, TimeUnit.SECONDS);
         return connMgr;
     }
     

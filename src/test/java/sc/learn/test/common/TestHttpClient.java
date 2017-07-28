@@ -2,6 +2,11 @@ package sc.learn.test.common;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.security.KeyManagementException;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
@@ -13,11 +18,19 @@ import org.apache.http.HttpHost;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.config.Registry;
+import org.apache.http.config.RegistryBuilder;
 import org.apache.http.config.SocketConfig;
 import org.apache.http.conn.routing.HttpRoute;
+import org.apache.http.conn.socket.ConnectionSocketFactory;
+import org.apache.http.conn.socket.PlainConnectionSocketFactory;
+import org.apache.http.conn.ssl.NoopHostnameVerifier;
+import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
+import org.apache.http.ssl.SSLContextBuilder;
+import org.apache.http.ssl.TrustStrategy;
 import org.junit.Test;
 
 import com.alibaba.fastjson.JSONArray;
@@ -69,33 +82,38 @@ public class TestHttpClient {
 	}
 	
 	@Test
-	public void testHttpClient() throws InterruptedException{
+	public void testHttpClient() throws InterruptedException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException{
 		int count=10;
-		PoolingHttpClientConnectionManager cm = new PoolingHttpClientConnectionManager();
+		SSLContextBuilder builder = new SSLContextBuilder();
+        // 全部信任 不做身份鉴定
+        builder.loadTrustMaterial(null, new TrustStrategy() {
+			public boolean isTrusted(X509Certificate[] chain, String authType) throws CertificateException {
+				return true;
+			}
+        });
+        SSLConnectionSocketFactory sslsf = new SSLConnectionSocketFactory(builder.build(), new String[]{"SSLv2Hello", "SSLv3", "TLSv1", "TLSv1.2"}, null, NoopHostnameVerifier.INSTANCE);
+        Registry<ConnectionSocketFactory> registry = RegistryBuilder.<ConnectionSocketFactory>create()
+                .register("http", new PlainConnectionSocketFactory())
+                .register("https", sslsf)
+                .build();
+		PoolingHttpClientConnectionManager cm = new PoolingHttpClientConnectionManager(registry);
+		
 		CountDownLatch countDownLatch = new CountDownLatch(10);
-		cm.setMaxTotal(10);
+		cm.setMaxTotal(count);
 		cm.setDefaultMaxPerRoute(3);
 		
-		HttpHost httphost=HttpHost.create("https://www.baidu.com");
+		HttpHost httphost=HttpHost.create("https://shenchao.xin:8443");
 		HttpRoute httproute=new HttpRoute(httphost);
 		cm.setMaxPerRoute(httproute, 5);
 		ExecutorService executors = Executors.newFixedThreadPool(10);
-//		executors=Executors.newSingleThreadExecutor();
-		for(int i=0;i<10;i++){
+		for(int i=0;i<count;i++){
 			final int ii=i;
 			executors.submit(()->{
-//				int max=cm.getStats(new HttpRoute(new HttpHost("www.google.com.hk", 80,"https"))).getMax();
-//				if(max==5){
-//					cm.setDefaultMaxPerRoute(10);
-//				}
 				try {
-					/**
-					 * Socket timeout in SocketConfig represents the default value applied to newly created connections. 
-					 * This value can be overwritten for individual requests by setting a non zero value of socket timeout in RequestConfig.
-					 */
+					
 					RequestConfig config=RequestConfig.custom().setConnectionRequestTimeout(1).build();
 					SocketConfig sockConfig=SocketConfig.custom().setSoTimeout(5000).build();
-					String url="https://www.baidu.com";
+					String url="https://shenchao.xin:8443";
 					HttpGet get=new HttpGet(url);
 					get.setConfig(config);
 					CloseableHttpClient httpClient=HttpClients.custom().setDefaultRequestConfig(config).setDefaultSocketConfig(sockConfig).setConnectionManager(cm).build();
