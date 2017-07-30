@@ -1,4 +1,5 @@
 package sc.learn.common.util.net;
+
 import java.io.IOException;
 import java.io.InterruptedIOException;
 import java.io.UnsupportedEncodingException;
@@ -66,12 +67,10 @@ public class HttpClientUtil {
     private static final String CHARSET="UTF-8";
     private static final int MAX_TIMEOUT = 7000;
     private static final int MAX_CONNECTION=100;
-    
-    private static PoolingHttpClientConnectionManager CONNECTION_MANAGER=generatePoolConnectionManager();
     /**
-	 * Socket timeout in SocketConfig represents the default value applied to newly created connections. 
-	 * This value can be overwritten for individual requests by setting a non zero value of socket timeout in RequestConfig.
-	 */
+     * Socket timeout in SocketConfig represents the default value applied to newly created connections. 
+     * This value can be overwritten for individual requests by setting a non zero value of socket timeout in RequestConfig.
+     */
     private static final RequestConfig DEFAULT_REQUEST_CONFIG=RequestConfig.custom()
     		.setConnectionRequestTimeout(1000)
     		.setConnectTimeout(MAX_TIMEOUT)
@@ -79,6 +78,35 @@ public class HttpClientUtil {
     		.build();
     private static final SocketConfig DEFAULT_SOCKET_CONFIG=SocketConfig.custom().setSoTimeout(MAX_TIMEOUT).build();
     private static final Set<BasicHeader> DEFAULT_HEADERS=Sets.newHashSet(new BasicHeader(HttpHeaders.ACCEPT, "*/*"));
+    private static PoolingHttpClientConnectionManager CONNECTION_MANAGER=generatePoolConnectionManager();
+    private static HttpRequestRetryHandler HTTPREQUEST_RETRYHANDLER = new HttpRequestRetryHandler() {
+        public boolean retryRequest(IOException exception,int executionCount, HttpContext context) {
+        	if(Objects.nonNull(context)){//TODO 先不重试 后期调整策略
+        		return false;
+        	}else if (executionCount >= 5) {// 如果已经重试了5次，就放弃
+                return false;
+            }else if (exception instanceof NoHttpResponseException) {// 如果服务器丢掉了连接，那么就重试
+                return true;
+            }else if (exception instanceof SSLHandshakeException) {// 不要重试SSL握手异常
+                return false;
+            }else if (exception instanceof InterruptedIOException) {// 超时
+                return false;
+            }else if (exception instanceof UnknownHostException) {// 目标服务器不可达
+                return false;
+            }else if (exception instanceof ConnectTimeoutException) {// 连接被拒绝
+                return false;
+            }else if (exception instanceof SSLException) {// SSL握手异常
+                return false;
+            }
+            HttpClientContext clientContext = HttpClientContext.adapt(context);
+            HttpRequest request = clientContext.getRequest();
+            // 如果请求是幂等的，就再次尝试
+            if (!(request instanceof HttpEntityEnclosingRequest)) {
+                return true;
+            }
+            return false;
+        }
+    };
   
     private static PoolingHttpClientConnectionManager generatePoolConnectionManager(){
     	PoolingHttpClientConnectionManager connMgr = new PoolingHttpClientConnectionManager();  
@@ -89,7 +117,7 @@ public class HttpClientUtil {
         return connMgr;
     }
     
-
+    
     private static void config(HttpRequestBase httpRequestBase,Map<String,String> headers,RequestConfig requestConfig) {
         // 设置Header等
         // httpRequestBase.setHeader("User-Agent", "Mozilla/5.0");
@@ -107,44 +135,13 @@ public class HttpClientUtil {
      * 
      */
     public static CloseableHttpClient createHttpClient(String url) {
-        // 请求重试处理
-        HttpRequestRetryHandler httpRequestRetryHandler = new HttpRequestRetryHandler() {
-            public boolean retryRequest(IOException exception,int executionCount, HttpContext context) {
-            	if(Objects.nonNull(context)){//TODO 先不重试 后期调整策略
-            		return false;
-            	}else if (executionCount >= 5) {// 如果已经重试了5次，就放弃
-                    return false;
-                }else if (exception instanceof NoHttpResponseException) {// 如果服务器丢掉了连接，那么就重试
-                    return true;
-                }else if (exception instanceof SSLHandshakeException) {// 不要重试SSL握手异常
-                    return false;
-                }else if (exception instanceof InterruptedIOException) {// 超时
-                    return false;
-                }else if (exception instanceof UnknownHostException) {// 目标服务器不可达
-                    return false;
-                }else if (exception instanceof ConnectTimeoutException) {// 连接被拒绝
-                    return false;
-                }else if (exception instanceof SSLException) {// SSL握手异常
-                    return false;
-                }
-                HttpClientContext clientContext = HttpClientContext.adapt(context);
-                HttpRequest request = clientContext.getRequest();
-                // 如果请求是幂等的，就再次尝试
-                if (!(request instanceof HttpEntityEnclosingRequest)) {
-                    return true;
-                }
-                return false;
-            }
-        };
-        
-        CloseableHttpClient httpClient = HttpClients.custom()
-        		.setDefaultHeaders(DEFAULT_HEADERS)
-        		.setConnectionManager(CONNECTION_MANAGER)
-        		.setDefaultRequestConfig(DEFAULT_REQUEST_CONFIG)
-        		.setDefaultSocketConfig(DEFAULT_SOCKET_CONFIG)
-        		.setRetryHandler(httpRequestRetryHandler)
-        		.build();
-        return httpClient;
+    	 return HttpClients.custom()
+    	    		.setDefaultHeaders(DEFAULT_HEADERS)
+    	    		.setConnectionManager(CONNECTION_MANAGER)
+    	    		.setDefaultRequestConfig(DEFAULT_REQUEST_CONFIG)
+    	    		.setDefaultSocketConfig(DEFAULT_SOCKET_CONFIG)
+    	    		.setRetryHandler(HTTPREQUEST_RETRYHANDLER)
+    	    		.build();
     }
 
     private static void setPostParams(HttpPost httpost,Map<String, Object> params) throws UnsupportedEncodingException {

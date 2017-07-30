@@ -1,6 +1,8 @@
 package sc.learn.common.util.security;
 
+import java.security.InvalidKeyException;
 import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 
 import javax.crypto.KeyGenerator;
 import javax.crypto.Mac;
@@ -21,26 +23,13 @@ public abstract class Coder {
 	public static final String KEY_MD5 = "MD5";
 
 	/**
-	 * MAC算法可选以下多种算法
-	 * 
-	 * <pre>
-	 * HmacMD5  
-	 * HmacSHA1  
-	 * HmacSHA256  
-	 * HmacSHA384  
-	 * HmacSHA512
-	 * </pre>
-	 */
-	public static final String KEY_MAC = "HmacMD5";
-
-	/**
 	 * BASE64解密
 	 * 
 	 * @param key
 	 * @return
 	 * @throws Exception
 	 */
-	public static byte[] decryptBASE64(String key) throws Exception {
+	public static byte[] decryptBASE64(String key){
 		return Base64.decodeBase64(key);
 	}
 
@@ -51,7 +40,7 @@ public abstract class Coder {
 	 * @return
 	 * @throws Exception
 	 */
-	public static String encryptBASE64(byte[] key) throws Exception {
+	public static String encryptBASE64(byte[] key){
 		return Base64.encodeBase64String(key);
 	}
 
@@ -62,10 +51,15 @@ public abstract class Coder {
 	 * @return
 	 * @throws Exception
 	 */
-	public static byte[] encryptMD5(byte[] data) throws Exception {
-		MessageDigest md5 = MessageDigest.getInstance(KEY_MD5);
-		md5.update(data);
-		return md5.digest();
+	public static byte[] encryptMD5(byte[] data){
+		MessageDigest md5;
+		try {
+			md5 = MessageDigest.getInstance(KEY_MD5);
+			md5.update(data);
+			return md5.digest();
+		} catch (NoSuchAlgorithmException e) {
+			throw new RuntimeException(e);
+		}
 
 	}
 	
@@ -104,38 +98,60 @@ public abstract class Coder {
 	 * @return
 	 * @throws Exception
 	 */
-	public static byte[] encryptSHA(byte[] data) throws Exception {
-		MessageDigest sha = MessageDigest.getInstance(KEY_SHA);
-		sha.update(data);
-		return sha.digest();
+	public static byte[] encryptSHA(byte[] data) {
+		MessageDigest sha;
+		try {
+			sha = MessageDigest.getInstance(KEY_SHA);
+			sha.update(data);
+			return sha.digest();
+		} catch (NoSuchAlgorithmException e) {
+			throw new RuntimeException(e);
+		}
+		
 
 	}
 
 	/**
 	 * 初始化HMAC密钥
-	 * 
+	 * MAC算法可选以下多种算法
+	 * <pre>
+	 * HmacMD5  
+	 * HmacSHA1  
+	 * HmacSHA256  
+	 * HmacSHA384  
+	 * HmacSHA512
+	 * </pre>
 	 * @return
+	 * @throws NoSuchAlgorithmException 
 	 * @throws Exception
 	 */
-	public static String initMacKey() throws Exception {
-		KeyGenerator keyGenerator = KeyGenerator.getInstance(KEY_MAC);
+	public static String initMacKey(String keyMac) throws NoSuchAlgorithmException{
+		
+		KeyGenerator keyGenerator = KeyGenerator.getInstance(keyMac);
 		SecretKey secretKey = keyGenerator.generateKey();
 		return encryptBASE64(secretKey.getEncoded());
 	}
 
 	/**
 	 * HMAC加密
-	 * 
+	 * <pre>
+	 * HmacMD5  
+	 * HmacSHA1  
+	 * HmacSHA256  
+	 * HmacSHA384  
+	 * HmacSHA512
+	 * </pre>
 	 * @param data
 	 * @param key
 	 * @return
+	 * @throws NoSuchAlgorithmException 
+	 * @throws InvalidKeyException 
 	 * @throws Exception
 	 */
-	public static byte[] encryptHMAC(byte[] data, String key) throws Exception {
-		SecretKey secretKey = new SecretKeySpec(decryptBASE64(key), KEY_MAC);
+	public static String encryptHexHMAC(byte[] data, String key ,String keyMac) throws NoSuchAlgorithmException, InvalidKeyException{
+		SecretKey secretKey = new SecretKeySpec(decryptBASE64(key), keyMac);
 		Mac mac = Mac.getInstance(secretKey.getAlgorithm());
 		mac.init(secretKey);
-		return mac.doFinal(data);
-
+		return Hex.encodeHexString(mac.doFinal(data));
 	}
 }

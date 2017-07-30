@@ -3,15 +3,33 @@ package sc.learn.common.pojo;
 import java.util.ArrayList;
 import java.util.List;
 
+
+/**
+ * start 开始角标 0开始
+ * length 查找数量
+ * columns List<Column>集合
+ * 					data  列的属性名  对于where查找写对象的属性名如userId, 对于order by排序需要些真实列名如f_user_id
+ * 					searchable 此属性是否可用于 search对象模糊查找，见search属性
+ * 					orderable 此属性是否可用于排序 此时data是f_user_id
+ *					search 检索对象
+ *						value 检索的具体值
+ *						regex 按正则表达式查找(暂不支持)
+ * order List<Order>集合
+ * 					column  需要按照某列排序的角标0开始
+ * 					dir     asc正序 desc倒序
+ * 
+ * search 			全局模糊查找,会按照columns中searchable等于true的列模糊查找  where column.data like 'search.value%'
+ *
+ */
 public class DataTableParam {
 	
 	public static class Search{
-		private String value;
+		private Object value;
 		private boolean regex;
-		public String getValue() {
+		public Object getValue() {
 			return value;
 		}
-		public void setValue(String value) {
+		public void setValue(Object value) {
 			this.value = value;
 		}
 		public boolean isRegex() {
@@ -52,7 +70,7 @@ public class DataTableParam {
 		private String name;
 		private boolean searchable;
 		private boolean orderable;
-		private Search search;
+		private Search search=new Search();
 		public String getData() {
 			return data;
 		}
@@ -89,7 +107,6 @@ public class DataTableParam {
 		}
 	}
 	
-	/////
 	private int draw;
 	
 	private int start;
