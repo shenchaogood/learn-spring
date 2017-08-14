@@ -11,8 +11,9 @@ public class TestJson {
 	public void testSerial(){
 		String json=JsonUtil.toJSONString(ResponseResult.createSuccess());
 		System.out.println(json);
-		ResponseResult r=JsonUtil.parseJSONString(json, ResponseResult.class);
+		ResponseResult<?> r=JsonUtil.parseJSONString(json, ResponseResult.class);
 		System.out.println(r);
 	}
+	
 
 }

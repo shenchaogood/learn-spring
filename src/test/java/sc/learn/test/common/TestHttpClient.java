@@ -12,7 +12,6 @@ import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -51,53 +50,7 @@ import org.apache.http.ssl.TrustStrategy;
 import org.apache.http.util.EntityUtils;
 import org.junit.Test;
 
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
-import com.google.common.collect.Maps;
-
-import sc.learn.common.util.net.HttpClientUtil;
-import sc.learn.common.util.net.HttpClientUtil.HttpResult;
-
 public class TestHttpClient {
-
-	@Test
-	public void testSendSms() throws IOException {
-		String url = "https://sandboxapp.cloopen.com:8883/2013-12-26/Accounts/accountSid/SMS/TemplateSMS?sig=C1F20E7A9";
-		JSONObject json = new JSONObject();
-		json.put("to", "18600138712");
-		json.put("appId", "ff8080813fc70a7b013fc72312324213");
-		json.put("templateId", "1");
-		json.put("datas", new JSONArray(Arrays.asList("123456", "30")));
-
-		Map<String, String> headers = Maps.newHashMap();
-		headers.put("Accept", "application/json");
-		headers.put("Content-Type", "application/xml;charset=utf-8");
-		headers.put("Authorization", "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
-
-		HttpResult result = HttpClientUtil.post(url, json.toJSONString(), headers, null);
-		System.out.println(result);
-	}
-
-	@Test
-	public void testCreateSMSTemplate() throws IOException {
-		String url = "https://sandboxapp.cloopen.com:8883/2013-12-26/Accounts/accountSid/SMS/CreateSMSTemplate?sig=C1F20E7A9";
-		JSONObject json = new JSONObject();
-		json.put("appId", "aaf98f8946471bb00146806064f02206");
-		json.put("productType", "1");
-		json.put("addr", "http://yuntong.com/app");
-		json.put("title", "title");
-		json.put("signature", "signature");
-		json.put("templateContent", "{},{}");
-		json.put("auditNotifyUrl", "http://www.baidu.com");
-
-		Map<String, String> headers = Maps.newHashMap();
-		headers.put("Accept", "application/json");
-		headers.put("Content-Type", "application/xml;charset=utf-8");
-		headers.put("Authorization", "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
-
-		HttpResult result = HttpClientUtil.post(url, json.toJSONString(), headers, null);
-		System.out.println(result);
-	}
 
 	@Test
 	public void testHttpClient() throws InterruptedException, NoSuchAlgorithmException, KeyStoreException,
@@ -151,6 +104,7 @@ public class TestHttpClient {
 							.setDefaultSocketConfig(sockConfig).setConnectionManager(cm).build();
 					CloseableHttpResponse response = httpClient.execute(get);
 					HttpEntity entity = response.getEntity();
+					System.out.println(entity.getContentEncoding().getValue());
 					InputStream is = entity.getContent();
 					System.out.println(ii);
 					// System.out.println(StreamUtils.copyToString(is,
@@ -227,7 +181,8 @@ public class TestHttpClient {
 
 		// tomcat是我自己的密钥库的密码，你可以替换成自己的
 		// 如果密码为空，则用"nopassword"代替
-		SSLContext sslcontext = custom("E:\\workspace\\work\\learn-spring\\src\\test\\resources\\client.keystore", "123456");
+		String keyPath=TestHttpClient.class.getResource("/client.keystore").getFile();
+		SSLContext sslcontext = custom(keyPath, "123456");
 
 		// 设置协议http和https对应的处理socket链接工厂的对象
 		Registry<ConnectionSocketFactory> socketFactoryRegistry = RegistryBuilder.<ConnectionSocketFactory>create()
@@ -274,14 +229,10 @@ public class TestHttpClient {
 		return body;
 	}
 
-	public static void main(String[] args)
-			throws ParseException, IOException, KeyManagementException, NoSuchAlgorithmException {
+	@Test
+	public void testSSL() throws ClientProtocolException, IOException{
 		String url = "https://www.shenchao.xin:8443";
 		String body = send(url, null, "utf-8");
 		System.out.println("交易响应结果长度：" + body.length());
-
-		System.out.println("-----------------------------------");
-
 	}
-
 }
