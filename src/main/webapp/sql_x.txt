@@ -1,0 +1,2 @@
+use mifi_loan_counter;
+insert into privilege (id,name,hash,uri,p_id) values (33,"账务处理","/dealing/dealing","33",0),(34,"日中处理","/dealing/dealing","/dealing/doDayEnd",33),(35,"BankCheck处理","/dealing/dealing","/dealing/doBankCheck",33),(36,"内部账对账","/dealing/dealing","/dealing/doInternalCheck",33);

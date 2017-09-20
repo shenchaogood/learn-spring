@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<cashpayQuery>
+    <baseInfo>
+        <isSuccess>T</isSuccess>
+        <partnerId>10000000</partnerId>
+        <responseCode>SUCCESS</responseCode>
+        <sign>g4rpZaJvZsKIsHnbbGo6rgETy2bKS14uYcvIGZlRxCanCOKw-SMm0h7jjVDoqwrQwmBsku70g8d1WtHeLYLb9Kn7qavwv2tWK3-VHduqHIrKiAIqWdiFDqEA2YTeEol0GViDwh0_A-L-5x5G_9DFXzKRoFYnopiEabGUfaKoRIM.</sign>
+        <signType>RSA</signType>
+    </baseInfo>
+    <refundTradeDetail>&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot; standalone=&quot;yes&quot;?&gt;
+&lt;refundTradeList&gt;
+    &lt;refundTrade&gt;
+        &lt;refundId&gt;20140731202846932000010300880382&lt;/refundId&gt;
+        &lt;refundDesc&gt;我要退款&lt;/refundDesc&gt;
+        &lt;userId&gt;107711753&lt;/userId&gt;
+        &lt;tradeId&gt;20140731202845100001010300880256&lt;/tradeId&gt;
+        &lt;orderId&gt;56257267658878833437353965421700&lt;/orderId&gt;
+        &lt;applyRefundFee&gt;5000&lt;/applyRefundFee&gt;
+        &lt;refundFee&gt;5000&lt;/refundFee&gt;
+        &lt;refundStatus&gt;REFUND_SUCCESS&lt;/refundStatus&gt;
+        &lt;failDesc&gt;&lt;/failDesc&gt;
+        &lt;createTime&gt;2014-07-31 20:28:47&lt;/createTime&gt;
+        &lt;modifyTime&gt;2014-07-31 20:28:47&lt;/modifyTime&gt;
+        &lt;partnerRefundId&gt;2ccce7a8-9598-483d-9d04-ce1799f0&lt;/partnerRefundId&gt;
+        &lt;partnerId&gt;10000000&lt;/partnerId&gt;
+        &lt;refundCouponFee&gt;0&lt;/refundCouponFee&gt;
+    &lt;/refundTrade&gt;
+    &lt;refundTrade&gt;
+        &lt;refundId&gt;20140731202846515000010300880381&lt;/refundId&gt;
+        &lt;refundDesc&gt;我要退款&lt;/refundDesc&gt;
+        &lt;userId&gt;107711753&lt;/userId&gt;
+        &lt;tradeId&gt;20140731202845100001010300880256&lt;/tradeId&gt;
+        &lt;orderId&gt;56257267658878833437353965421700&lt;/orderId&gt;
+        &lt;applyRefundFee&gt;5000&lt;/applyRefundFee&gt;
+        &lt;refundFee&gt;5000&lt;/refundFee&gt;
+        &lt;refundStatus&gt;REFUND_SUCCESS&lt;/refundStatus&gt;
+        &lt;failDesc&gt;&lt;/failDesc&gt;
+        &lt;createTime&gt;2014-07-31 20:28:46&lt;/createTime&gt;
+        &lt;modifyTime&gt;2014-07-31 20:28:46&lt;/modifyTime&gt;
+        &lt;partnerRefundId&gt;675c4cc9-e436-4aa4-8dea-8c1df34c&lt;/partnerRefundId&gt;
+        &lt;partnerId&gt;10000000&lt;/partnerId&gt;
+        &lt;refundCouponFee&gt;0&lt;/refundCouponFee&gt;
+    &lt;/refundTrade&gt;
+&lt;/refundTradeList&gt;
+</refundTradeDetail>
+</cashpayQuery>
