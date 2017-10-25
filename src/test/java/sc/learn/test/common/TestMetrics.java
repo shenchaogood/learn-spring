@@ -39,11 +39,10 @@ public class TestMetrics {
 	 */
 	@Test
 	public void testGauge() throws Exception {
-
 		Gauge<Integer> gauge = metrics.register(MetricRegistry.name(TestMetrics.class, "Gauges", "size"), queue::size);
 
 		while (true) {
-			gauge.getValue();
+//			gauge.getValue();
 			// reporter.report();
 			queue.add("");
 			Thread.sleep(1000);
