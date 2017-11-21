@@ -12,7 +12,7 @@ import sc.learn.manage.po.User;
 import sc.learn.manage.po.UserExample;
 import sc.learn.manage.vo.UserVo;
 
-@Service
+//@Service
 public class UserBiz extends BaseBiz<User,UserMapper>{
 	
 	@Autowired

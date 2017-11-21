@@ -8,7 +8,7 @@ import sc.learn.common.pojo.ResponseResult;
 import sc.learn.manage.mapper.RoleMapper;
 import sc.learn.manage.po.Role;
 
-@Service
+//@Service
 public class RoleBiz extends BaseBiz<Role,RoleMapper>{
 	
 	@Autowired

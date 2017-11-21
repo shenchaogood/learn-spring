@@ -20,7 +20,7 @@ import sc.learn.manage.po.User;
 import sc.learn.manage.po.UserRole;
 import sc.learn.manage.po.UserRoleExample;
 
-@Service
+//@Service
 public class PrivilegeBiz extends BaseBiz<Privilege,PrivilegeMapper>{
 	@Autowired
 	private UserRoleMapper userRoleMapper;

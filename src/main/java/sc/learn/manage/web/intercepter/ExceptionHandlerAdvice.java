@@ -17,7 +17,7 @@ import sc.learn.common.pojo.ResponseResult;
 import sc.learn.common.util.ExceptionUtil;
 import sc.learn.manage.util.Constants;
 
-@ControllerAdvice
+//@ControllerAdvice
 public class ExceptionHandlerAdvice {
 	
 	private static final Logger LOGGER=LoggerFactory.getLogger(ExceptionHandlerAdvice.class);

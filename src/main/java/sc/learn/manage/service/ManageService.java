@@ -6,7 +6,7 @@ import org.apache.thrift.async.AsyncMethodCallback;
 import sc.learn.common.spring.annotation.ThriftService;
 import sc.learn.manage.model.TUser;
 
-@ThriftService
+//@ThriftService
 public class ManageService implements TManageService.Iface,TManageService.AsyncIface{
 
 	@Override

@@ -17,6 +17,7 @@ import org.mybatis.spring.SqlSessionFactoryBean;
 import org.mybatis.spring.mapper.MapperScannerConfigurer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.EnvironmentAware;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
@@ -61,20 +62,23 @@ import sc.learn.manage.service.TManageService;
 @Lazy(false)
 @Configuration
 @EnableAspectJAutoProxy
+//@EnableTransactionManagement
 @PropertySources({
 		@PropertySource("classpath:config/db.properties"),
-		@PropertySource("classpath:config/redis.properties"),
-		@PropertySource("classpath:config/mail.properties"),
-		@PropertySource("classpath:config/zookeeper.properties")
+//		@PropertySource("classpath:config/redis.properties"),
+//		@PropertySource("classpath:config/mail.properties"),
+//		@PropertySource("classpath:config/zookeeper.properties")
 	})
 @ComponentScan(basePackages="sc.learn",excludeFilters={
 		@Filter(type=FilterType.ANNOTATION,value=EnableWebMvc.class),
 		@Filter(type=FilterType.ANNOTATION,value=Controller.class)
 		})
-public class RootConfig implements EnvironmentAware {
+public class RootConfig/* implements EnvironmentAware */{
 	private static final Logger LOGGER=LoggerFactory.getLogger(RootConfig.class);
+	@Autowired
 	private Environment env;
-	@Override
+	
+	/*@Override
 	public void setEnvironment(Environment environment) {
 		env=environment;
 		try {
@@ -91,7 +95,7 @@ public class RootConfig implements EnvironmentAware {
 		} catch(Exception e) {
 			LOGGER.error(ExceptionUtil.getStackTrace(e));
 		}  
-	}
+	}*/
 	
 	@Bean(initMethod="init",destroyMethod="close")
 	public DataSource dataSource() throws SQLException{
@@ -107,11 +111,6 @@ public class RootConfig implements EnvironmentAware {
 		dataSource.setTimeBetweenEvictionRunsMillis(60);
 		return dataSource;
 	}
-	
-	@Bean
-	public DataSourceTransactionManager transactionManager(DataSource dataSource){
-		return new DataSourceTransactionManager(dataSource);
-	}
 
 	@Bean
 	public SqlSessionFactoryBean sqlSessionFactory(DataSource dataSource){
@@ -119,6 +118,11 @@ public class RootConfig implements EnvironmentAware {
 		sqlSessionFactoryBean.setDataSource(dataSource);
 		sqlSessionFactoryBean.setConfigLocation(new ClassPathResource("config/SqlMapConfig.xml"));
 		return sqlSessionFactoryBean;
+	}
+/*	
+	@Bean
+	public DataSourceTransactionManager transactionManager(DataSource dataSource){
+		return new DataSourceTransactionManager(dataSource);
 	}
 	
 	@Bean
@@ -201,6 +205,7 @@ public class RootConfig implements EnvironmentAware {
 //		return new ThriftAsyncIfaceTransportPool(addressProvider, timeout, maxActive, maxIdle, minIdle, maxWait);
 		return new ThriftIfaceTransportPool(addressProvider, 3000, 10, 10, 1, 1000);
 	}
+	
 	@Bean
 	public ThriftAsyncIfaceTransportPool thriftAsyncIfaceTransportPool(CuratorFramework zkClient){
 		Triple<Boolean,String,String> triple=ThriftUtil.fetchSynchronizedAndIfacePathAndServiceName(TManageService.AsyncIface.class);
@@ -217,4 +222,5 @@ public class RootConfig implements EnvironmentAware {
 		thriftServiceProxyFactory.setIfaceClass(TManageService.Iface.class);
 		return thriftServiceProxyFactory;
 	}
+*/
 }

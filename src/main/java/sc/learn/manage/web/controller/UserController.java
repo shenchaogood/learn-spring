@@ -21,7 +21,7 @@ import sc.learn.manage.po.User;
 import sc.learn.manage.util.Constants;
 import sc.learn.manage.vo.UserVo;
 
-@RestController
+//@RestController
 @RequestMapping("/manage/user")
 public class UserController {
 	

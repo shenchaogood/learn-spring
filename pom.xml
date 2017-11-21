@@ -31,9 +31,11 @@
 		<jackson-version>2.6.7</jackson-version>
 		<slf4j-api-version>1.7.25</slf4j-api-version>
 		<joda-time-version>2.9.9</joda-time-version>
-		<!-- <guava-version>22.0</guava-version> -->
+		<guava-version>22.0</guava-version>
 		<msgpack-version>0.6.12</msgpack-version>
 		<marshalling-version>2.0.0.Final</marshalling-version>
+		<swift-version>0.23.1</swift-version>
+		<swift-codec-version>0.23.1</swift-codec-version>
 	</properties>
 
 	<build>
@@ -134,6 +136,34 @@
 					</dependency>
 				</dependencies>
 			</plugin>
+			<plugin>
+				<groupId>com.facebook.mojo</groupId>
+				<artifactId>swift-maven-plugin</artifactId>
+					<version>${swift-version}</version>
+					<executions>
+	                    <execution>
+	                        <phase>generate-sources</phase>
+	                        <goals>
+	                            <goal>generate</goal>
+	                        </goals>
+	                    </execution>
+	                </executions>
+			        <configuration>
+			            <skip>false</skip>
+			            <idlFiles>
+			                <directory>${project.basedir}/src/main/resources/thrift</directory>
+			                <includes>
+			                    <include>**/*.thrift</include>
+			                </includes>
+			                <!--<excludes>-->
+								<!--<exclude>**/other.thrift</exclude>-->
+							<!--</excludes>-->
+			        	</idlFiles>
+			        	<defaultPackage>${project.groupId}.thrift.swift</defaultPackage>
+			        	<outputFolder>src/main/swift/</outputFolder>
+					</configuration>
+			</plugin>
+			<!-- thrift 插件 -->
 			<plugin>
 				<groupId>org.apache.thrift.tools</groupId>
 				<artifactId>maven-thrift-plugin</artifactId>
@@ -562,7 +592,7 @@
 		</dependency>
 		-->
 		<!-- hadoop end -->
-		<!-- 用fastjson替代
+		<!-- 用fastjson替代 -->
 		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>
 			<artifactId>jackson-core</artifactId>
@@ -577,7 +607,7 @@
 			<groupId>com.fasterxml.jackson.core</groupId>
 			<artifactId>jackson-annotations</artifactId>
 			<version>${jackson-version}</version>
-		</dependency> -->
+		</dependency>
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-api</artifactId>
@@ -629,18 +659,31 @@
 			<artifactId>mifi-qlexpress</artifactId>
 			<version>3.0.18-SNAPSHOT</version>
 		</dependency>
-		
+		<dependency>
+		    <groupId>com.facebook.swift</groupId>
+		    <artifactId>swift-codec</artifactId>
+		    <version>${swift-codec-version}</version>
+		</dependency>
+		<dependency>
+		    <groupId>com.facebook.swift</groupId>
+		    <artifactId>swift-service</artifactId>
+		    <version>${swift-codec-version}</version>
+		</dependency>
 		<!-- <dependency>
 			<groupId>com.taobao.util</groupId>
 			<artifactId>taobao-express</artifactId>
 			<version>3.0.17</version>
 		</dependency> -->
-		<!-- <dependency>
+		<dependency>
 		    <groupId>com.google.guava</groupId>
 		    <artifactId>guava</artifactId>
 		    <version>${guava-version}</version>
-		</dependency> -->
-		
+		</dependency>
+		<dependency>
+		    <groupId>com.alibaba</groupId>
+		    <artifactId>dubbo</artifactId>
+		    <version>2.5.7</version>
+		</dependency>
 		<!-- <dependency>
 		    <groupId>org.jasig.cas.client</groupId>
 		    <artifactId>cas-client-core</artifactId>
