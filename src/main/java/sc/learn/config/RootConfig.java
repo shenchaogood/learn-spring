@@ -35,6 +35,7 @@ import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 
 import com.alibaba.druid.pool.DruidDataSource;
@@ -62,23 +63,21 @@ import sc.learn.manage.service.TManageService;
 @Lazy(false)
 @Configuration
 @EnableAspectJAutoProxy
-//@EnableTransactionManagement
+@EnableTransactionManagement
 @PropertySources({
 		@PropertySource("classpath:config/db.properties"),
-//		@PropertySource("classpath:config/redis.properties"),
-//		@PropertySource("classpath:config/mail.properties"),
-//		@PropertySource("classpath:config/zookeeper.properties")
+	
 	})
 @ComponentScan(basePackages="sc.learn",excludeFilters={
 		@Filter(type=FilterType.ANNOTATION,value=EnableWebMvc.class),
 		@Filter(type=FilterType.ANNOTATION,value=Controller.class)
 		})
-public class RootConfig/* implements EnvironmentAware */{
+public class RootConfig implements EnvironmentAware{
 	private static final Logger LOGGER=LoggerFactory.getLogger(RootConfig.class);
 	@Autowired
 	private Environment env;
 	
-	/*@Override
+	@Override
 	public void setEnvironment(Environment environment) {
 		env=environment;
 		try {
@@ -95,7 +94,7 @@ public class RootConfig/* implements EnvironmentAware */{
 		} catch(Exception e) {
 			LOGGER.error(ExceptionUtil.getStackTrace(e));
 		}  
-	}*/
+	}
 	
 	@Bean(initMethod="init",destroyMethod="close")
 	public DataSource dataSource() throws SQLException{
@@ -119,7 +118,12 @@ public class RootConfig/* implements EnvironmentAware */{
 		sqlSessionFactoryBean.setConfigLocation(new ClassPathResource("config/SqlMapConfig.xml"));
 		return sqlSessionFactoryBean;
 	}
-/*	
+	
+	@Bean
+	public BizParamPrintAspect bizParamPrintAspect(){
+		return new BizParamPrintAspect();
+	}
+	
 	@Bean
 	public DataSourceTransactionManager transactionManager(DataSource dataSource){
 		return new DataSourceTransactionManager(dataSource);
@@ -177,12 +181,7 @@ public class RootConfig/* implements EnvironmentAware */{
 		mailSender.setJavaMailProperties(mailProperties);
 		return mailSender;
 	}
-	
-	@Bean
-	public BizParamPrintAspect bizParamPrintAspect(){
-		return new BizParamPrintAspect();
-	}
-	
+
 	@Bean
 	public ThriftServicePostProcessor ThriftServicePostProcessor(){
 		return new ThriftServicePostProcessor();
@@ -222,5 +221,5 @@ public class RootConfig/* implements EnvironmentAware */{
 		thriftServiceProxyFactory.setIfaceClass(TManageService.Iface.class);
 		return thriftServiceProxyFactory;
 	}
-*/
+
 }

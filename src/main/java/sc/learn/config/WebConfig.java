@@ -28,7 +28,7 @@ import sc.learn.manage.web.intercepter.PrivilegeIntercepter;
 @EnableAspectJAutoProxy
 @ComponentScan("sc.learn.*.web")
 public class WebConfig extends WebMvcConfigurerAdapter{
-
+/*
 	@Bean
 	public ViewResolver viewResolver(){
 		return new InternalResourceViewResolver("/WEB-INF/views", ".jsp");
@@ -38,7 +38,7 @@ public class WebConfig extends WebMvcConfigurerAdapter{
 	public void configureDefaultServletHandling(DefaultServletHandlerConfigurer configurer) {
 		configurer.enable();
 	}
-	
+	*/
 	@Bean
 	public MultipartResolver multipartResolver() throws IOException{
 		/**
@@ -51,7 +51,7 @@ public class WebConfig extends WebMvcConfigurerAdapter{
 		**/
 		return new StandardServletMultipartResolver();
 	}
-	
+	/*
 	@Bean
 	public RequestMappingHandlerMapping requestMappingHandlerMapping(){
 		RequestMappingHandlerMapping handlerMapping=new RequestMappingHandlerMapping();
@@ -72,5 +72,5 @@ public class WebConfig extends WebMvcConfigurerAdapter{
 	@Bean
 	public ControllerParamPrintAspect controllerParamPrintAspect(){
 		return new ControllerParamPrintAspect();
-	}
+	}*/
 }

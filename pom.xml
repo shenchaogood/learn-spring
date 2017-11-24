@@ -668,6 +668,12 @@
 		    <groupId>com.facebook.swift</groupId>
 		    <artifactId>swift-service</artifactId>
 		    <version>${swift-codec-version}</version>
+		    <exclusions>
+		    	<exclusion>
+		    		<groupId>org.apache.bval</groupId>
+		    		<artifactId>bval-jsr303</artifactId>
+		    	</exclusion>
+		    </exclusions>
 		</dependency>
 		<!-- <dependency>
 			<groupId>com.taobao.util</groupId>
